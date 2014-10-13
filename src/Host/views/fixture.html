@@ -1,0 +1,14 @@
+<h3>Fixture</h3>
+<loading></loading>
+<h4>{{model.fixture.home}} {{model.result.home}} v {{model.result.away}} {{model.fixture.away}}</h4>
+<a href="#/gameweekscores/{{model.fixture.gameWeekNumber}}">Game Week #{{model.fixture.gameWeekNumber}}</a>
+<div class="list-group">
+	<div ng-repeat-start="row in model.rows"></div>
+	<a href="#/player/{{row.player.id}}" class="list-group-item">
+		<span>{{row.player.name}}</span>
+		(<span>{{row.prediction.home}}</span> v 
+		<span>{{row.prediction.away}}</span>)
+		<span class="badge">{{row.points}}</span>
+	</a>
+	<div ng-repeat-end></div>
+</div>

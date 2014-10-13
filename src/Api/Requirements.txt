@@ -1,0 +1,32 @@
+﻿a fixture is made up of two teams
+a list of fixtures is published as a gameweek, with a deadline (first ko)
+players of the game submit scores for each fixture before the deadline
+fixture results are submitted after each fixture has been played
+players are scored on the accuracy of their predictions
+	3 points for correct score
+	1 point for correct outcome (homewin, awaywin, draw)
+
+
+admin can add a gameweek with a deadline
+admin can add fixtures to a gameweek before submitting
+if gameweek must be changed after submitting any submitted player scores must be dropped
+players can work on open fixtures up until deadline
+admin can submit fixture results at any time
+players can review their score for previous gameweeks
+	all weeks view, table of gwno & points
+	in detail view with predicions v results, outcome & points
+league table includes number of fixtures player has submitted predictions for
+league table includes player accuracy index score (function of prediction v result difference, sum & home away separate)
+league position vs gameweek line chart
+sum points for all users per week to see high/low scoring weeks
+compare outcome variation each week to see which game weeks are more/less predictable
+
+view by fixture - who called the fixture correctly?
+view predictions for fixture before game kicks off
+
+// denis nedry gif
+// gravatars
+// date in modal
+// server side validation on score
+// make mono-able
+// 

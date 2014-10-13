@@ -1,0 +1,30 @@
+
+<div ng-if="row.submitted">
+	<alert type="success">score submitted {{row.home}} v {{row.away}}</alert>
+</div>
+<div ng-if="!row.submitted" class="well">
+
+	<form class="form" name="form" role="form">
+		
+		<div class="form-group">
+			<span class="label label-default">GW #{{ row.gameWeekNumber }}</span>
+			<span class="label label-default">{{ row.kickoff | date:'EEE dd MMM HH:mm Z' }}</span>
+		</div>
+
+		<div class="form-group">
+			<div class="input-group">
+      			<div class="input-group-addon team-label">{{row.home}}</div>
+				<input type="number" class="form-control" ng-model="row.homeScore" required>
+			</div>
+		</div>
+	
+		<div class="form-group">
+			<div class="input-group">
+      			<div class="input-group-addon team-label">{{row.away}}</div>
+				<input type="number" class="form-control" ng-model="row.awayScore" required>
+			</div>
+		</div>
+		<button type="submit" ng-d class="btn btn-primary" ng-disabled="form.$invalid" ng-click="submitResult(row)">Submit</button>
+	</form>
+
+</div>
