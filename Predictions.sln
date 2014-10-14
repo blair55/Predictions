@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".settings", ".settings", "{
 		.gitignore = .gitignore
 		Gruntfile.js = Gruntfile.js
 		package.json = package.json
+		Requirements.txt = Requirements.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A77F57C3-A0AC-43D3-9C26-F1C48C3E5766}"

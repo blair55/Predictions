@@ -32,10 +32,9 @@ module Services =
         | true -> Success { GameWeek.id=gwid; number=(GwNo gwpm.number); description="" }
         | false -> Failure "Fixture dates must be in the future"
 
-    // is gameweek number correct
-    let checkGameWeekNo (gw:GameWeek) =
-        let expected = getNewGameWeekNo()
-        if (getGameWeekNo gw.number) = expected then Success gw else Failure (sprintf "get week number should be %i" expected)
+    let setGameWeekNo (gw:GameWeek) =
+        let expected = getNewGameWeekNo()|> GwNo
+        { gw with number = expected }
 
     // build fixtures
     let createFixtures (gwpm:GameWeekPostModel) (gw:GameWeek) =
@@ -58,7 +57,7 @@ module Services =
     let saveGameWeekPostModel (gwpm:GameWeekPostModel) =
         let newGameWeekId = Guid.NewGuid()|>GwId;        
         newGameWeekId |> ((tryCreateGameWeekFromPostModel gwpm)
-                        >> bind checkGameWeekNo
+                        >> bind (switch setGameWeekNo)
                         >> bind tryToSaveGameWeek
                         >> bind (switch (createFixtures gwpm))
                         >> bind tryToSaveFixtures)
@@ -93,8 +92,12 @@ module Services =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
         let result = results |> List.find(fun r -> r.fixture = fixture)
         let resultScore = { ScoreViewModel.home=(fst result.score); away=(snd result.score) }
+        let getPredictionViewModel prediction =
+            match prediction with
+            | Some p -> toScoreViewModel p
+            | None -> { ScoreViewModel.home=0; away=0 }
         let rows = (getPlayerPointsForFixture players predictions results fixture)
-                    |> List.map(fun (player, prediction, points) -> { FixturePointsRowViewModel.player=(getPlayerViewModel player); prediction=(toScoreViewModel prediction); points=points })
+                    |> List.map(fun (player, prediction, points) -> { FixturePointsRowViewModel.player=(getPlayerViewModel player); predictionSubmitted=prediction.IsSome; prediction=(getPredictionViewModel prediction); points=points })
         { FixturePointsViewModel.fixture=(toFixtureViewModel fixture); result=resultScore; rows=rows }
 
 
@@ -105,10 +108,11 @@ module Services =
 
     let getGameWeeks() =
         readGameWeeks() |> List.sortBy(fun gw -> gw.number)
-
-    let getLeagueTableRows() =
+        
+    let getLeagueTable() =
         let (_, results, predictions) = getPlayersAndResultsAndPredictions()
-        getLeagueTable predictions results
+        let rows = (getLeagueTable predictions results) |> List.map(fun r -> { LeagueTableRowViewModel.position=r.position; player=getPlayerViewModel r.player; points=r.points })
+        { LeagueTableViewModel.rows=rows }
 
     let getGameWeeksPointsForPlayer playerId =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()

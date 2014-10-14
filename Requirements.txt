@@ -26,7 +26,14 @@ view predictions for fixture before game kicks off
 
 // denis nedry gif
 // gravatars
-// date in modal
 // server side validation on score
 // make mono-able
-// 
+// deployment package
+// organise service/domain layer
+// fixtures tab - open - edit - predictions for kick off game - previous gameweeks
+// gameweek winner draw?
+// fixtures - two teams cannot play each other
+
+// fix menu scroll thing & double click for drop down
+// fix gameweek no when adding new gw
+// no prediction submitted view on gameweek score

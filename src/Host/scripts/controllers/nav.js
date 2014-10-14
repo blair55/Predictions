@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
   .controller('NavCtrl', function ($scope, auth) {
-  	auth.withPlayer(function(player){
-    	$scope.player = player;  		
-  	});
+      auth.withPlayer(function (player) {
+          $scope.player = player;
+      });
   });

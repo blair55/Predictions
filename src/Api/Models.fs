@@ -58,7 +58,7 @@ module ViewModels =
     type GameWeekPointsViewModel = { gameWeekNo:int; rows:GameWeekPointsRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixturePointsRowViewModel = { player:PlayerViewModel; prediction:ScoreViewModel; points:int }
+    type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePointsViewModel = { fixture:FixtureViewModel; result:ScoreViewModel; rows:FixturePointsRowViewModel list }

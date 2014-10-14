@@ -14,7 +14,6 @@ open Predictions.Api.ViewModels
 open Predictions.Api.PostModels
 open Predictions.Api.Services
 
-[<EnableCors("*", "*", "*")>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
@@ -32,9 +31,8 @@ type HomeController() =
     
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
-        let rows = getLeagueTableRows() |> List.map(fun r -> { LeagueTableRowViewModel.position=r.position; player=getPlayerViewModel r.player; points=r.points })
-        { LeagueTableViewModel.rows=rows }
-
+        () |> (switch getLeagueTable >> resultToHttp)
+        
     [<Route("player/{playerId:Guid}")>]
     member this.GetPlayer (playerId:Guid) =
         playerId |> (switch getGameWeeksPointsForPlayer >> resultToHttp)
@@ -68,7 +66,6 @@ type HomeController() =
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (switch getPlayerPointsForFixture >> resultToHttp)
                 
-[<EnableCors("*", "*", "*")>]
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()

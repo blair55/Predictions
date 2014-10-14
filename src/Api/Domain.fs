@@ -64,17 +64,18 @@ module Domain =
         else if fst score < snd score then AwayWin
         else Draw
 
-    let getPointsForPredictionComparedToResult (prediction:Prediction) result =
-        if prediction.score = result.score then 3
+    let getPointsForPredictionComparedToResult (prediction:Prediction option) result =
+        if prediction.IsNone then 0
+        else if prediction.Value.score = result.score then 3
         else
-            let predictionOutcome = getOutcome prediction.score
+            let predictionOutcome = getOutcome prediction.Value.score
             let resultOutcome = getOutcome result.score
             if predictionOutcome = resultOutcome then 1 else 0
         
     let getPointsForPrediction (prediction:Prediction) (results:Result list) =
         let result = results |> List.tryFind(fun r -> r.fixture = prediction.fixture)
         match result with
-        | Some r -> getPointsForPredictionComparedToResult prediction r
+        | Some r -> getPointsForPredictionComparedToResult (Some prediction) r
         | None -> 0
 
     let getTotalPlayerScore (predictions:Prediction list) results player =
@@ -108,14 +109,10 @@ module Domain =
         let playerGameWeekPredictions = getPlayerGameWeekPredictions predictions player gameWeekNo
         let gameWeekResults = getGameWeekResults results gameWeekNo
         let getGameWeekDetailsRow (prediction:Prediction option) result =
-            let points =
-                match prediction with
-                | Some p -> getPointsForPredictionComparedToResult p result
-                | None -> 0
+            let points = getPointsForPredictionComparedToResult prediction result
             { GameWeekDetailsRow.fixture=result.fixture; prediction=prediction; result=result; points=points }
-        gameWeekResults
-        |> List.map(fun r -> let prediction = playerGameWeekPredictions |> List.tryFind(fun p -> r.fixture = p.fixture )
-                             getGameWeekDetailsRow prediction r)
+        gameWeekResults |> List.map(fun r -> let prediction = playerGameWeekPredictions |> List.tryFind(fun p -> r.fixture = p.fixture )
+                                             getGameWeekDetailsRow prediction r)
     
     let getPlayerPredictionsForFixture (predictions:Prediction list) (results:Result list) fxid =
         let fixture = (predictions |> List.find(fun p -> p.fixture.id = fxid)).fixture
@@ -171,7 +168,7 @@ module Domain =
         |> Seq.toList
 
     let getPointsForFixtureForPlayer (predictions:Prediction list) (results:Result list) fixture player =
-        let prediction = predictions |> List.filter(fun p -> p.player = player) |> List.find(fun p -> p.fixture = fixture)
+        let prediction = predictions |> List.filter(fun p -> p.player = player) |> List.tryFind(fun p -> p.fixture = fixture)
         let result = results |> List.find(fun r -> r.fixture = fixture)
         let points = getPointsForPredictionComparedToResult prediction result
         (prediction, points)

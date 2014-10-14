@@ -59,7 +59,6 @@
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <Content Include="Requirements.txt" />
     <None Include="Script1.fsx" />
   </ItemGroup>
   <ItemGroup>
