@@ -7,12 +7,12 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1616D15C-1BC6-4ED0-B303-543787EFBCEA}</ProjectGuid>
+    <ProjectGuid>{70EFF670-38B3-4C26-9BF2-BBA61AEDBDC8}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Predictions.Host</RootNamespace>
-    <AssemblyName>Predictions.Host</AssemblyName>
+    <RootNamespace>Predictions.Host.AppHb</RootNamespace>
+    <AssemblyName>Predictions.Host.AppHb</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -77,24 +77,9 @@
     <Content Include="images\yeoman.png" />
     <Content Include="index.html" />
     <Content Include="robots.txt" />
-    <Content Include="scripts\app.js" />
-    <Content Include="scripts\controllers\adminaddgameweek.js" />
-    <Content Include="scripts\controllers\adminaddresults.js" />
-    <Content Include="scripts\controllers\fixture.js" />
-    <Content Include="scripts\controllers\gameweekscores.js" />
-    <Content Include="scripts\controllers\leaguetable.js" />
-    <Content Include="scripts\controllers\main.js" />
-    <Content Include="scripts\controllers\nav.js" />
-    <Content Include="scripts\controllers\notifications.js" />
-    <Content Include="scripts\controllers\openfixtures.js" />
-    <Content Include="scripts\controllers\pastgameweeks.js" />
-    <Content Include="scripts\controllers\player.js" />
-    <Content Include="scripts\controllers\playergameweek.js" />
-    <Content Include="scripts\directives\loading.js" />
-    <Content Include="scripts\directives\submitscore.js" />
-    <Content Include="scripts\services\auth.js" />
-    <Content Include="scripts\services\interceptor.js" />
-    <Content Include="scripts\services\notify.js" />
+    <Content Include="scripts\oldieshim.js" />
+    <Content Include="scripts\scripts.js" />
+    <Content Include="scripts\vendor.js" />
     <Content Include="styles\main.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
@@ -122,14 +107,12 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bower.json" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Predictions.Api\Predictions.Api.fsproj">
       <Project>{9e5a39d8-ec5f-4169-b54b-42db5293e3e4}</Project>
       <Name>Predictions.Api</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -1,0 +1,1 @@
+<h3>Game Week #{{ model.gameWeekNo }}</h3> <loading></loading> <div class="list-group"> <div ng-repeat-start="row in model.rows"></div> <a href="#/player/{{row.player.id}}" class="list-group-item"> <span>{{row.player.name}}</span> <span class="badge">{{row.points}}</span> </a> <div ng-repeat-end></div> </div>
