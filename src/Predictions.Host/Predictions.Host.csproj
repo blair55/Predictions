@@ -119,16 +119,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Api\Api.fsproj">
-      <Project>{9e5a39d8-ec5f-4169-b54b-42db5293e3e4}</Project>
-      <Name>Api</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\PublishProfiles\file.pubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Predictions.Api\Predictions.Api.fsproj">
+      <Project>{9e5a39d8-ec5f-4169-b54b-42db5293e3e4}</Project>
+      <Name>Predictions.Api</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
