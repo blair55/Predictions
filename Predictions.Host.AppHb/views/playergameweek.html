@@ -1,1 +1,15 @@
-<h3>Player: {{model.player.name}}</h3> <a href="#/gameweekscores/{{model.gameWeekNo}}">Game Week #{{model.gameWeekNo}}</a> <br> <span>Total: {{model.totalPoints}}</span> <loading></loading> <div class="list-group"> <div ng-repeat-start="row in model.rows"></div> <a href="#/fixture/{{row.fixture.fxId}}" class="list-group-item"> <span>{{row.fixture.home}} {{row.result.home}} v {{row.result.away}} {{row.fixture.away}}</span> <span ng-if="row.predictionSubmitted">({{row.prediction.home}} v {{row.prediction.away}})</span> <span ng-if="!row.predictionSubmitted">(no prediction submitted)</span> <span class="badge">{{row.points}}</span> </a> <div ng-repeat-end></div> </div>
+<h3>Player: {{model.player.name}}</h3>
+<a href="#/gameweekscores/{{model.gameWeekNo}}">Game Week #{{model.gameWeekNo}}</a>
+<br>
+<span>Total: {{model.totalPoints}}</span>
+<loading></loading>
+<div class="list-group">
+	<div ng-repeat-start="row in model.rows"></div>
+	<a href="#/fixture/{{row.fixture.fxId}}" class="list-group-item">
+		<span>{{row.fixture.home}} {{row.result.home}} v {{row.result.away}} {{row.fixture.away}}</span>
+        <span ng-if="row.predictionSubmitted">({{row.prediction.home}} v {{row.prediction.away}})</span>
+        <span ng-if="!row.predictionSubmitted">(no prediction submitted)</span>
+		<span class="badge">{{row.points}}</span>		
+	</a>
+	<div ng-repeat-end></div>
+</div>

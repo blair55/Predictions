@@ -1,1 +1,10 @@
-<h3>Player: {{model.player.name}}</h3> <loading></loading> <div class="list-group"> <div ng-repeat-start="row in model.rows"></div> <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}" class="list-group-item"> <span>Game Week #{{row.gameWeekNo}}</span> <span class="badge">{{row.points}}</span> </a> <div ng-repeat-end></div> </div>
+<h3>Player: {{model.player.name}}</h3>
+<loading></loading>
+<div class="list-group">
+	<div ng-repeat-start="row in model.rows"></div>
+	<a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}" class="list-group-item">
+		<span>Game Week #{{row.gameWeekNo}}</span>
+		<span class="badge">{{row.points}}</span>
+	</a>
+	<div ng-repeat-end></div>
+</div>

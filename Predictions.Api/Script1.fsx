@@ -10,8 +10,8 @@ open Predictions.Api.Data
 let rnd = new System.Random()
 let teamsList = [ "Arsenal"; "Chelsea"; "Liverpool"; "Everton"; "WestHam"; "Qpr"; "Man Utd"; "Man City"; "Newcastle"; "Sunderland"; 
                     "Stoke"; "Leicester"; "Spurs"; "Aston Villa"; "West Brom"; "Crystal Palace"; "Hull"; "Burnley"; "Southampton"; "Swansea" ]
-//let playersList = readPlayers()
-let playersList = [ for p in [ "Adam"; "Anthony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { Player.id=(Guid.NewGuid()|>PlId); name=p; role=Admin } ]
+let playersList = readPlayers()
+//let playersList = [ for p in [ "Adam"; "Anthony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { Player.id=(Guid.NewGuid()|>PlId); name=p; role=Admin } ]
 let gameWeeksList = [ for i in 1..6 -> { GameWeek.id=Guid.NewGuid()|>GwId; number=(GwNo i); description="" } ]
 
 let getTwoDifferentRndTeams (teams:string list) =
