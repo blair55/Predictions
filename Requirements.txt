@@ -31,8 +31,8 @@ view predictions for fixture before game kicks off
 // deployment package
 // organise service/domain layer
 // fixtures tab - open - edit - predictions for kick off game - previous gameweeks
-// gameweek winner draw?
-// fixtures - two teams cannot play each other
+// gameweek winner draw - deciding metrics? avg delta, # correct scoreline, #correct outcome 
+// fixture server side validation two teams cannot play each other
 
 // fix menu scroll thing & double click for drop down
 // fix gameweek no when adding new gw

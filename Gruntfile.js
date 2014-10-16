@@ -17,9 +17,9 @@ module.exports = function (grunt) {
 
     // Configurable paths for the application
     var appConfig = {
-        app: 'src/Predictions.Host/',
-        dist: 'src/Predictions.Host.AppHb/',
-        exportDist: 'src/Predictions.Host.AppHb/'
+        app: require('./bower.json').appPath,
+        dist: './Predictions.Host.AppHb'
+        //exportDist: 'src/Predictions.Host.AppHb/'
     };
 
     // Define the configuration for all the tasks
@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             bower: {
-                files: ['<%= yeoman.app %>/bower.json'],
+                files: ['bower.json'],
                 tasks: ['wiredep']
             },
             js: {
@@ -134,6 +134,7 @@ module.exports = function (grunt) {
         // Empties folders to start fresh
         clean: {
             dist: [
+              '<%= yeoman.dist %>/index.html',
               '<%= yeoman.dist %>/fonts',
               '<%= yeoman.dist %>/images',
               '<%= yeoman.dist %>/scripts',
@@ -150,14 +151,7 @@ module.exports = function (grunt) {
             //        ]
             //    }]
             //},
-            server: '.tmp',
-            exportDist: [
-              '<%= yeoman.exportDist %>/fonts',
-              '<%= yeoman.exportDist %>/images',
-              '<%= yeoman.exportDist %>/scripts',
-              '<%= yeoman.exportDist %>/styles',
-              '<%= yeoman.exportDist %>/views'
-            ]
+            server: '.tmp'
         },
 
         // Add vendor prefixed styles
@@ -178,7 +172,6 @@ module.exports = function (grunt) {
         // Automatically inject Bower components into the app
         wiredep: {
             app: {
-                cwd: '<%= yeoman.app %>',
                 src: ['<%= yeoman.app %>/index.html'],
                 ignorePath: /\.\.\//
             }
@@ -321,7 +314,7 @@ module.exports = function (grunt) {
                     dest: '<%= yeoman.dist %>',
                     src: [
                       '*.{ico,png,txt}',
-                      '.htaccess',
+                      //'.htaccess',
                       '*.html',
                       'views/{,*/}*.html',
                       'images/{,*/}*.{webp}',
@@ -344,13 +337,6 @@ module.exports = function (grunt) {
                 cwd: '<%= yeoman.app %>/styles',
                 dest: '.tmp/styles/',
                 src: '{,*/}*.css'
-            },
-            exportDist: {
-                expand: true,
-                dot: true,
-                cwd: '<%= yeoman.dist %>',
-                dest: '<%= yeoman.exportDist %>',
-                src: '**/*'
             }
         },
 
@@ -374,6 +360,18 @@ module.exports = function (grunt) {
             unit: {
                 configFile: 'test/karma.conf.js',
                 singleRun: true
+            }
+        },
+
+        eol: {
+            dist: {
+                options: {
+                    eol: 'lf',
+                    replace: true
+                },
+                files: [{
+                    src: ['<%= yeoman.dist %>/*.html'],
+                }]
             }
         }
     });
@@ -416,6 +414,7 @@ module.exports = function (grunt) {
       'concat',
       'ngAnnotate',
       'copy:dist',
+      'eol',
       //'cdnify',
       'cssmin',
       'uglify',

@@ -1,18 +1,17 @@
-﻿#r """Y:\Code\PredictionsManager\packages\Npgsql.2.2.1\lib\net40\Npgsql.dll"""
-#r """Y:\Code\PredictionsManager\PredictionsManager.Domain\bin\Debug\PredictionsManager.Domain.dll"""
+﻿#r """C:\Code\Predictions\packages\Npgsql.2.2.1\lib\net40\Npgsql.dll"""
+#r """C:\Code\Predictions\Predictions.Api\bin\Debug\Predictions.Api.dll"""
 open System
 open System.IO
 open System.Data
 open Npgsql
-
-open PredictionsManager.Domain.Domain
-open PredictionsManager.Domain.Data
+open Predictions.Api.Domain
+open Predictions.Api.Data
 
 let rnd = new System.Random()
 let teamsList = [ "Arsenal"; "Chelsea"; "Liverpool"; "Everton"; "WestHam"; "Qpr"; "Man Utd"; "Man City"; "Newcastle"; "Sunderland"; 
                     "Stoke"; "Leicester"; "Spurs"; "Aston Villa"; "West Brom"; "Crystal Palace"; "Hull"; "Burnley"; "Southampton"; "Swansea" ]
-let playersList = readPlayers()
-//let playersList = [ for p in [ "Adam"; "Anthony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { Player.id=(Guid.NewGuid()|>PlId); name=p; role=Admin } ]
+//let playersList = readPlayers()
+let playersList = [ for p in [ "Adam"; "Anthony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { Player.id=(Guid.NewGuid()|>PlId); name=p; role=Admin } ]
 let gameWeeksList = [ for i in 1..6 -> { GameWeek.id=Guid.NewGuid()|>GwId; number=(GwNo i); description="" } ]
 
 let getTwoDifferentRndTeams (teams:string list) =

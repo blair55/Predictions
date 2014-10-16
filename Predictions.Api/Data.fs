@@ -10,7 +10,7 @@ open Predictions.Api.Domain
 module Data =
 
     let connStr =
-        let uriString = "postgres://iobxdsep:sQ5pYLEEjC8Ih6V3OVS_V8F0N67VQ-28@horton.elephantsql.com:5432/iobxdsep"
+        let uriString = "postgres://awisbnpt:51Y0ezlLiSkMZWqB86qaKjCP6_au2mNa@horton.elephantsql.com:5432/awisbnpt"
         let uri = new Uri(uriString)
         let db = uri.AbsolutePath.Trim('/')
         let user = uri.UserInfo.Split(':').[0]
