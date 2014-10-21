@@ -120,10 +120,7 @@ module Domain =
         let fixturePredictions = predictions |> List.filter(fun p -> p.fixture.id = fxid)
         { fixture=fixture; result = fixtureResult; predictions=fixturePredictions }
 
-    let isFixtureOpen f =
-        let d = DateTime.Now
-        let b = f.kickoff > d
-        b
+    let isFixtureOpen f = f.kickoff > DateTime.Now
 
     let getOpenFixturesForPlayer (predictions:Prediction list) (fixtures:Fixture list) (players:Player list) (plId:PlId) =
         let player = findPlayerById players plId
@@ -178,3 +175,9 @@ module Domain =
         |> Seq.map(fun pl -> let (prediction, points) = getPointsForFixtureForPlayer predictions results fixture pl
                              (pl, prediction, points))
         |> Seq.toList
+
+
+    let checkFixtureIsInFuture f = if isFixtureOpen f then Success f else Failure "Fixture must be in the future"
+    let checkFixtureTeamsAreUnique f = if f.home = f.away then Success f else Failure "Teams cannot play themselves"
+    
+    let validateFixture f = f |> (checkFixtureIsInFuture >> bind checkFixtureTeamsAreUnique)

@@ -1,14 +1,18 @@
-<h3>Add GameWeek #{{ gameweek.number }}</h3>
+<h3>Add Game Week #{{ newGameweekNumber }}</h3>
 
 <form ng-submit="submit" class="form-inline" name="form" role="form">
 
 <div class="well" ng-repeat="f in gameweek.fixtures">
 
 	<div class="form-group">
-		<input ng-model="f.home" type="text" class="form-control" placeholder="home" required>
+        <select ng-model="f.home" ng-options="team for team in teams" class="form-control" required>
+            <option value="">home</option>
+        </select>
 	</div>
 	<div class="form-group">
-        <input ng-model="f.away" type="text" class="form-control" placeholder="away" required>
+        <select ng-model="f.away" ng-options="team for team in teams" class="form-control" required>
+            <option value="">away</option>
+        </select>
 	</div>
 
 	<div class="form-group">
@@ -36,7 +40,7 @@
 	    <span class="glyphicon glyphicon-plus"></span>
     </button>
 
-    <button ng-click="submit()" class="btn btn-default" ng-disabled="form.$invalid">Submit</button>
+    <button ng-click="submit()" class="btn btn-primary" ng-disabled="form.$invalid">Submit</button>
 </div>
 
 </form>

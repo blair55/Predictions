@@ -74,6 +74,7 @@ type AdminController() =
     member this.GetNewGameWeekNo () =
         base.Request |> (makeSurePlayerIsAdmin
                      >> bind (switch getNewGameWeekNo)
+                     >> bind (switch (fun gwno -> getGameWeekNo gwno))
                      >> resultToHttp)
 
     [<Route("gameweek")>][<HttpPost>]

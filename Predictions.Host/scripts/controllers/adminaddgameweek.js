@@ -10,6 +10,8 @@
 angular.module('frontendApp')
     .controller('AdminaddgameweekCtrl', function ($scope, $http, $location, $modal, localStorageService, notify) {
 
+        $scope.teams = ["Arsenal", "Chelsea", "Liverpool", "Everton", "WestHam", "Qpr", "Man Utd", "Man City", "Newcastle", "Sunderland", "Stoke", "Leicester", "Spurs", "Aston Villa", "West Brom", "Crystal Palace", "Hull", "Burnley", "Southampton", "Swansea"];
+
         $scope.gameweek = {
             fixtures: [
                 { home: "", away: "", kickoff: new Date() },
@@ -19,7 +21,7 @@ angular.module('frontendApp')
         };
 
         $http.get('/api/admin/getnewgameweekno').success(function (data) {
-            $scope.gameweek.number = data;
+            $scope.newGameweekNumber = data;
         });
 
         $scope.addFixture = function () {

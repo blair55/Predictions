@@ -71,7 +71,7 @@ module PostModels =
     type FixturePostModel = { home:string; away:string; kickOff:string }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPostModel = { number:int; fixtures:FixturePostModel list }
+    type GameWeekPostModel = { fixtures:FixturePostModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ResultPostModel = { fixtureId:string; score:ScoreViewModel }
