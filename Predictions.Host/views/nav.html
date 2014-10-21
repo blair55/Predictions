@@ -1,4 +1,4 @@
-<div class="container" ng-controller="NavCtrl" ng-init="navCollapsed = true">
+<div class="container" ng-controller="NavCtrl">
 
     <div class="navbar-header">
         <button type="button" class="navbar-toggle" ng-click="navCollapsed = !navCollapsed">
@@ -10,19 +10,19 @@
         <a class="navbar-brand" href="#">Predictions</a>
     </div>
 
-    <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'" ng-click="navCollapsed=true">
+    <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
 
         <ul class="nav navbar-nav">
 
-            <li><a ng-href="#leaguetable">League Table</a></li>
-            <li><a ng-href="#pastgameweeks">Previous Game Weeks</a></li>
-            <li><a ng-href="#openfixtures">Open Fixtures</a></li>
+            <li><a ng-click="navTo($event)" href="#leaguetable">League Table</a></li>
+            <li><a ng-click="navTo($event)" href="#pastgameweeks">Previous Game Weeks</a></li>
+            <li><a ng-click="navTo($event)" href="#openfixtures">Open Fixtures</a></li>
 
             <li class="dropdown" ng-show="player.isAdmin">
                 <a href="#" class="dropdown-toggle">Admin <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                    <li><a ng-href='#admin/addgameweek'>Add Gameweek</a></li>
-                    <li><a ng-href='#admin/addresults'>Add Results</a></li>
+                    <li><a ng-click="navTo($event)" href="#admin/addgameweek">Add Gameweek</a></li>
+                    <li><a ng-click="navTo($event)" href="#admin/addresults">Add Results</a></li>
                 </ul>
             </li>
 
