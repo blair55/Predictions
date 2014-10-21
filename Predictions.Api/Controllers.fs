@@ -31,7 +31,7 @@ type HomeController() =
     
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
-        () |> (switch getLeagueTable >> resultToHttp)
+        () |> (switch getLeagueTableView >> resultToHttp)
         
     [<Route("player/{playerId:Guid}")>]
     member this.GetPlayer (playerId:Guid) =
@@ -60,7 +60,7 @@ type HomeController() =
         
     [<Route("gameweekscores/{gwno:int}")>]
     member this.GetGameWeekPoints (gwno:int) =
-        GwNo gwno |> (switch getGameWeekPoints >> resultToHttp)
+        GwNo gwno |> (switch getGameWeekPointsView >> resultToHttp)
         
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =

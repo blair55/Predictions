@@ -74,12 +74,6 @@ module Services =
                 {PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gameWeekNo); winner=(getPlayerViewModel player); points=points})
         { PastGameWeeksViewModel.rows = rows }
 
-    let getGameWeekPoints gwno =
-        let (_, results, predictions) = getPlayersAndResultsAndPredictions()
-        let rows = (getGameWeekPoints predictions results gwno) |> List.map(fun (player, gameWeekNo, points) ->
-            { GameWeekPointsRowViewModel.player=(getPlayerViewModel player); points=points })
-        { GameWeekPointsViewModel.gameWeekNo = (getGameWeekNo gwno); rows=rows }
-        
     let getPlayerPointsForFixture (fxId:FxId) =
         let (_, fixtures) = getGameWeeksAndFixtures()
         let fixture = findFixtureById fixtures fxId
@@ -97,16 +91,23 @@ module Services =
 
 
 
-    let getPlayer playerId =
-        getPlayerById (playerId|>PlId)
+    let getPlayer playerId = getPlayerById (playerId|>PlId)
 
-    let getGameWeeks() =
-        readGameWeeks() |> List.sortBy(fun gw -> gw.number)
+    let getGameWeeks() = readGameWeeks() |> List.sortBy(fun gw -> gw.number)
         
-    let getLeagueTable() =
-        let (_, results, predictions) = getPlayersAndResultsAndPredictions()
-        let rows = (getLeagueTable predictions results) |> List.map(fun r -> { LeagueTableRowViewModel.position=r.position; player=getPlayerViewModel r.player; points=r.points })
+    let leagueTableRowToViewModel r = { LeagueTableRowViewModel.position=r.position; player=getPlayerViewModel r.player; correctScores=r.correctScores; correctOutcomes=r.correctOutcomes; points=r.points }
+
+    let getLeagueTableView() =
+        let (players, results, predictions) = getPlayersAndResultsAndPredictions()
+        let rows = (getLeagueTable predictions results players) |> List.map(leagueTableRowToViewModel)
         { LeagueTableViewModel.rows=rows }
+
+    let getGameWeekPointsView gwno =
+        let (players, results, predictions) = getPlayersAndResultsAndPredictions()
+        let predictionsForGameWeek = predictions |> List.filter(fun p -> p.fixture.gameWeek.number = gwno)
+        let rows = (getLeagueTable predictionsForGameWeek results players) |> List.map(leagueTableRowToViewModel)
+        { GameWeekPointsViewModel.gameWeekNo = (getGameWeekNo gwno); rows=rows }
+        
 
     let getGameWeeksPointsForPlayer playerId =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()

@@ -71,4 +71,4 @@ let initAll (pl:Player list) (g:GameWeek list) (f:Fixture list) (r:Result list) 
     p |> List.iter(addPrediction)
 
 
-initAll players gameWeeks fixtures results predictions
+//initAll players gameWeeks fixtures results predictions

@@ -29,6 +29,7 @@ module Domain =
     type Prediction = { fixture:Fixture; score:Score; player:Player }
     type Result = { fixture:Fixture; score:Score }
     type Outcome = HomeWin | AwayWin | Draw
+    type Bracket = CorrectScore | CorrectOutcome | Incorrect
     type GameWeekWinner = { gameWeek:GameWeek; player:Player; points:int }
 
     let isPlayerAdmin (player:Player) =
@@ -37,7 +38,7 @@ module Domain =
         | _ -> false
 
     // dtos / viewmodels
-    type LeagueTableRow = { position:int; predictions:int; player:Player; points:int }
+    type LeagueTableRow = { position:int; player:Player; correctScores:int; correctOutcomes:int; points:int }
     type GameWeekAndPoints = GwNo * int
     type GameWeekDetailsRow = { fixture:Fixture; prediction:Prediction option; result:Result; points:int }
     type FixtureDetails = { fixture:Fixture; result:Result; predictions:Prediction list }
@@ -58,42 +59,62 @@ module Domain =
         |> Seq.distinctBy(fun gw -> gw)
         |> Seq.toList
 
+
     // base calculations
-    let getOutcome score =
+
+    let getPointsForBracket b =
+        match b with
+        | CorrectScore -> 3
+        | CorrectOutcome -> 1
+        | Incorrect -> 0
+
+    let getResultOutcome score =
         if fst score > snd score then HomeWin
         else if fst score < snd score then AwayWin
         else Draw
 
-    let getPointsForPredictionComparedToResult (prediction:Prediction option) result =
-        if prediction.IsNone then 0
-        else if prediction.Value.score = result.score then 3
+    let getBracketForPredictionComparedToResult (prediction:Prediction option) (result:Result option) =
+        if prediction.IsNone || result.IsNone then Incorrect
+        else if prediction.Value.score = result.Value.score then CorrectScore
         else
-            let predictionOutcome = getOutcome prediction.Value.score
-            let resultOutcome = getOutcome result.score
-            if predictionOutcome = resultOutcome then 1 else 0
+            let predictionOutcome = getResultOutcome prediction.Value.score
+            let resultOutcome = getResultOutcome result.Value.score
+            if predictionOutcome = resultOutcome then CorrectOutcome
+            else Incorrect
         
     let getPointsForPrediction (prediction:Prediction) (results:Result list) =
-        let result = results |> List.tryFind(fun r -> r.fixture = prediction.fixture)
-        match result with
-        | Some r -> getPointsForPredictionComparedToResult (Some prediction) r
-        | None -> 0
+        let bracket = let result = results |> List.tryFind(fun r -> r.fixture = prediction.fixture)
+                      getBracketForPredictionComparedToResult (Some prediction) result
+        getPointsForBracket bracket
 
     let getTotalPlayerScore (predictions:Prediction list) results player =
-            let predictionsForPlayer = predictions |> List.filter(fun p -> p.player = player)
-            let score = predictionsForPlayer |> List.sumBy(fun p -> getPointsForPrediction p results)
-            predictionsForPlayer.Length, player, score
+        let predictionsForPlayer = predictions |> List.filter(fun p -> p.player = player)
+        let score = predictionsForPlayer |> List.sumBy(fun p -> getPointsForPrediction p results)
+        predictionsForPlayer.Length, player, score
+
+
+
+    let getBracketForPrediction (prediction:Prediction) (results:Result list) =
+        let result = results |> List.tryFind(fun r -> r.fixture = prediction.fixture)
+        getBracketForPredictionComparedToResult (Some prediction) result
+
+    let getPlayerBracketProfile (predictions:Prediction list) results player =
+        let countBracket l bracket = l |> List.filter(fun b -> b = bracket) |> List.length
+        let playerPredictions = predictions |> List.filter(fun p -> p.player = player)
+        let brackets = playerPredictions |> List.map(fun p -> getBracketForPrediction p results)
+        let totalPoints = brackets |> List.sumBy(fun b -> getPointsForBracket b)
+        let totalCorrectScores = CorrectScore |> (countBracket brackets)
+        let totalCorrectOutcomes = CorrectOutcome |> (countBracket brackets)
+        player, totalCorrectScores, totalCorrectOutcomes, totalPoints
+
 
     // entry points
-    let getAllPlayerScores (predictions:Prediction list) results =
-        let getTotalPlayerScorePartialFunc = getTotalPlayerScore predictions results
-        let allPlayers = predictions |> List.map(fun p -> p.player) |> Seq.distinctBy(fun p -> p) |> Seq.toList
-        allPlayers |> List.map(getTotalPlayerScorePartialFunc)
 
-    let getLeagueTable (predictions:Prediction list) results =
-        let playerScores = getAllPlayerScores predictions results
-        playerScores
-        |> List.sortBy(fun (_, _, score) -> -score)
-        |> List.mapi(fun i (predictions, player, score) -> { position=(i+1); predictions=predictions; player=player; points=score })
+    let getLeagueTable (predictions:Prediction list) results players =
+        players
+        |> List.map(fun p -> getPlayerBracketProfile predictions results p)
+        |> List.sortBy(fun (_, _, _, totalPoints) -> -totalPoints)
+        |> List.mapi(fun i (p, cs, co, tp) -> { position=(i+1); player=p; correctScores=cs; correctOutcomes=co; points=tp })
 
     let getGameWeekPointsForPlayer (predictions:Prediction list) results player gameWeekNo =
         let playerGameWeekPredictions = getPlayerGameWeekPredictions predictions player gameWeekNo
@@ -109,7 +130,7 @@ module Domain =
         let playerGameWeekPredictions = getPlayerGameWeekPredictions predictions player gameWeekNo
         let gameWeekResults = getGameWeekResults results gameWeekNo
         let getGameWeekDetailsRow (prediction:Prediction option) result =
-            let points = getPointsForPredictionComparedToResult prediction result
+            let points = getBracketForPredictionComparedToResult prediction (Some result) |> getPointsForBracket
             { GameWeekDetailsRow.fixture=result.fixture; prediction=prediction; result=result; points=points }
         gameWeekResults |> List.map(fun r -> let prediction = playerGameWeekPredictions |> List.tryFind(fun p -> r.fixture = p.fixture )
                                              getGameWeekDetailsRow prediction r)
@@ -155,19 +176,19 @@ module Domain =
         |> Seq.map(getGameWeekWinner predictions results)
         |> Seq.sortBy(fun (_, gwno, _) -> gwno)
         |> Seq.toList
-
-    let getGameWeekPoints (predictions:Prediction list) (results:Result list) (gwno:GwNo) =
-        predictions
-        |> List.map(fun pr -> pr.player)
-        |> Seq.distinct
-        |> Seq.map(fun pl -> getGameWeekPointsForPlayer predictions results pl gwno)
-        |> Seq.sortBy(fun (_, _, points) -> -points)
-        |> Seq.toList
+//
+//    let getGameWeekPoints (predictions:Prediction list) (results:Result list) (gwno:GwNo) =
+//        predictions
+//        |> List.map(fun pr -> pr.player)
+//        |> Seq.distinct
+//        |> Seq.map(fun pl -> getGameWeekPointsForPlayer predictions results pl gwno)
+//        |> Seq.sortBy(fun (_, _, points) -> -points)
+//        |> Seq.toList
 
     let getPointsForFixtureForPlayer (predictions:Prediction list) (results:Result list) fixture player =
         let prediction = predictions |> List.filter(fun p -> p.player = player) |> List.tryFind(fun p -> p.fixture = fixture)
-        let result = results |> List.find(fun r -> r.fixture = fixture)
-        let points = getPointsForPredictionComparedToResult prediction result
+        let result = results |> List.tryFind(fun r -> r.fixture = fixture)
+        let points = getBracketForPredictionComparedToResult prediction result |> getPointsForBracket
         (prediction, points)
 
     let getPlayerPointsForFixture (players:Player list) (predictions:Prediction list) (results:Result list) (fixture:Fixture) =

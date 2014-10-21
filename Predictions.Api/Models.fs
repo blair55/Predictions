@@ -13,7 +13,7 @@ module ViewModels =
     type PlayerViewModel = { id:string; name:string; isAdmin:bool }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueTableRowViewModel = { position:int; player:PlayerViewModel; points:int }
+    type LeagueTableRowViewModel = { position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueTableViewModel = { rows:LeagueTableRowViewModel list }
@@ -52,10 +52,7 @@ module ViewModels =
     type PastGameWeeksViewModel = { rows:PastGameWeekRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsRowViewModel = { player:PlayerViewModel; points:int }
-    
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsViewModel = { gameWeekNo:int; rows:GameWeekPointsRowViewModel list }
+    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
