@@ -146,6 +146,8 @@ module Data =
         | Some n -> n+1
         | None -> 1
 
+    let getGameWeeks() = readGameWeeks()
+
     let getGameWeeksAndFixtures() =
         let gameWeeks = readGameWeeks()
         let fixtures = readFixtures gameWeeks

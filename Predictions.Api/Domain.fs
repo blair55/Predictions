@@ -53,12 +53,6 @@ module Domain =
     let getPlayerGameWeekPredictions (predictions:Prediction list) player gameWeekNo = getGameWeekPredictions (getPlayersPredictions predictions player) gameWeekNo
     let getGameWeekResults (results:Result list) gameWeekNo = results |> List.filter(fun r -> r.fixture.gameWeek.number = gameWeekNo)
 
-    let getAllGameWeeks (results:Result list) =
-        results
-        |> List.map(fun r -> r.fixture.gameWeek)
-        |> Seq.distinctBy(fun gw -> gw)
-        |> Seq.toList
-
 
     // base calculations
 
@@ -110,6 +104,11 @@ module Domain =
 
     // entry points
 
+    // to get player movement for player:
+    // get league table rows for all predictions 
+    // get league table rows for predictions excluding latest gameweek
+    // diff position
+
     let getLeagueTable (predictions:Prediction list) results players =
         players
         |> List.map(fun p -> getPlayerBracketProfile predictions results p)
@@ -121,8 +120,15 @@ module Domain =
         let points = playerGameWeekPredictions |> List.sumBy(fun p -> getPointsForPrediction p results)
         player, gameWeekNo, points
 
-    let getAllGameWeekPointsForPlayer (predictions:Prediction list) results player =
-        (getAllGameWeeks results)
+
+
+    let getPlayerPointsForGameWeeks (predictions:Prediction list) results player gameWeeks =
+        // need to get league table for each week to get players position
+        //gw, pos, cs, co, pts
+        ()
+
+    let getAllGameWeekPointsForPlayer (predictions:Prediction list) results player gameWeeks =
+        gameWeeks
         |> List.map(fun gw -> getGameWeekPointsForPlayer predictions results player gw.number)
         |> List.sortBy(fun (_, gwno, _) -> getGameWeekNo gwno)
         

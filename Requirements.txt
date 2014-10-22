@@ -23,8 +23,8 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 view by fixture - who called the fixture correctly?
 view predictions for fixture before game kicks off
+fixture prediction histogram
 
-// denis nedry gif
 // gravatars
 // server side validation on score
 // make mono-able
@@ -33,6 +33,7 @@ view predictions for fixture before game kicks off
 // fixtures tab - open - edit - predictions for kick off game - previous gameweeks
 // gameweek winner draw - deciding metrics? avg delta, # correct scoreline, #correct outcome 
 // fixture server side validation two teams cannot play each other
+// league position movement indicator
 
 // fix menu scroll thing & double click for drop down
 // fix gameweek no when adding new gw

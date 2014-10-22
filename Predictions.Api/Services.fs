@@ -86,6 +86,7 @@ module Services =
             | None -> { ScoreViewModel.home=0; away=0 }
         let rows = (getPlayerPointsForFixture players predictions results fixture)
                     |> List.map(fun (player, prediction, points) -> { FixturePointsRowViewModel.player=(getPlayerViewModel player); predictionSubmitted=prediction.IsSome; prediction=(getPredictionViewModel prediction); points=points })
+                    |> List.sortBy(fun p -> p.player.name)
         { FixturePointsViewModel.fixture=(toFixtureViewModel fixture); result=resultScore; rows=rows }
 
 
@@ -111,8 +112,9 @@ module Services =
 
     let getGameWeeksPointsForPlayer playerId =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
+        let gameWeeks = getGameWeeks()
         let player = findPlayerById players (playerId|>PlId)
-        let gameWeeksPoints = (getAllGameWeekPointsForPlayer predictions results player)
+        let gameWeeksPoints = (getAllGameWeekPointsForPlayer predictions results player gameWeeks)
                               |> List.map(fun (_, gameWeekNo, points) -> { PlayerGameWeekViewModel.gameWeekNo=getGameWeekNo gameWeekNo; points=points })
         { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=gameWeeksPoints }        
 
@@ -136,7 +138,7 @@ module Services =
                 result={home=fst d.result.score; away=snd d.result.score}
                 points=d.points
             }
-        let rows = gameWeekDetailRows |> List.map(rowToViewModel)
+        let rows = gameWeekDetailRows |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
     let saveResultPostModel (rpm:ResultPostModel) =

@@ -1,6 +1,5 @@
 <h3>League Table</h3>
 <loading></loading>
-
 <table class="table table-striped">
     <thead>
         <tr>
@@ -14,7 +13,11 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>{{row.position}}</td>
-            <td>{{row.player.name}}</td>
+            <td>
+                <a href="#/player/{{row.player.id}}">
+                    {{row.player.name}}
+                </a>
+            </td>
             <td>{{row.correctScores}}</td>
             <td>{{row.correctOutcomes}}</td>
             <td>{{row.points}}</td>
