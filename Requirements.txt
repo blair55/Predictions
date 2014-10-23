@@ -21,20 +21,22 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-view by fixture - who called the fixture correctly?
-view predictions for fixture before game kicks off
-fixture prediction histogram
 
 // gravatars
 // server side validation on score
 // make mono-able
 // deployment package
 // organise service/domain layer
-// fixtures tab - open - edit - predictions for kick off game - previous gameweeks
-// gameweek winner draw - deciding metrics? avg delta, # correct scoreline, #correct outcome 
+// gameweek winner draw - deciding metrics? avg delta, #correct scoreline, #correct outcome 
 // fixture server side validation two teams cannot play each other
 // league position movement indicator
+// home page dashboard (# of open fixtures / current league position)
+// edit fixtures
+// fixtures in play
+// fixture prediction histogram
+// players league position line graph
 
+//view by fixture - who called the fixture correctly?
 // fix menu scroll thing & double click for drop down
 // fix gameweek no when adding new gw
 // no prediction submitted view on gameweek score

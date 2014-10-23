@@ -90,13 +90,11 @@ module Services =
         { FixturePointsViewModel.fixture=(toFixtureViewModel fixture); result=resultScore; rows=rows }
 
 
-
-
     let getPlayer playerId = getPlayerById (playerId|>PlId)
 
     let getGameWeeks() = readGameWeeks() |> List.sortBy(fun gw -> gw.number)
         
-    let leagueTableRowToViewModel r = { LeagueTableRowViewModel.position=r.position; player=getPlayerViewModel r.player; correctScores=r.correctScores; correctOutcomes=r.correctOutcomes; points=r.points }
+    let leagueTableRowToViewModel (pos, pl, cs, co, pts) = { LeagueTableRowViewModel.position=pos; player=getPlayerViewModel pl; correctScores=cs; correctOutcomes=co; points=pts }
 
     let getLeagueTableView() =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
@@ -110,13 +108,20 @@ module Services =
         { GameWeekPointsViewModel.gameWeekNo = (getGameWeekNo gwno); rows=rows }
         
 
+
     let getGameWeeksPointsForPlayer playerId =
+
+        let getPlayerGameWeeksViewModelRow (gwno, r) =
+            match r with
+            | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gwno); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
+            | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gwno); position=0; correctScores=0; correctOutcomes=0; points=0}
+
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
         let gameWeeks = getGameWeeks()
         let player = findPlayerById players (playerId|>PlId)
-        let gameWeeksPoints = (getAllGameWeekPointsForPlayer predictions results player gameWeeks)
-                              |> List.map(fun (_, gameWeekNo, points) -> { PlayerGameWeekViewModel.gameWeekNo=getGameWeekNo gameWeekNo; points=points })
-        { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=gameWeeksPoints }        
+        let x = getPlayerPointsForGameWeeks predictions results players player gameWeeks
+        let rows = x |> List.map(getPlayerGameWeeksViewModelRow)
+        { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=rows }
 
     let getFixtureDetail fxid =
         let (_, results, predictions) = getPlayersAndResultsAndPredictions()
@@ -124,18 +129,24 @@ module Services =
 
     let getPlayerGameWeek playerId gameWeekNo =
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
+        let (_, fixtures) = getGameWeeksAndFixtures()
         let player = findPlayerById players (playerId|>PlId)
-        let gameWeekDetailRows = getGameWeekDetailsForPlayer predictions results player (gameWeekNo|>GwNo)
+        let gameWeekDetailRows = getGameWeekDetailsForPlayer fixtures predictions results player (gameWeekNo|>GwNo)
         let rowToViewModel (d:GameWeekDetailsRow) =
             let getVmPred (pred:Prediction option) =
                 match pred with
+                | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
+                | None -> { ScoreViewModel.home=0;away=0 }
+            let getVmResult (result:Result option) =
+                match result with
                 | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
                 | None -> { ScoreViewModel.home=0;away=0 }
             {
                 GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel d.fixture)
                 predictionSubmitted=d.prediction.IsSome
                 prediction=getVmPred d.prediction
-                result={home=fst d.result.score; away=snd d.result.score}
+                resultSubmitted=d.result.IsSome
+                result=getVmResult d.result
                 points=d.points
             }
         let rows = gameWeekDetailRows |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)

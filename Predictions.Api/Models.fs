@@ -18,12 +18,15 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueTableViewModel = { rows:LeagueTableRowViewModel list }
 
+
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeekViewModel = { gameWeekNo:int; points:int; }
+    type PlayerGameWeeksViewModelRow = { gameWeekNo:int; position:int; correctScores:int; correctOutcomes:int; points:int; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeeksViewModel = { player:PlayerViewModel; rows:PlayerGameWeekViewModel list }
+    type PlayerGameWeeksViewModel = { player:PlayerViewModel; rows:PlayerGameWeeksViewModelRow list }
     
+
+
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ScoreViewModel = { home:int; away:int; }
     
@@ -31,7 +34,7 @@ module ViewModels =
     type FixtureViewModel = { home:string; away:string; fxId:string; kickoff:DateTime; gameWeekNumber:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; result:ScoreViewModel; points:int }
+    type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; resultSubmitted:bool; result:ScoreViewModel; points:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeekDetailsViewModel = { gameWeekNo:int; player:PlayerViewModel; totalPoints:int; rows:GameWeekDetailsRowViewModel list }
