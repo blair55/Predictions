@@ -96,3 +96,70 @@ type AdminController() =
         base.Request |> (makeSurePlayerIsAdmin
                      >> bind (switch saveResult)
                      >> resultToHttp)
+
+    // when adding gameweek:
+        // cannot add fixture to gameweek with same home & away teams
+        // cannot add fixture to gameweek with ko in past
+        // cannot save gameweek with no fixtures
+
+    // when saving prediction/result:
+        // cannot save score with negative scores
+
+    // cannot save result to fixture with ko in future
+    // cannot save prediction to fixture with ko in past
+    // cannot view fixture with ko in future
+
+type Player = { id:PlId; name:string; role:Role }
+type Prediction = { score:Score; player:Player }
+type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
+
+type Fixture =
+    | OpenFixture of FixtureData
+    | ClosedFixture of (FixtureData * Score option)
+
+type GameWeekData = { number:GwNo; description:string; }
+
+type GameWeek =
+    | EmptyGameWeek of GameWeekData
+    | GameWeekWithFixtures of (GameWeekData * Fixture list)
+
+
+module Rules =
+
+    let initGameWeek gwno = EmptyGameWeek {number=gwno; description=""}
+
+    let addFixtureToGameWeek f gw =
+        match gw with
+        | EmptyGameWeek gwd -> GameWeekWithFixtures(gwd, [f]) 
+        | GameWeekWithFixtures (gwd, fs) -> GameWeekWithFixtures(gwd, f::fs)
+
+    let saveGameWeek gw =
+        match gw with
+        | EmptyGameWeek gwd -> Failure "cannot save empty gameweek"
+        | GameWeekWithFixtures (gwd, fs) -> Success () // persist gw...
+
+    let tryAddScoreToFixture s f =
+        match f with
+        | OpenFixture f -> Failure "cannot add result to fixture with ko in future"
+        | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some s))
+
+    let tryAddPredictionToFixture p f =
+        match f with
+        | OpenFixture f -> Success(OpenFixture({f with predictions=p::f.predictions}))
+        | ClosedFixture _ -> Failure "cannot add prediction to fixture with ko in past"
+
+    let tryGetFixtureToView f =
+        match f with
+        | OpenFixture _ -> Failure "cannot view fixture with ko in future"
+        | ClosedFixture f -> Success(ClosedFixture f)
+
+    let newFxId = Guid.NewGuid()|>FxId
+    
+    let tryToCreateScoreFromSbm home away =
+        if home >= 0 && away >= 0 then Success(home, away) else Failure "scores must be positive"
+
+    let tryToCreateFixtureDataFromSbm home away ko =
+        if home = away then Failure "fixture home and away team cannot be the same"
+        else if ko > DateTime.Now then Failure "fixture not in the future"
+        else Success({id=newFxId; home=home; away=away; kickoff=ko; predictions=[]})
+    

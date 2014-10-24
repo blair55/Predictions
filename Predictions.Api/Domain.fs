@@ -30,7 +30,6 @@ module Domain =
     type Result = { fixture:Fixture; score:Score }
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
-    type GameWeekWinner = { gameWeek:GameWeek; player:Player; points:int }
     type ClosedFixtureStatus = AwaitingResult | ResultAdded
     type FixtureStatus = Open | ClosedFixtureStatus
 
@@ -41,9 +40,6 @@ module Domain =
 
     //let getFixtureStatus results fixture =
 
-    // can only add fixture with ko in future
-    // can only add result to fixture with ko in past
-    // can only view fixture with ko in past
         
 
     // dtos / viewmodels

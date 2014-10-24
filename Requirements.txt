@@ -7,7 +7,7 @@ players are scored on the accuracy of their predictions
 	1 point for correct outcome (homewin, awaywin, draw)
 
 
-admin can add a gameweek with a deadline
+admin can add a gameweek with fixtures with deadlines
 admin can add fixtures to a gameweek before submitting
 if gameweek must be changed after submitting any submitted player scores must be dropped
 players can work on open fixtures up until deadline
