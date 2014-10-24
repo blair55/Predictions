@@ -1,6 +1,14 @@
-<h3>{{model.fixture.home}} {{model.result.home}} v {{model.result.away}} {{model.fixture.away}}</h3>
-<loading></loading>
+<h3>{{model.fixture.home}} v {{model.fixture.away}}</h3>
+
+<span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
+<span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
+<br />
+<span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+<br />
 <a href="#/gameweekscores/{{model.fixture.gameWeekNumber}}">Game Week #{{model.fixture.gameWeekNumber}}</a>
+<br />
+
+<loading></loading>
 
 <table class="table table-striped">
     <thead>

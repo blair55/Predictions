@@ -18,7 +18,8 @@ module Services =
     
     let getPlayerViewModel (p:Player) = { id=getPlayerId p.id|>str; name=p.name; isAdmin=(p.role=Admin) } 
     let toFixtureViewModel (f:Fixture) = { home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo f.gameWeek.number) }
-    let toScoreViewModel (p:Prediction) = { ScoreViewModel.home=(fst p.score); away=(snd p.score) }
+    let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
+    let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
 
     let longStrToDateTime (s:string) =
@@ -78,16 +79,19 @@ module Services =
         let (_, fixtures) = getGameWeeksAndFixtures()
         let fixture = findFixtureById fixtures fxId
         let (players, results, predictions) = getPlayersAndResultsAndPredictions()
-        let result = results |> List.find(fun r -> r.fixture = fixture)
-        let resultScore = { ScoreViewModel.home=(fst result.score); away=(snd result.score) }
-        let getPredictionViewModel prediction =
+        let result = results |> List.tryFind(fun r -> r.fixture = fixture)
+        let getPredictionScoreViewModel (prediction:Prediction option) =
             match prediction with
-            | Some p -> toScoreViewModel p
+            | Some p -> toScoreViewModel p.score
+            | None -> { ScoreViewModel.home=0; away=0 }
+        let getResultScoreViewModel (result:Result option) =
+            match result with
+            | Some r -> toScoreViewModel r.score
             | None -> { ScoreViewModel.home=0; away=0 }
         let rows = (getPlayerPointsForFixture players predictions results fixture)
-                    |> List.map(fun (player, prediction, points) -> { FixturePointsRowViewModel.player=(getPlayerViewModel player); predictionSubmitted=prediction.IsSome; prediction=(getPredictionViewModel prediction); points=points })
+                    |> List.map(fun (player, prediction, points) -> { FixturePointsRowViewModel.player=(getPlayerViewModel player); predictionSubmitted=prediction.IsSome; prediction=(getPredictionScoreViewModel prediction); points=points })
                     |> List.sortBy(fun p -> p.player.name)
-        { FixturePointsViewModel.fixture=(toFixtureViewModel fixture); result=resultScore; rows=rows }
+        { FixturePointsViewModel.fixture=(toFixtureViewModel fixture); resultSubmitted=result.IsSome; result=result|>getResultScoreViewModel; rows=rows }
 
 
     let getPlayer playerId = getPlayerById (playerId|>PlId)

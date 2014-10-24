@@ -35,8 +35,9 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fixtures in play
 // fixture prediction histogram
 // players league position line graph
+// consistent link text and link target
 
-//view by fixture - who called the fixture correctly?
+// view by fixture - who called the fixture correctly?
 // fix menu scroll thing & double click for drop down
 // fix gameweek no when adding new gw
 // no prediction submitted view on gameweek score

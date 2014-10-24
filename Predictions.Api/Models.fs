@@ -61,7 +61,7 @@ module ViewModels =
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixturePointsViewModel = { fixture:FixtureViewModel; result:ScoreViewModel; rows:FixturePointsRowViewModel list }
+    type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; rows:FixturePointsRowViewModel list }
 
 
 [<AutoOpen>]

@@ -31,15 +31,24 @@ module Domain =
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
     type GameWeekWinner = { gameWeek:GameWeek; player:Player; points:int }
+    type ClosedFixtureStatus = AwaitingResult | ResultAdded
+    type FixtureStatus = Open | ClosedFixtureStatus
 
     let isPlayerAdmin (player:Player) =
         match player.role with
         | Admin -> true
         | _ -> false
 
+    //let getFixtureStatus results fixture =
+
+    // can only add fixture with ko in future
+    // can only add result to fixture with ko in past
+    // can only view fixture with ko in past
+        
+
     // dtos / viewmodels
     //type LeagueTableRow = { position:int; player:Player; correctScores:int; correctOutcomes:int; points:int }
-    type GameWeekAndPoints = GwNo * int
+    //type GameWeekAndPoints = GwNo * int
     type GameWeekDetailsRow = { fixture:Fixture; prediction:Prediction option; result:Result option; points:int }
     type FixtureDetails = { fixture:Fixture; result:Result; predictions:Prediction list }
 
