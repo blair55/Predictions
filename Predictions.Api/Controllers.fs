@@ -103,7 +103,7 @@ type AdminController() =
         // cannot save gameweek with no fixtures
 
     // when saving prediction/result:
-        // cannot save score with negative scores
+        // cannot add score with negative scores
 
     // cannot save result to fixture with ko in future
     // cannot save prediction to fixture with ko in past
@@ -111,11 +111,12 @@ type AdminController() =
 
 type Player = { id:PlId; name:string; role:Role }
 type Prediction = { score:Score; player:Player }
+type Result = { score:Score }
 type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
 
 type Fixture =
     | OpenFixture of FixtureData
-    | ClosedFixture of (FixtureData * Score option)
+    | ClosedFixture of (FixtureData * Result option)
 
 type GameWeekData = { number:GwNo; description:string; }
 
@@ -138,10 +139,10 @@ module Rules =
         | EmptyGameWeek gwd -> Failure "cannot save empty gameweek"
         | GameWeekWithFixtures (gwd, fs) -> Success () // persist gw...
 
-    let tryAddScoreToFixture s f =
+    let tryAddResultToFixture r f =
         match f with
         | OpenFixture f -> Failure "cannot add result to fixture with ko in future"
-        | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some s))
+        | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some r))
 
     let tryAddPredictionToFixture p f =
         match f with
@@ -163,3 +164,7 @@ module Rules =
         else if ko > DateTime.Now then Failure "fixture not in the future"
         else Success({id=newFxId; home=home; away=away; kickoff=ko; predictions=[]})
     
+    let readFixtureFromDb f =
+        match f.kickoff > DateTime.Now with
+        | true -> OpenFixture f
+        | false -> ClosedFixture (f, None)
