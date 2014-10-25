@@ -32,3 +32,13 @@ module Common =
         with
             | :? (System.Exception) as ex -> Failure ex.Message
 
+    
+    let fstOption a =
+        match a with
+        | Some (b, _) -> Some b
+        | None -> None
+
+    let sndOption a =
+        match a with
+        | Some (_, b) -> Some b
+        | None -> None

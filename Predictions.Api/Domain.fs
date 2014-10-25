@@ -61,6 +61,7 @@ module Domain =
         | OpenFixture fd -> fd, None 
         | ClosedFixture (fd, r) -> (fd, r)
 
+
 //    let getPredictionsForGameWeeks (gws:GameWeek list) =
 //        gws
 //        |> List.collect(fun gw -> gw.fixtures)
@@ -84,6 +85,20 @@ module Domain =
         |> List.map(fixtureToFixtureData)
         |> List.collect(fun fd -> fd.predictions)
         |> List.filter(fun pr -> pr.player = pl)
+
+    let tryFindFixture (gws:GameWeek list) fxid =
+        gws
+        |> List.collect(fun gw -> gw.fixtures)
+        |> List.map(fun f -> f, fixtureToFixtureData f)
+        |> List.tryFind(fun (f, fd) -> fd.id = fxid)
+        |> fstOption
+
+    let tryFindFixtureWithGameWeek (gws:GameWeek list) fxid =
+        gws
+        |> List.map(fun gw -> gw, gw.fixtures)
+        |> List.collect(fun (gw, fixtures) -> gw.fixtures |> List.map(fun f -> gw, f))
+        |> List.map(fun (gw, f) -> gw, f, fixtureToFixtureData f)
+        |> List.tryFind(fun (gw, f, fd) -> fd.id = fxid)
 
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
@@ -150,14 +165,17 @@ module Domain =
         match f with
         | OpenFixture _ -> None
         | ClosedFixture fr -> Some fr
+        
+    let onlyOpenFixtures f =
+        match f with
+        | OpenFixture fd -> Some fd
+        | ClosedFixture _ -> None
 
     let getPlayerBracketProfile (fixtures:Fixture list) player =
-        
         let brackets = fixtures
                        |> List.choose(onlyClosedFixtures)
                        |> List.map(fun (fd, r) -> (tryFindPlayerPrediction fd.predictions player, r))
                        |> List.map(fun (p, r) -> getBracketForPredictionComparedToResult p r)
-
         let totalPoints = brackets |> List.sumBy(fun b -> getPointsForBracket b)
         let countBracket l bracket = l |> List.filter(fun b -> b = bracket) |> List.length
         let totalCorrectScores = CorrectScore |> (countBracket brackets)
@@ -204,16 +222,12 @@ module Domain =
 
     let isFixtureOpen f = f.kickoff > DateTime.Now
 
-    let getOpenFixturesForPlayer (predictions:Prediction list) (fixtures:Fixture list) (players:Player list) (plId:PlId) =
+    let getOpenFixturesForPlayer (fixtures:Fixture list) (players:Player list) (plId:PlId) =
         let player = findPlayerById players plId
-        let doesFixtureAlreadyHavePredictionFromPlayer (predictions:Prediction list) player fixture =
-            let predictionsForFixtureByPlayer =
-                predictions |> List.filter(fun p -> p.player = player) |> List.filter(fun p -> p.fixture = fixture)
-            (List.isEmpty predictionsForFixtureByPlayer) = false
-        fixtures
-        |> List.filter(isFixtureOpen)
-        |> List.filter(fun f -> (doesFixtureAlreadyHavePredictionFromPlayer predictions player f) = false)
-        |> List.sortBy(fun f -> f.gameWeek.number)
+        // todo: filter for fixtures with no prediction
+        fixtures |> List.choose(onlyOpenFixtures) |> List.sortBy(fun fd -> fd.kickoff)
+
+        
 
     let getFixturesAwaitingResults (fixtures:Fixture list) (results:Result list) =
         let hasFilterGotMatchingResult f =
@@ -230,13 +244,12 @@ module Domain =
         |> List.map(fun pl -> getGameWeekPointsForPlayer predictions results pl gameWeek.number)
         |> List.maxBy(fun (_,_,points) -> points)
 
-    let getPastGameWeeks (predictions:Prediction list) (results:Result list) =
-        results
-        |> List.map(fun r -> r.fixture.gameWeek)
-        |> Seq.distinct
-        |> Seq.map(getGameWeekWinner predictions results)
-        |> Seq.sortBy(fun (_, gwno, _) -> gwno)
-        |> Seq.toList
+    let getPastGameWeeksWithWinner (gameWeeks:GameWeek list) players =
+        gameWeeks
+        |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
+        |> List.map(fun (gw, fixtures) -> gw, getLeagueTable players fixtures)
+        |> List.map(fun (gw, lgtbl) -> gw, lgtbl.Head)
+        |> List.map(fun (gw, (_, plr, _, _, pts)) -> gw, plr, pts)
 
     let getPointsForFixtureForPlayer (predictions:Prediction list) (results:Result list) fixture player =
         let prediction = predictions |> List.filter(fun p -> p.player = player) |> List.tryFind(fun p -> p.fixture = fixture)
@@ -268,7 +281,13 @@ module Domain =
     // cannot view fixture with ko in future
 
     let newFxId = Guid.NewGuid()|>FxId
-    
+    let newPrId = Guid.NewGuid()|>PrId
+    let newGwId = Guid.NewGuid()|>GwId
+
+    let createPrediction player score = { Prediction.id=newPrId; player=player; score=score }
+    let createGameWeek gwno = { GameWeek.id=newGwId; number=gwno; fixtures=[]; description="" }
+    let createFixture home away (ko:string) = { FixtureData.id=newFxId; home=home; away=away; kickoff=Convert.ToDateTime(ko); predictions=[] }
+
     let tryAddResultToFixture r f =
         match f with
         | OpenFixture f -> Failure "cannot add result to fixture with ko in future"
@@ -276,13 +295,13 @@ module Domain =
 
     let tryAddPredictionToFixture p f =
         match f with
-        | OpenFixture f -> Success(OpenFixture({f with predictions=p::f.predictions}))
+        | OpenFixture f -> Success((p, OpenFixture({f with predictions=p::f.predictions})))
         | ClosedFixture _ -> Failure "cannot add prediction to fixture with ko in past"
 
     let tryViewFixture f =
         match f with
         | OpenFixture _ -> Failure "cannot view fixture with ko in future"
-        | ClosedFixture f -> Success(ClosedFixture f)
+        | ClosedFixture(fd, r) -> Success(fd, r)
 
     let tryToCreateScoreFromSbm home away =
         if home >= 0 && away >= 0 then Success(home, away) else Failure "scores must be positive"

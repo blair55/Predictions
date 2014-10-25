@@ -124,11 +124,6 @@ module Data =
         let rsDtos = readResults()
         let plDtos = readPlayers()
 
-        let sndOption a =
-            match a with
-            | Some (_, b) -> Some b
-            | None -> None
-
         let playerPairs = plDtos |> List.map(fun plDto -> plDto, toPlayer plDto)
         let findPlayerById id = playerPairs |> List.find(fun (dto, model) -> dto.id = id) |> snd
         let resultPairs = rsDtos |> List.map(fun rsDto -> rsDto, toResult rsDto)

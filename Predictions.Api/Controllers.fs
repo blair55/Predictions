@@ -45,7 +45,7 @@ type HomeController() =
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =
         base.Request |> (getPlayerIdCookie
-                     >> bind (switch getOpenFixtures)
+                     >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
                      
     [<Route("prediction")>][<HttpPost>]
@@ -56,7 +56,7 @@ type HomeController() =
 
     [<Route("pastgameweeks")>]
     member this.GetPastGameWeeks() =
-        () |> (switch getPastGameWeeks >> resultToHttp)
+        () |> (switch getPastGameWeeksWithWinner >> resultToHttp)
         
     [<Route("gameweekscores/{gwno:int}")>]
     member this.GetGameWeekPoints (gwno:int) =
@@ -77,7 +77,7 @@ type AdminController() =
                      >> bind (switch (fun gwno -> getGameWeekNo gwno))
                      >> resultToHttp)
 
-    [<Route("gameweek")>][<HttpPost>]
+    [<HttpPost>][<Route("gameweek")>]
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
         let saveGameWeek() = saveGameWeekPostModel gameWeek
         base.Request |> (makeSurePlayerIsAdmin
@@ -90,7 +90,7 @@ type AdminController() =
                      >> bind (switch getFixturesAwaitingResults)
                      >> resultToHttp)
 
-    [<Route("result")>][<HttpPost>]
+    [<HttpPost>][<Route("result")>]
     member this.AddResult (result:ResultPostModel) =
         let saveResult() = saveResultPostModel result
         base.Request |> (makeSurePlayerIsAdmin
