@@ -17,7 +17,7 @@ open Predictions.Api.Common
 module Services =
     
     let getPlayerViewModel (p:Player) = { id=getPlayerId p.id|>str; name=p.name; isAdmin=(p.role=Admin) } 
-    let toFixtureViewModel (f:Fixture) = { home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo f.gameWeek.number) }
+    let toFixtureViewModel (f:FixtureData) (gw:GameWeek)= { home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number) }
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
@@ -25,14 +25,16 @@ module Services =
     let longStrToDateTime (s:string) =
         let d = s.Split('+').[0];
         Convert.ToDateTime(d)
+    
+    let season() = buildSeason Const.CurrentSeason
 
-    let rec validateFixtures fixtures r =
-        match fixtures with
-        | h::t -> let res = validateFixture h
-                  match res with
-                  | Success _ -> validateFixtures t r
-                  | Failure _ -> res
-        | [] -> r
+//    let rec validateFixtures fixtures r =
+//        match fixtures with
+//        | h::t -> let res = validateFixture h
+//                  match res with
+//                  | Success _ -> validateFixtures t r
+//                  | Failure _ -> res
+//        | [] -> r
 
     let buildGameWeek (gwno:GwNo) = { GameWeek.id=Guid.NewGuid()|>GwId; number=gwno; description="" }
 
@@ -101,8 +103,10 @@ module Services =
     let leagueTableRowToViewModel (pos, pl, cs, co, pts) = { LeagueTableRowViewModel.position=pos; player=getPlayerViewModel pl; correctScores=cs; correctOutcomes=co; points=pts }
 
     let getLeagueTableView() =
-        let (players, results, predictions) = getPlayersAndResultsAndPredictions()
-        let rows = (getLeagueTable predictions results players) |> List.map(leagueTableRowToViewModel)
+        let players = getPlayers()
+        let season = season()
+        let fixtures = getFixturesForGameWeeks season.gameWeeks // all gameweeks for full league table
+        let rows = (getLeagueTable players fixtures) |> List.map(leagueTableRowToViewModel)
         { LeagueTableViewModel.rows=rows }
 
     let getGameWeekPointsView gwno =
@@ -114,16 +118,15 @@ module Services =
 
 
     let getGameWeeksPointsForPlayer playerId =
-
-        let getPlayerGameWeeksViewModelRow (gwno, r) =
+        let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
             match r with
-            | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gwno); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
-            | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gwno); position=0; correctScores=0; correctOutcomes=0; points=0}
-
-        let (players, results, predictions) = getPlayersAndResultsAndPredictions()
-        let gameWeeks = getGameWeeks()
+            | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
+            | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=0; correctScores=0; correctOutcomes=0; points=0}
+        let players = getPlayers()
+        let season = season()
+        let gameWeeks = season.gameWeeks
         let player = findPlayerById players (playerId|>PlId)
-        let x = getPlayerPointsForGameWeeks predictions results players player gameWeeks
+        let x = getPlayerPointsForGameWeeks players player gameWeeks
         let rows = x |> List.map(getPlayerGameWeeksViewModelRow)
         { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=rows }
 
@@ -132,11 +135,11 @@ module Services =
         getPlayerPredictionsForFixture predictions results (FxId fxid)
 
     let getPlayerGameWeek playerId gameWeekNo =
-        let (players, results, predictions) = getPlayersAndResultsAndPredictions()
-        let (_, fixtures) = getGameWeeksAndFixtures()
+        let players = getPlayers()
         let player = findPlayerById players (playerId|>PlId)
-        let gameWeekDetailRows = getGameWeekDetailsForPlayer fixtures predictions results player (gameWeekNo|>GwNo)
-        let rowToViewModel (d:GameWeekDetailsRow) =
+        let season = season()
+        let gw = season.gameWeeks |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
+        let rowToViewModel (fd, (r:Result option), (p:Prediction option), pts) =
             let getVmPred (pred:Prediction option) =
                 match pred with
                 | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
@@ -145,15 +148,8 @@ module Services =
                 match result with
                 | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
                 | None -> { ScoreViewModel.home=0;away=0 }
-            {
-                GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel d.fixture)
-                predictionSubmitted=d.prediction.IsSome
-                prediction=getVmPred d.prediction
-                resultSubmitted=d.result.IsSome
-                result=getVmResult d.result
-                points=d.points
-            }
-        let rows = gameWeekDetailRows |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
+            { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts }
+        let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
     let saveResultPostModel (rpm:ResultPostModel) =
@@ -185,6 +181,13 @@ module Services =
         () |> (tryCreatePrediction >> bind tryAddPrediction)
 
         
+
+
+
+
+    // web helpers
+
+
     let playerIdCookieName = "playerId"
 
     let getCookieValue (request:HttpRequestMessage) key =

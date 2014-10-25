@@ -58,12 +58,13 @@ let results = buildResults fixtures
         
 // initialising
 
-let initAll (pl:Player list) (g:GameWeek list) (f:Fixture list) (r:Result list) (p:Prediction list) =
+let initAll (pl:Player list) (s:Season list) (g:GameWeek list) (f:Fixture list) (r:Result list) (p:Prediction list) =
     executeNonQuery "drop table if exists players; create table players (id uuid, name text, role text, email text)"
+    executeNonQuery "drop table if exists seasons; create table seasons (id uuid, seasonId uuid, year text)"
     executeNonQuery "drop table if exists gameweeks; create table gameweeks (id uuid, number int, description text)"
     executeNonQuery "drop table if exists fixtures; create table fixtures (id uuid, gameWeekid uuid, home text, away text, kickoff timestamp)"
-    executeNonQuery "drop table if exists results; create table results (fixtureId uuid, homeScore int, awayScore int)"
-    executeNonQuery "drop table if exists predictions; create table predictions (fixtureId uuid, homeScore int, awayScore int, playerId uuid)" 
+    executeNonQuery "drop table if exists results; create table results (id uuid, fixtureId uuid, homeScore int, awayScore int)"
+    executeNonQuery "drop table if exists predictions; create table predictions (id uuid, fixtureId uuid, homeScore int, awayScore int, playerId uuid)" 
     pl |> List.iter(addPlayer)
     g |> List.iter(addGameWeek)
     f |> List.iter(addFixture)

@@ -29,3 +29,6 @@ type Config() =
         config.Formatters.XmlFormatter.SupportedMediaTypes.Clear();
         config.Formatters.JsonFormatter.SerializerSettings.ContractResolver
             <- Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+
+type Const() =
+    static member CurrentSeason = "2014/15"
