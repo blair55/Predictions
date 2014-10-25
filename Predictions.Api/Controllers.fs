@@ -81,7 +81,7 @@ type AdminController() =
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
         let saveGameWeek() = saveGameWeekPostModel gameWeek
         base.Request |> (makeSurePlayerIsAdmin
-                     >> bind saveGameWeek
+                     >> bind (switch saveGameWeek)
                      >> resultToHttp)
         
     [<Route("getfixturesawaitingresults")>]

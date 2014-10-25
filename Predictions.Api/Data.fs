@@ -53,6 +53,7 @@ module Data =
 
     // writing
     
+    
     type SeasonDto = { id:Guid; year:string; }
     type GameWeekDto = { id:Guid; seasonId:Guid; number:int; description:string; }
     type FixtureDto = { id:Guid; gameWeekId:Guid; home:string; away:string; kickoff:DateTime }
@@ -86,6 +87,13 @@ module Data =
     let addResult r fxid = getResultDto r fxid |> insertResultQuery |> executeNonQuery
     let addPrediction p fxid = getPredictionDto p fxid |> insertPredictionQuery |> executeNonQuery
     let addPlayer pl = getPlayerDto pl |> insertPlayerQuery |> executeNonQuery
+
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; number:GwNo; description:string; fixtures:FixtureData list }
+
+    let saveGameWeek (cmd:SaveGameWeekCommand) =
+        addGameWeek { GameWeek.id=cmd.id; number=cmd.number; description=cmd.description; fixtures=[] } cmd.seasonId
+        cmd.fixtures |> List.iter(fun fd -> addFixture fd cmd.id)
+
 
     // reading
     
