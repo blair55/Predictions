@@ -21,27 +21,8 @@ module Services =
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
-//
-//    let longStrToDateTime (s:string) =
-//        let d = s.Split('+').[0];
-//        Convert.ToDateTime(d)
     
     let season() = buildSeason Const.CurrentSeason
-
-//    let rec validateFixtures fixtures r =
-//        match fixtures with
-//        | h::t -> let res = validateFixture h
-//                  match res with
-//                  | Success _ -> validateFixtures t r
-//                  | Failure _ -> res
-//        | [] -> r
-
-    let saveGameWeekPostModel (gwpm:GameWeekPostModel) =
-        let gwno = getNewGameWeekNo()
-        let snid = season().id
-        let fixtures = gwpm.fixtures |> List.map(fun f -> tryToCreateFixtureDataFromSbm f.home f.away f.kickOff)
-        let gw = { SaveGameWeekCommand.id=newGwId; seasonId=snid; number=gwno; fixtures=fixtures; description="" }
-        saveGameWeek gw
 
     let getOpenFixturesForPlayer (playerId:string) =
         let plId = PlId (sToGuid playerId)
@@ -124,6 +105,13 @@ module Services =
         let rows = (getLeagueTable players fixtures) |> List.map(leagueTableRowToViewModel)
         { GameWeekPointsViewModel.gameWeekNo = (getGameWeekNo gwno); rows=rows }
         
+        
+    // get player from guid
+    let getPlayerFromGuid guid =
+        let player = getPlayers() |> List.tryFind(fun plr -> plr.id = PlId guid)
+        match player with
+        | Some p -> Success (p|>getPlayerViewModel)
+        | None -> Failure (sprintf "no player found matching id %s" (str guid))
 
 
     let getGameWeeksPointsForPlayer playerId =
@@ -152,21 +140,29 @@ module Services =
             let getVmPred (pred:Prediction option) =
                 match pred with
                 | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
-                | None -> { ScoreViewModel.home=0;away=0 }
+                | None -> noScoreViewModel
             let getVmResult (result:Result option) =
                 match result with
-                | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
-                | None -> { ScoreViewModel.home=0;away=0 }
+                | Some r -> { ScoreViewModel.home=fst r.score;away=snd r.score }
+                | None -> noScoreViewModel
             { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts }
         let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
-    let saveResultPostModel (rpm:ResultPostModel) =
-        let fxId = FxId (sToGuid rpm.fixtureId)
-        let (_, fixtures) = getGameWeeksAndFixtures()
-        let fixture = findFixtureById fixtures fxId
-        let result = { Result.fixture=fixture; score=(rpm.score.home,rpm.score.away) }
-        addResult result
+    let trySaveResultPostModel (rpm:ResultPostModel) =
+        let gws = season().gameWeeks
+        let fxid = FxId (sToGuid rpm.fixtureId)
+        let createScore() = tryToCreateScoreFromSbm rpm.score.home rpm.score.away
+        let createResult score = { Result.id=newRsId; score=score }
+        let makeSureFixtureExists r =
+            match (tryFindFixture gws fxid) with
+            | Some _ -> Success (fxid,r)
+            | None -> Failure "fixture does not exist"
+        let saveResult (fxid,r) = addResult r fxid
+        () |> (createScore
+           >> bind (switch createResult)
+           >> bind makeSureFixtureExists
+           >> bind (switch saveResult))
 
     let trySavePredictionPostModel (ppm:PredictionPostModel) (playerId:string) =
         let plId = PlId (sToGuid playerId)
@@ -186,89 +182,26 @@ module Services =
             let fd = fixtureToFixtureData f
             let addPredictionWithReturn() = addPrediction p fd.id; ()
             tryToWithReturn addPredictionWithReturn
-        
-        // prevent adding more than 1 prediction per fixture per player
-
+        // todo: prevent adding more than 1 prediction per fixture per player
         () |> (createScore
                >> bind (switch createPrediction)
                >> bind makeSureFixtureExists
                >> bind addPredictionToFixture
                >> bind trySavePrediction)
-
-    // web helpers
-
-
-    let playerIdCookieName = "playerId"
-
-    let getCookieValue (request:HttpRequestMessage) key =
-        let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
-        match cookie with
-        | Some c -> Success c.[key].Value
-        | None -> Failure "No cookie found"
-
-    let logPlayerIn (request:HttpRequestMessage) (player:PlayerViewModel) =
-        let nd d = new Nullable<DateTimeOffset>(d)
-        let c = new CookieHeaderValue(playerIdCookieName, player.id)
-        let july1025 = new DateTime(2015, 7, 1)        
-        let r = new HttpResponseMessage(HttpStatusCode.Redirect)
-        c.Expires <- new DateTimeOffset(july1025) |> nd
-        c.Path <- "/"
-        r.Headers.AddCookies([c])
-        let components = match request.IsLocal() with
-                            | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
-                            | false -> UriComponents.Scheme ||| UriComponents.Host
-        let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
-        r.Headers.Location <- new Uri(url)
-        r
-
-    // get player cookie value
-    let getPlayerIdCookie r =
-        getCookieValue r playerIdCookieName
-
-    // convert value to guid
-    let convertStringToGuid v =
-        let (isParsed, guid) = trySToGuid v
-        if isParsed then Success guid else Failure (sprintf "could not convert %s to guid" v)
-
-    // get player from guid
-    let getPlayerFromGuid guid =
-        let player = getPlayer guid
-        match player with
-        | Some p -> Success (p|>getPlayerViewModel)
-        | None -> Failure (sprintf "no player found matching id %s" (str guid))
-
-    let getOkResponseWithBody (body:'T) =
-        let response = new HttpResponseMessage(HttpStatusCode.OK)
-        response.Content <- new ObjectContent<'T>(body, new Formatting.JsonMediaTypeFormatter())
-        response
     
-    let unauthorised msg =
-        let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
-        response.Content <- new StringContent(msg)
-        response
+    let rec tryCreateFixturesFromPostModels (viewModels:FixturePostModel list) fixtures =
+        match viewModels with
+        | h::t -> let fixtureData = tryToCreateFixtureDataFromSbm h.home h.away h.kickOff
+                  match fixtureData with
+                  | Success fd -> tryCreateFixturesFromPostModels t (fd::fixtures)
+                  | Failure msg -> Failure msg
+        | [] -> Success fixtures
 
-    let getWhoAmIResponse result =
-        match result with
-        | Success player -> getOkResponseWithBody player
-        | Failure msg -> unauthorised msg
-
-    let doLogin req result =
-        match result with
-        | Success player -> logPlayerIn req player
-        | Failure msg -> unauthorised msg 
-
-    let checkPlayerIsAdmin (player:PlayerViewModel) =
-        match player.isAdmin with
-        | true -> Success ()
-        | false -> Failure "player not admin"
-
-    let makeSurePlayerIsAdmin req =
-        req |> (getPlayerIdCookie
-            >> bind convertStringToGuid
-            >> bind getPlayerFromGuid
-            >> bind checkPlayerIsAdmin)
-    
-    let resultToHttp result =
-        match result with
-        | Success body -> getOkResponseWithBody body
-        | Failure msg -> unauthorised msg 
+    let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
+        let gwno = getNewGameWeekNo()
+        let snid = season().id
+        let createFixtures viewModels = tryCreateFixturesFromPostModels viewModels []
+        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId; seasonId=snid; number=gwno; fixtures=fixtures; description="" }
+        gwpm.fixtures |> (createFixtures
+                      >> bind (switch createGameWeek)
+                      >> bind (switch saveGameWeek)) 

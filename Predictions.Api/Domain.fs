@@ -15,8 +15,11 @@ module Domain =
     type GwNo = GwNo of int
     type Role = User | Admin
 
-    let sToGuid s = Guid.Parse(s)
-    let trySToGuid s = Guid.TryParse(s)
+    let nguid() = Guid.NewGuid()
+    let newFxId = nguid()|>FxId
+    let newPrId = nguid()|>PrId
+    let newGwId = nguid()|>GwId
+    let newRsId = nguid()|>RsId
 
     // deconstructors
     let getPlayerId (PlId id) = id
@@ -280,10 +283,7 @@ module Domain =
     // cannot save prediction to fixture with ko in past
     // cannot view fixture with ko in future
 
-    let newFxId = Guid.NewGuid()|>FxId
-    let newPrId = Guid.NewGuid()|>PrId
-    let newGwId = Guid.NewGuid()|>GwId
-
+    
     let createPrediction player score = { Prediction.id=newPrId; player=player; score=score }
     //let createFixture home away (ko:string) = { FixtureData.id=newFxId; home=home; away=away; kickoff=Convert.ToDateTime(ko); predictions=[] }
 

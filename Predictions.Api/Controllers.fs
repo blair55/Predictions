@@ -13,6 +13,7 @@ open Predictions.Api.Domain
 open Predictions.Api.ViewModels
 open Predictions.Api.PostModels
 open Predictions.Api.Services
+open Predictions.Api.WebUtils
 
 [<RoutePrefix("api")>]
 type HomeController() =
@@ -48,7 +49,7 @@ type HomeController() =
                      >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
                      
-    [<Route("prediction")>][<HttpPost>]
+    [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
         base.Request |> (getPlayerIdCookie
                      >> bind (trySavePredictionPostModel prediction)
@@ -79,9 +80,9 @@ type AdminController() =
 
     [<HttpPost>][<Route("gameweek")>]
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
-        let saveGameWeek() = saveGameWeekPostModel gameWeek
+        let saveGameWeek() = trySaveGameWeekPostModel gameWeek
         base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch saveGameWeek)
+                     >> bind saveGameWeek
                      >> resultToHttp)
         
     [<Route("getfixturesawaitingresults")>]
@@ -92,7 +93,7 @@ type AdminController() =
 
     [<HttpPost>][<Route("result")>]
     member this.AddResult (result:ResultPostModel) =
-        let saveResult() = saveResultPostModel result
+        let saveResult() = trySaveResultPostModel result
         base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch saveResult)
+                     >> bind saveResult
                      >> resultToHttp)

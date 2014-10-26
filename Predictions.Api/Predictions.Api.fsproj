@@ -56,6 +56,7 @@
     <Compile Include="Data.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="Services.fs" />
+    <Compile Include="WebUtils.fs" />
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />

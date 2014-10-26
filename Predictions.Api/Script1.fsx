@@ -66,6 +66,7 @@ let initAll (pl:Player list) (s:Season list) (g:GameWeek list) (f:Fixture list) 
     executeNonQuery "drop table if exists results; create table results (id uuid, fixtureId uuid, homeScore int, awayScore int)"
     executeNonQuery "drop table if exists predictions; create table predictions (id uuid, fixtureId uuid, homeScore int, awayScore int, playerId uuid)" 
     pl |> List.iter(addPlayer)
+    s |> List.iter(addSeason)
     g |> List.iter(addGameWeek)
     f |> List.iter(addFixture)
     r |> List.iter(addResult)

@@ -1,5 +1,7 @@
 ﻿namespace Predictions.Api
 
+open System
+
 [<AutoOpen>]
 module Common =
 
@@ -42,3 +44,6 @@ module Common =
         match a with
         | Some (_, b) -> Some b
         | None -> None
+        
+    let sToGuid s = Guid.Parse(s)
+    let trySToGuid s = Guid.TryParse(s)
