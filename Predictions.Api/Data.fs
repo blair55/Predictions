@@ -61,38 +61,39 @@ module Data =
     type PredictionDto = { id:Guid; fixtureId:Guid; playerId:Guid; homeScore:int; awayScore:int }
     type PlayerDto = { id:Guid; name:string; role:string; email:string }
     
-    let str o = o.ToString()
+    type SaveSeasonCommand = { id:SnId; year:SnYr; }
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; number:GwNo; description:string; fixtures:FixtureData list }
+    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
+    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
+    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string }
+    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
+    
     let roleToString r = match r with | User -> "User" | Admin -> "Admin"
     let stringToRole s = match s with | "User" -> User | "Admin" -> Admin | _ -> User
-
     let kostr (k:DateTime) = String.Format("{0:u}", k)
 
-    let insertSeasonQuery (s:SeasonDto) = sprintf "insert into seasons values ('%s', '%s')" (str s.id) s.year
-    let insertGameWeekQuery (g:GameWeekDto) = sprintf "insert into gameweeks values ('%s', '%s', %i, '%s')" (str g.id) (str g.seasonId) g.number g.description
-    let insertFixtureQuery (f:FixtureDto) = sprintf "insert into fixtures values ('%s', '%s', '%s', '%s', '%s')" (str f.id) (str f.gameWeekId) f.home f.away (kostr f.kickoff)
-    let insertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
-    let insertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
-    let insertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email
-    
-    let getSeasonDto (s:Season) = { SeasonDto.id=s.id|>getSnId; year=s.year; }
-    let getGameWeekDto (g:GameWeek) snid = { GameWeekDto.id=g.id|>getGwId; number=g.number|>getGameWeekNo; seasonId=snid|>getSnId; description=g.description; }
-    let getFixtureDto (f:FixtureData) gwid = { FixtureDto.id=f.id|>getFxId; gameWeekId=gwid|>getGwId; home=f.home; away=f.away; kickoff=f.kickoff }
-    let getResultDto (r:Result) fxid = { ResultDto.id=r.id|>getRsId; fixtureId=fxid|>getFxId; homeScore=(fst r.score); awayScore=(snd r.score); }
-    let getPredictionDto (p:Prediction) fxid = { PredictionDto.id=p.id|>getPrId; fixtureId=fxid|>getFxId; playerId=(getPlayerId p.player.id); homeScore=(fst p.score); awayScore=(snd p.score); }
-    let getPlayerDto (p:Player) = { PlayerDto.id=p.id|>getPlayerId; name=(p.name); role=(roleToString p.role); email="" }
+    let getInsertSeasonQuery (s:SeasonDto) = sprintf "insert into seasons values ('%s', '%s')" (str s.id) s.year
+    let getInsertGameWeekQuery (g:GameWeekDto) = sprintf "insert into gameweeks values ('%s', '%s', %i, '%s')" (str g.id) (str g.seasonId) g.number g.description
+    let getInsertFixtureQuery (f:FixtureDto) = sprintf "insert into fixtures values ('%s', '%s', '%s', '%s', '%s')" (str f.id) (str f.gameWeekId) f.home f.away (kostr f.kickoff)
+    let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
+    let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
+    let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email
 
-    let addSeason s = getSeasonDto s |> insertSeasonQuery |> executeNonQuery
-    let addGameWeek g snid = getGameWeekDto g snid |> insertGameWeekQuery |> executeNonQuery
-    let addFixture f gwid = getFixtureDto f gwid |> insertFixtureQuery |> executeNonQuery
-    let addResult r fxid = getResultDto r fxid |> insertResultQuery |> executeNonQuery
-    let addPrediction p fxid = getPredictionDto p fxid |> insertPredictionQuery |> executeNonQuery
-    let addPlayer pl = getPlayerDto pl |> insertPlayerQuery |> executeNonQuery
+    let getSeasonDto (cmd:SaveSeasonCommand) = { SeasonDto.id=cmd.id|>getSnId; year=cmd.year|>getSnYr; }
+    let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=cmd.number|>getGameWeekNo; seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
+    let getFixtureDto (cmd:SaveFixtureCommand) = { FixtureDto.id=cmd.id|>getFxId; gameWeekId=cmd.gameWeekId|>getGwId; home=cmd.home; away=cmd.away; kickoff=cmd.ko }
+    let getResultDto (cmd:SaveResultCommand) = { ResultDto.id=cmd.id|>getRsId; fixtureId=cmd.fixtureId|>getFxId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
+    let getPredictionDto (cmd:SavePredictionCommand) = { PredictionDto.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
+    let getPlayerDto (cmd:SavePlayerCommand) = { PlayerDto.id=cmd.id|>getPlayerId; name=(cmd.name); role=(roleToString cmd.role); email=cmd.email }
 
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; number:GwNo; description:string; fixtures:FixtureData list }
-
+    let savePlayer (cmd:SavePlayerCommand) = cmd |> getPlayerDto |> getInsertPlayerQuery |> executeNonQuery
+    let saveSeason (cmd:SaveSeasonCommand) = cmd |> getSeasonDto |> getInsertSeasonQuery |> executeNonQuery
+    let saveResult (cmd:SaveResultCommand) = cmd |> getResultDto |> getInsertResultQuery |> executeNonQuery
+    let savePrediction (cmd:SavePredictionCommand) = cmd |> getPredictionDto |> getInsertPredictionQuery |> executeNonQuery
     let saveGameWeek (cmd:SaveGameWeekCommand) =
-        addGameWeek { GameWeek.id=cmd.id; number=cmd.number; description=cmd.description; fixtures=[] } cmd.seasonId
-        cmd.fixtures |> List.iter(fun fd -> addFixture fd cmd.id)
+        let saveFixtureCommands = cmd.fixtures |> List.map(fun fd -> { SaveFixtureCommand.id=fd.id; gameWeekId=cmd.id; home=fd.home; away=fd.away; ko=fd.kickoff })
+        cmd |> getGameWeekDto |> getInsertGameWeekQuery |> executeNonQuery
+        saveFixtureCommands |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
 
 
     // reading
@@ -103,7 +104,7 @@ module Data =
     let readDateTimeAtPosition (r:NpgsqlDataReader) i = r.GetDateTime(i)    
     
     let readerToSeasonDto r = { SeasonDto.id = (readGuidAtPosition r 0); year=(readStringAtPosition r 1) }
-    let readerToGameWeekDto (r) = { GameWeekDto.id = (readGuidAtPosition r 0); number=(readIntAtPosition r 1); seasonId=(readGuidAtPosition r 2); description=(readStringAtPosition r 3) }
+    let readerToGameWeekDto (r) = { GameWeekDto.id = (readGuidAtPosition r 0); seasonId=(readGuidAtPosition r 1); number=(readIntAtPosition r 2); description=(readStringAtPosition r 3) }
     let readerToFixtureDto (r) = { FixtureDto.id = (readGuidAtPosition r 0); gameWeekId=(readGuidAtPosition r 1); home=(readStringAtPosition r 2); away=(readStringAtPosition r 3); kickoff=(readDateTimeAtPosition r 4) }
     let readerToResultDto (r) = { ResultDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3) }
     let readerToPredictionDto (r) = { PredictionDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3); playerId=(readGuidAtPosition r 4) }
@@ -121,7 +122,7 @@ module Data =
     let toPrediction (p:PredictionDto) player = { Prediction.id=PrId p.id; score=(p.homeScore, p.awayScore); player=player }
     let toFixture (f:FixtureDto) predictions = { FixtureData.id=FxId f.id; home=f.home; away=f.away; kickoff=f.kickoff; predictions=predictions }
     let toGameWeek (gw:GameWeekDto) fixtures = { GameWeek.id=gw.id|>GwId; number=gw.number|>GwNo; description=gw.description; fixtures=fixtures }
-    let toSeason (s:SeasonDto) gameWeeks = { Season.id=SnId s.id; year=s.year; gameWeeks=gameWeeks }
+    let toSeason (s:SeasonDto) gameWeeks = { Season.id=SnId s.id; year=SnYr s.year; gameWeeks=gameWeeks }
     
     let buildSeason year =
 
@@ -159,26 +160,5 @@ module Data =
         match gwn with
         | Some n -> n+1
         | None -> 1
-
-//    let getPlayersAndResultsAndPredictions() =
-//        let players = readPlayers()
-//        let gameWeeks = readGameWeeks()
-//        let fixtures = readFixtures gameWeeks
-//        let results = readResults fixtures
-//        let predictions = readPredictions players fixtures
-//        players, results, predictions
-//
-//    let getGameWeeks() = readGameWeeks()
-//
-//    let getGameWeeksAndFixtures() =
-//        let gameWeeks = readGameWeeks()
-//        let fixtures = readFixtures gameWeeks
-//        gameWeeks, fixtures
-//
-//    let getGameWeeksAndFixturesAndResults() =
-//        let gameWeeks = readGameWeeks()
-//        let fixtures = readFixtures gameWeeks
-//        let results = readResults fixtures
-//        gameWeeks, fixtures, results
 
     

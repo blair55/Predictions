@@ -65,7 +65,7 @@ type HomeController() =
         
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
-        FxId fxId |> (switch getPlayerPointsForFixture >> resultToHttp)
+        FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
                 
 [<RoutePrefix("api/admin")>]
 type AdminController() =
