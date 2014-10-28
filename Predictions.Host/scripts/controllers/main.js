@@ -8,6 +8,8 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('MainCtrl', function ($scope) {
-
+  .controller('MainCtrl', function ($scope, $http) {
+      $http.get('/api/leaguetable').success(function (data) {
+          $scope.model = data;
+      });
   });
