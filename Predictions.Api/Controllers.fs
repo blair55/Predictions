@@ -78,7 +78,13 @@ type HomeController() =
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
-        
+    
+    [<Route("leaguePosition")>]
+    member this.GetLeaguePosition() =
+        base.Request |> (getPlayerIdCookie
+                     >> bind (switch getLeaguePositionGraphData)
+                     >> resultToHttp)
+
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()

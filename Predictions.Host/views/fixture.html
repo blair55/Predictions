@@ -5,10 +5,10 @@
 <br />
 <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
 <br />
-<a href="#/gameweekscores/{{model.fixture.gameWeekNumber}}">Game Week #{{model.fixture.gameWeekNumber}}</a>
+<a href="#/gameweekscores/{{model.fixture.gameWeekNumber}}">GW#{{model.fixture.gameWeekNumber}}</a>
 <br />
 
-<loading></loading>
+<loading model="model" no-rows-msg="no results"></loading>
 
 <table class="table table-striped">
     <thead>
@@ -21,9 +21,7 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/player/{{row.player.id}}">
-                    {{row.player.name}}
-                </a>
+                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
             </td>
             <td>
                 <span ng-if="row.predictionSubmitted">{{row.prediction.home}} v {{row.prediction.away}}</span>

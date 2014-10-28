@@ -4,7 +4,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>GW</th>
+            <th></th>
             <th>Winner</th>
             <th>Pts</th>
         </tr>
@@ -12,7 +12,7 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/gameweekscores/{{row.gameWeekNo}}">#{{row.gameWeekNo}}</a>
+                <a href="#/gameweekscores/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
             </td>
             <td>
                 <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>

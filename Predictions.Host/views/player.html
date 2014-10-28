@@ -4,7 +4,8 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>GW</th>
+            <th></th>
+            <th></th>
             <th>Pos</th>
             <th>W</th>
             <th>D</th>
@@ -14,9 +15,10 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">
-                    #{{row.gameWeekNo}}
-                </a>
+                <a href="#/gameweekscores/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
+            </td>
+            <td>
+                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">fixtures</a>
             </td>
             <td>{{row.position}}</td>
             <td>{{row.correctScores}}</td>

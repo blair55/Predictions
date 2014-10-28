@@ -62,9 +62,15 @@ module Domain =
         | OpenFixture fd -> fd, None 
         | ClosedFixture (fd, r) -> (fd, r)
 
+    let isFixtureOpen f = match f with | OpenFixture _ -> true | ClosedFixture _ -> false
+    let isFixtureClosedAndHaveResult f = match f with | OpenFixture _ -> false | ClosedFixture (fd, r) -> r.IsSome
+
     let getFixturesForGameWeeks (gws:GameWeek list) =
         gws |> List.collect(fun gw -> gw.fixtures)
-
+        
+    let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek list) =
+        gws |> List.filter(fun gw -> gw.fixtures |> List.exists(isFixtureClosedAndHaveResult))
+        
     let getPlayersForGameWeeks (gws:GameWeek list) =
         gws
         |> List.collect(fun gw -> gw.fixtures)
@@ -196,14 +202,18 @@ module Domain =
         |> List.map(fun fd -> fd, fd.predictions |> List.find(fun p -> p.player = player))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
 
-    let getPastGameWeeksWithWinner (gameWeeks:GameWeek list) players =
-        gameWeeks
+    let getPastGameWeeksWithWinner (gws:GameWeek list) players =
+        gws
         |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
         |> List.map(fun (gw, fixtures) -> gw, getLeagueTable players fixtures)
         |> List.map(fun (gw, lgtbl) -> gw, lgtbl.Head)
         |> List.map(fun (gw, (_, plr, _, _, pts)) -> gw, plr, pts)
 
-
+    let getLeaguePositionForGameWeekForPlayer (gw:GameWeek) players player =
+        gw.fixtures
+        |> getLeagueTable players
+        |> List.find(fun (_, plr, _, _, _) -> plr = player)
+        |> (fun (pos, _, _, _, _) -> gw, pos)
 
 
     // Rules 
