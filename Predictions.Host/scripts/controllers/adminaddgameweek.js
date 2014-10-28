@@ -70,6 +70,6 @@ angular.module('frontendApp')
         var i = index;
 
         $scope.onTimeSet = function (oldTime, newTime) {
-            $modalInstance.close({index:i, kickoff:newTime});
+            $modalInstance.close({ index: i, kickoff: newTime });
         };
     });

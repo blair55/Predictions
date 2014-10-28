@@ -10,17 +10,17 @@
 angular.module('frontendApp')
     .controller('EditpredictionsCtrl', function ($scope, $http) {
 
-    $http.get('/api/editpredictions').success(function (data) {
-        $scope.model = data;
-    });
-
-    $scope.submitResult = function (row, index) {
-        var prediction = {
-            predictionId: row.predictionId,
-            score: score
-        };
-        $http.post('/api/editprediction', prediction).success(function (data) {
-            row.submitted = true;
+        $http.get('/api/editpredictions').success(function (data) {
+            $scope.model = data;
         });
-    };
-});
+
+        $scope.submitResult = function (row, index) {
+            var prediction = {
+                predictionId: row.predictionId,
+                score: row.score
+            };
+            $http.post('/api/editprediction', prediction).success(function (data) {
+                row.submitted = true;
+            });
+        };
+    });

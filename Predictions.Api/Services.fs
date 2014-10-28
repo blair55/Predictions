@@ -166,20 +166,17 @@ module Services =
         let createPrediction score = createPrediction player score
         let makeSureFixtureExists p =
             match (tryFindFixture gws fxId) with
-            | Some f -> Success (p, f)
+            | Some f -> Success (f, p)
             | None -> Failure "fixture does not exist"
-        let addPredictionToFixture (p, f) =
-            tryAddPredictionToFixture p f
-        let trySavePrediction ((p:Prediction), f) =
+        let trySavePrediction (f, (p:Prediction)) =
             let fd = fixtureToFixtureData f
             let addPredictionWithReturn() = savePrediction { SavePredictionCommand.id=p.id; fixtureId=fd.id; playerId=player.id; score=p.score }; ()
             tryToWithReturn addPredictionWithReturn
         // todo: make sure player exists
-        // todo: prevent adding more than 1 prediction per fixture per player
         () |> (createScore
                >> bind (switch createPrediction)
                >> bind makeSureFixtureExists
-               >> bind addPredictionToFixture
+               >> bind tryAddPredictionToFixture
                >> bind trySavePrediction)
     
     let rec tryCreateFixturesFromPostModels (viewModels:FixturePostModel list) fixtures =
@@ -199,25 +196,22 @@ module Services =
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))
 
-    let tryEditPrediction (prediction:EditPredictionPostModel) (playerId:string) =
+    let tryEditPrediction (eppm:EditPredictionPostModel) (playerId:string) =
         let players = getPlayers()
         let gws = gameWeeks()
         let plid = playerId |> sToGuid |> PlId
-        let prid = PrId prediction.predictionId
-        // make sure player exists
+        let prid = PrId eppm.predictionId
         let player = players |> List.tryFind(fun p -> p.id = plid)
         let findPlayer p = match p with | Some p -> Success p | None -> Failure "could not find player" 
-        // make sure prediction exists
         let fdp = tryFindPredictionWithFixture gws prid
         let findPrediction plr = match fdp with | Some (fd, p) -> Success (plr, fd, p) | None -> Failure "could not find prediction" 
-        // make sure prediction belongs to player
         let makeSurePredictionBelongsToPlayer (plr:Player, f, pr:Prediction) = if plr = pr.player then Success (plr, f, pr) else Failure "prediction is not player's to edit"
-        // make sure fixture is open
-        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) =
-            let f = fixtureDataToFixture f None
-            match f with | OpenFixture f -> Success f | ClosedFixture f -> Failure "fixture is closed"
-        // todo: create update fixture command 
+        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) = match fixtureDataToFixture f None with | OpenFixture f -> Success pr | ClosedFixture f -> Failure "fixture is closed"
+        let createScore pr = match tryToCreateScoreFromSbm eppm.score.home eppm.score.away with | Success s -> Success(pr, s) | Failure msg -> Failure msg
+        let updatePrediction ((pr:Prediction), s) = updatePrediction { UpdatePredictionCommand.id=pr.id; score=s }
         player |> (findPlayer
-               >> (bind findPrediction)
-               >> (bind makeSurePredictionBelongsToPlayer)
-               >> (bind makeSureFixtureIsOpen))
+               >> bind findPrediction
+               >> bind makeSurePredictionBelongsToPlayer
+               >> bind makeSureFixtureIsOpen
+               >> bind createScore
+               >> bind (switch updatePrediction))

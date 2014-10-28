@@ -214,8 +214,6 @@ module Domain =
     
     // when saving prediction/result:
         // cannot add score with negative scores
-    
-    // when saving prediction:
         // cannot add more than one prediction per user
 
     // cannot save result to fixture with ko in future
@@ -230,10 +228,20 @@ module Domain =
         | OpenFixture f -> Failure "cannot add result to fixture with ko in future"
         | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some r))
 
-    let tryAddPredictionToFixture p f =
+    let checkFixtureIsOpen (f, p) =
         match f with
-        | OpenFixture f -> Success((p, OpenFixture({f with predictions=p::f.predictions})))
+        | OpenFixture fd -> Success (fd, p)
         | ClosedFixture _ -> Failure "cannot add prediction to fixture with ko in past"
+
+    let checkPlayerHasNoSubmittedPredictionsForFixture ((fd:FixtureData), (pr:Prediction)) =
+        let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
+        if hasAlreadySubmitted then Failure "cannot submit more than one prediction for fixture" else Success (fd, pr)
+
+    let tryAddPredictionToFixture (f, p) =
+        let addPredictionToFixture(fd, p) = (OpenFixture({fd with predictions=p::fd.predictions}), p)
+        (f, p) |> (checkFixtureIsOpen
+               >> bind checkPlayerHasNoSubmittedPredictionsForFixture
+               >> bind (switch addPredictionToFixture))
 
     let tryViewFixture f =
         match f with
@@ -241,7 +249,7 @@ module Domain =
         | ClosedFixture(fd, r) -> Success(fd, r)
 
     let tryToCreateScoreFromSbm home away =
-        if home >= 0 && away >= 0 then Success(home, away) else Failure "scores must be positive"
+        if home >= 0 && away >= 0 then Success(home, away) else Failure "cannot submit negative score"
 
     let tryToCreateFixtureDataFromSbm home away (ko:string) =
         let (isKoValid, kickoff) = DateTime.TryParse(ko)
