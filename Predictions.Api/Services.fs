@@ -200,7 +200,24 @@ module Services =
                       >> bind (switch saveGameWeek))
 
     let tryEditPrediction (prediction:EditPredictionPostModel) (playerId:string) =
-        // todo: make sure player exists
-        // todo: make sure prediction exists
-        // todo: make sure prediction belongs to player
-        Success ()
+        let players = getPlayers()
+        let gws = gameWeeks()
+        let plid = playerId |> sToGuid |> PlId
+        let prid = PrId prediction.predictionId
+        // make sure player exists
+        let player = players |> List.tryFind(fun p -> p.id = plid)
+        let findPlayer p = match p with | Some p -> Success p | None -> Failure "could not find player" 
+        // make sure prediction exists
+        let fdp = tryFindPredictionWithFixture gws prid
+        let findPrediction plr = match fdp with | Some (fd, p) -> Success (plr, fd, p) | None -> Failure "could not find prediction" 
+        // make sure prediction belongs to player
+        let makeSurePredictionBelongsToPlayer (plr:Player, f, pr:Prediction) = if plr = pr.player then Success (plr, f, pr) else Failure "prediction is not player's to edit"
+        // make sure fixture is open
+        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) =
+            let f = fixtureDataToFixture f None
+            match f with | OpenFixture f -> Success f | ClosedFixture f -> Failure "fixture is closed"
+        // todo: create update fixture command 
+        player |> (findPlayer
+               >> (bind findPrediction)
+               >> (bind makeSurePredictionBelongsToPlayer)
+               >> (bind makeSureFixtureIsOpen))

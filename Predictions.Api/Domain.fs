@@ -89,10 +89,17 @@ module Domain =
 
     let tryFindFixtureWithGameWeek (gws:GameWeek list) fxid =
         gws
-        |> List.map(fun gw -> gw, gw.fixtures)
-        |> List.collect(fun (gw, fixtures) -> gw.fixtures |> List.map(fun f -> gw, f))
+        |> List.collect(fun gw -> gw.fixtures |> List.map(fun f -> gw, f))
         |> List.map(fun (gw, f) -> gw, f, fixtureToFixtureData f)
         |> List.tryFind(fun (gw, f, fd) -> fd.id = fxid)
+
+    let tryFindPredictionWithFixture (gws:GameWeek list) prid =
+        gws
+        |> List.collect(fun gw -> gw.fixtures)
+        |> List.map(fixtureToFixtureData)
+        |> List.map(fun fd -> fd, fd.predictions)
+        |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
+        |> List.tryFind(fun (_, p) -> p.id = prid)
 
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
