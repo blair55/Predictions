@@ -9,8 +9,8 @@
  */
 angular.module('frontendApp')
   .controller('NotificationsCtrl', function ($scope, notify) {
-	$scope.alerts = notify.notifications;
-	$scope.closeAlert = function(index) {
-		notify.close(index);
-	};
-});
+      $scope.alerts = notify.notifications;
+      $scope.closeAlert = function (index) {
+          notify.close(index);
+      };
+  });

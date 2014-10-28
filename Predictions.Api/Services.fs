@@ -17,28 +17,39 @@ open Predictions.Api.Common
 module Services =
     
     let getPlayerViewModel (p:Player) = { id=getPlayerId p.id|>str; name=p.name; isAdmin=(p.role=Admin) } 
-    let toFixtureViewModel (f:FixtureData) (gw:GameWeek)= { home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number) }
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
-    let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
-    
+    let toFixtureViewModel (f:FixtureData) (gw:GameWeek) = { FixtureViewModel.home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number) }
+    let toEditPredictionViewModelRow (f:FixtureData) (gw:GameWeek) (p:Prediction) = { EditPredictionsViewModelRow.home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number); predictionId=(getPrId p.id); score=(toScoreViewModel p.score) }
+        
     let season() = buildSeason currentSeason
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
+    let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
 
     let getOpenFixturesForPlayer (playerId:string) =
         let plId = PlId (sToGuid playerId)
         let players = getPlayers()
         let rows = season().gameWeeks
-                   |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fixtures) -> gw, getOpenFixturesForPlayer fixtures players plId)
+                   |> List.map(fun gw -> gw, getOpenFixturesWithNoPredictionForPlayer [gw] players plId)
                    |> List.map(fun (gw, fds) -> fds |> List.map(fun fd -> toFixtureViewModel fd gw))
-                   |> List.collect(fun e -> e)
+                   |> List.collect(fun fvm -> fvm)
+                   |> List.sortBy(fun fvm -> fvm.kickoff)
         { OpenFixturesViewModel.rows=rows }
-        
+
+    let getOpenFixturesWithPredictionsForPlayer(playerId:string) =
+        let plId = PlId (sToGuid playerId)
+        let players = getPlayers()
+        let rows = season().gameWeeks
+                   |> List.map(fun (gw) -> gw, getOpenFixturesWithPredictionForPlayer [gw] players plId)
+                   |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd,pr) -> toEditPredictionViewModelRow fd gw pr))
+                   |> List.collect(fun fvm -> fvm)
+                   |> List.sortBy(fun fvm -> fvm.kickoff)
+        { EditPredictionsViewModel.rows = rows }
+
     let getFixturesAwaitingResults() =
         let rows = gameWeeks()
                    |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fixtures) -> gw, (fixtures |> List.choose(onlyClosedFixtures)))
+                   |> List.map(fun (gw, fixtures) -> gw, (fixtures |> List.choose(onlyClosedFixtures) |> List.map(fixtureToFixtureDataWithResult)))
                    |> List.collect(fun (gw, fdrs) -> fdrs |> List.map(fun (fd, r) -> gw, fd, r))
                    |> List.filter(fun (_, _, r) -> r.IsNone)
                    |> List.map(fun (gw, fd, _) -> toFixtureViewModel fd gw)
@@ -96,7 +107,6 @@ module Services =
         let rows = (getLeagueTable players fixtures) |> List.map(leagueTableRowToViewModel)
         { GameWeekPointsViewModel.gameWeekNo = (getGameWeekNo gwno); rows=rows }
         
-    // get player from guid
     let getPlayerFromGuid guid =
         let player = getPlayers() |> List.tryFind(fun plr -> plr.id = PlId guid)
         match player with
@@ -188,3 +198,9 @@ module Services =
         gwpm.fixtures |> (createFixtures
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))
+
+    let tryEditPrediction (prediction:EditPredictionPostModel) (playerId:string) =
+        // todo: make sure player exists
+        // todo: make sure prediction exists
+        // todo: make sure prediction belongs to player
+        Success ()

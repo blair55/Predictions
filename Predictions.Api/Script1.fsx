@@ -52,9 +52,8 @@ let getSavePredictionCommandList (gwCmds:SaveGameWeekCommand list) (plCmds:SaveP
     |> List.map(fun f -> plCmds |> List.map(fun p -> { SavePredictionCommand.id=newPrId(); fixtureId=f.id; playerId=p.id; score=getRndScore() }))
     |> List.collect(fun p -> p)
 
-//let playersList = readPlayers()
-let playersList = [ for p in [ "Adam"; "Antony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ]
-                        -> { PlayerDto.id=nguid(); name=p; role="Admin"; email="" } ]
+let playersList = readPlayers()
+//let playersList = [ for p in [ "Adam"; "Antony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { PlayerDto.id=nguid(); name=p; role="Admin"; email="" } ]
 
 let getSavePlayerCommands (playerDtos:PlayerDto list) =
     playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email="" })
@@ -79,4 +78,14 @@ let gameWeeks = getSaveGameWeekCommandList()
 let predictions = getSavePredictionCommandList gameWeeks players
 let results = getSaveResultCommandList gameWeeks
         
-initAll players saveSeasonCommand gameWeeks results predictions
+//initAll players saveSeasonCommand gameWeeks results predictions
+
+let pidtos pid = pid |> getPlayerId |> str
+let localUrl = "http://localhost:3/api/auth/"
+let liveUrl = "http://predictions.apphb.com/api/auth/"
+let publishPlayers url =
+    players
+    |> List.map(fun p -> (p.name, sprintf "%s%s" url (pidtos p.id)))
+    |> List.sortBy(fun (p, _) -> p)
+    |> List.iter(fun (name, url) -> printf "%s %s %s" name url Environment.NewLine)
+

@@ -14,14 +14,14 @@
 		<div class="form-group">
 			<div class="input-group">
       			<div class="input-group-addon team-label">{{row.home}}</div>
-				<input type="number" class="form-control" ng-model="row.homeScore" required>
+				<input type="number" class="form-control" ng-model="row.score.home" required>
 			</div>
 		</div>
 	
 		<div class="form-group">
 			<div class="input-group">
       			<div class="input-group-addon team-label">{{row.away}}</div>
-				<input type="number" class="form-control" ng-model="row.awayScore" required>
+                <input type="number" class="form-control" ng-model="row.score.away" required>
 			</div>
 		</div>
 		<button type="submit" ng-d class="btn btn-primary" ng-disabled="form.$invalid" ng-click="submitResult(row)">Submit</button>

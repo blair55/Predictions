@@ -9,9 +9,8 @@
  */
 angular.module('frontendApp')
   .controller('FixtureCtrl', function ($scope, $http, $routeParams) {
-  	var url = '/api/fixture/' + $routeParams.fxid;
-	$http.get(url).success(function(data){
-		$scope.isLoaded = true;
-		$scope.model = data;
-	});
+      var url = '/api/fixture/' + $routeParams.fxid;
+      $http.get(url).success(function (data) {
+          $scope.model = data;
+      });
   });

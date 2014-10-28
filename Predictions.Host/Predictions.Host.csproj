@@ -73,22 +73,6 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x64\msvcr100.dll">
-      <Link>SqlServerTypes\x64\msvcr100.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x64\SqlServerSpatial110.dll">
-      <Link>SqlServerTypes\x64\SqlServerSpatial110.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x86\msvcr100.dll">
-      <Link>SqlServerTypes\x86\msvcr100.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x86\SqlServerSpatial110.dll">
-      <Link>SqlServerTypes\x86\SqlServerSpatial110.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Global.asax" />
     <Content Include="images\yeoman.png" />
     <Content Include="index.html" />
@@ -96,6 +80,7 @@
     <Content Include="scripts\app.js" />
     <Content Include="scripts\controllers\adminaddgameweek.js" />
     <Content Include="scripts\controllers\adminaddresults.js" />
+    <Content Include="scripts\controllers\editpredictions.js" />
     <Content Include="scripts\controllers\fixture.js" />
     <Content Include="scripts\controllers\gameweekscores.js" />
     <Content Include="scripts\controllers\leaguetable.js" />
@@ -111,14 +96,14 @@
     <Content Include="scripts\services\auth.js" />
     <Content Include="scripts\services\interceptor.js" />
     <Content Include="scripts\services\notify.js" />
-    <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="styles\main.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
+    <Content Include="views\editpredictions.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\gameweekscores.html" />
     <Content Include="views\leaguetable.html" />
-    <Content Include="views\loading.html" />
+    <Content Include="views\directives\loading.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />
     <Content Include="views\notifications.html" />
@@ -126,7 +111,7 @@
     <Content Include="views\pastgameweeks.html" />
     <Content Include="views\player.html" />
     <Content Include="views\playergameweek.html" />
-    <Content Include="views\submitscore.html" />
+    <Content Include="views\directives\submitscore.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -134,7 +119,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServerTypes\Loader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

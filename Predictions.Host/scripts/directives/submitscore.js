@@ -9,7 +9,7 @@
 angular.module('frontendApp')
 	.directive('submitscore', function () {
     return {
-		templateUrl: 'views/submitscore.html'
+		templateUrl: 'views/directives/submitscore.html'
 		,restrict: 'E'
 		// ,link: function postLink(scope, element, attrs) {
 		// 	//element.text('this is the submitScore directive');

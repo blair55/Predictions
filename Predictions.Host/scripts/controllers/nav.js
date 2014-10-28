@@ -17,7 +17,6 @@ angular.module('frontendApp')
           $scope.navCollapsed = true;
           var i = $event.target.href.indexOf('#') + 1;
           var path = $event.target.href.substring(i);
-          console.log(path);
           $location.path(path);
           $event.preventDefault();
       }

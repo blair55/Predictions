@@ -11,7 +11,6 @@ angular.module('frontendApp')
 	.controller('AdminaddresultsCtrl', function ($scope, $http) {
 		
 	$http.get('/api/admin/getfixturesawaitingresults').success(function(data){
-		$scope.isLoaded = true;
 		$scope.model = data;
 	});
 
@@ -24,7 +23,6 @@ angular.module('frontendApp')
 			}};
 
 		$http.post('/api/admin/result', result).success(function(data){
-    		//$scope.model.rows.splice( index, 1 );
     		row.submitted = true;
 		});
 	};

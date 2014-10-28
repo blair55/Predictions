@@ -133,16 +133,17 @@ module Domain =
     let onlyClosedFixtures f =
         match f with
         | OpenFixture _ -> None
-        | ClosedFixture fr -> Some fr
+        | ClosedFixture fr -> fr|>ClosedFixture|>Some
         
     let onlyOpenFixtures f =
         match f with
-        | OpenFixture fd -> Some fd
+        | OpenFixture fd -> fd|>OpenFixture|>Some
         | ClosedFixture _ -> None
 
     let getPlayerBracketProfile (fixtures:Fixture list) player =
         let brackets = fixtures
                        |> List.choose(onlyClosedFixtures)
+                       |> List.map(fixtureToFixtureDataWithResult)
                        |> List.map(fun (fd, r) -> (tryFindPlayerPrediction fd.predictions player, r))
                        |> List.map(fun (p, r) -> getBracketForPredictionComparedToResult p r)
         let totalPoints = brackets |> List.sumBy(fun b -> getPointsForBracket b)
@@ -169,10 +170,24 @@ module Domain =
         |> List.map(fun (fd, r) -> (fd, r, tryFindPlayerPrediction fd.predictions player))
         |> List.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
 
-    let getOpenFixturesForPlayer (fixtures:Fixture list) (players:Player list) (plId:PlId) =
+    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
         let player = findPlayerById players plId
-        // todo: filter for fixtures with no prediction
-        fixtures |> List.choose(onlyOpenFixtures) |> List.sortBy(fun fd -> fd.kickoff)
+        gws
+        |> getFixturesForGameWeeks
+        |> List.choose(onlyOpenFixtures)
+        |> List.map(fixtureToFixtureData)
+        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player) = false)
+        |> List.sortBy(fun fd -> fd.kickoff)
+    
+    let getOpenFixturesWithPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
+        let player = findPlayerById players plId
+        gws
+        |> getFixturesForGameWeeks
+        |> List.choose(onlyOpenFixtures)
+        |> List.map(fixtureToFixtureData)
+        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player))
+        |> List.map(fun fd -> fd, fd.predictions |> List.find(fun p -> p.player = player))
+        |> List.sortBy(fun (fd, _) -> fd.kickoff)
 
     let getPastGameWeeksWithWinner (gameWeeks:GameWeek list) players =
         gameWeeks

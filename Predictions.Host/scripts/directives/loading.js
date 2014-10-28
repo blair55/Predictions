@@ -8,8 +8,12 @@
  */
 angular.module('frontendApp')
   .directive('loading', function () {
-    return {
-		templateUrl: 'views/loading.html',
-		restrict: 'E'
-    };
+      return {
+          templateUrl: 'views/directives/loading.html',
+          restrict: 'E',
+          scope: {
+              noRowsMsg: "@",
+              model: "="
+          }
+      };
   });

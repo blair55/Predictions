@@ -48,11 +48,23 @@ type HomeController() =
         base.Request |> (getPlayerIdCookie
                      >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
-                     
+                
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
         base.Request |> (getPlayerIdCookie
                      >> bind (trySavePredictionPostModel prediction)
+                     >> resultToHttp)
+                     
+    [<Route("editpredictions")>]
+    member this.GetEditPredictions() =
+        base.Request |> (getPlayerIdCookie
+                     >> bind (switch getOpenFixturesWithPredictionsForPlayer)
+                     >> resultToHttp)
+                
+    [<HttpPost>][<Route("editprediction")>]
+    member this.EditPrediction (prediction) =
+        base.Request |> (getPlayerIdCookie
+                     >> bind (tryEditPrediction prediction)
                      >> resultToHttp)
 
     [<Route("pastgameweeks")>]
@@ -66,7 +78,7 @@ type HomeController() =
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
-                
+        
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()

@@ -62,6 +62,10 @@ angular
         templateUrl: 'views/fixture.html',
         controller: 'FixtureCtrl'
       })
+      .when('/editpredictions', {
+        templateUrl: 'views/editpredictions.html',
+        controller: 'EditpredictionsCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

@@ -53,7 +53,6 @@ module Data =
 
     // writing
     
-    
     type SeasonDto = { id:Guid; year:string; }
     type GameWeekDto = { id:Guid; seasonId:Guid; number:int; description:string; }
     type FixtureDto = { id:Guid; gameWeekId:Guid; home:string; away:string; kickoff:DateTime }
@@ -67,6 +66,7 @@ module Data =
     type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
     type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string }
     type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
+    type UpdatePredictionCommand = { id:PrId; score:Score }
     
     let roleToString r = match r with | User -> "User" | Admin -> "Admin"
     let stringToRole s = match s with | "User" -> User | "Admin" -> Admin | _ -> User
@@ -78,6 +78,7 @@ module Data =
     let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
     let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
     let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email
+    let getUpdatePredictionQuery { UpdatePredictionCommand.id=id; score=(home, away) } = sprintf "update predictions set homeScore=%i, awayScore=%i where id='%s'" home away (id|>getPrId|>str)
 
     let getSeasonDto (cmd:SaveSeasonCommand) = { SeasonDto.id=cmd.id|>getSnId; year=cmd.year|>getSnYr; }
     let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=cmd.number|>getGameWeekNo; seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
@@ -94,6 +95,7 @@ module Data =
         let saveFixtureCommands = cmd.fixtures |> List.map(fun fd -> { SaveFixtureCommand.id=fd.id; gameWeekId=cmd.id; home=fd.home; away=fd.away; ko=fd.kickoff })
         cmd |> getGameWeekDto |> getInsertGameWeekQuery |> executeNonQuery
         saveFixtureCommands |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
+    let updatePrediction (cmd:UpdatePredictionCommand) = cmd |> getUpdatePredictionQuery |> executeNonQuery
 
 
     // reading
