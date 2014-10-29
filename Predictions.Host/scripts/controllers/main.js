@@ -9,7 +9,12 @@
  */
 angular.module('frontendApp')
   .controller('MainCtrl', function ($scope, $http) {
-      $http.get('/api/leaguetable').success(function (data) {
-          $scope.model = data;
+      $http.get('/api/leagueposition').success(function (data) {
+          c3.generate({
+              bindto: '#chart',
+              data: {
+                  columns: data
+              }
+          });
       });
   });

@@ -78,7 +78,7 @@ let gameWeeks = getSaveGameWeekCommandList()
 let predictions = getSavePredictionCommandList gameWeeks players
 let results = getSaveResultCommandList gameWeeks
         
-//initAll players saveSeasonCommand gameWeeks results predictions
+initAll players saveSeasonCommand gameWeeks results predictions
 
 let pidtos pid = pid |> getPlayerId |> str
 let localUrl = "http://localhost:3/api/auth/"

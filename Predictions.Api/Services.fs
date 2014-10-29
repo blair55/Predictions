@@ -158,13 +158,12 @@ module Services =
         let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
-    let getLeaguePositionGraphData playerId =
+    let getLeaguePositionGraphData() =
         let players = getPlayers()
-        let player = findPlayerById players (playerId|>sToGuid|>PlId)
-        gameWeeks()
-        |> List.map(fun gw -> getLeaguePositionForGameWeekForPlayer gw players player)
-        |> List.map(fun (gw, pos) -> { LeaguePositionGraphDataRow.gameweekno=gw.number|>getGameWeekNo; position=pos })
-        
+        let gws = gameWeeks()
+        players
+        |> List.map(fun plr -> (plr, gws |> List.map(fun gw -> getLeaguePositionForGameWeekForPlayer gw players plr) |> List.map(fun (_, pos) -> pos)))
+        |> List.map(fun (plr, posList) -> plr.name::(posList |> List.map(str)))
 
     // persistence
 

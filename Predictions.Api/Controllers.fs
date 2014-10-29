@@ -79,11 +79,9 @@ type HomeController() =
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
     
-    [<Route("leaguePosition")>]
+    [<Route("leagueposition")>]
     member this.GetLeaguePosition() =
-        base.Request |> (getPlayerIdCookie
-                     >> bind (switch getLeaguePositionGraphData)
-                     >> resultToHttp)
+        () |> ((switch getLeaguePositionGraphData) >> resultToHttp)
 
 [<RoutePrefix("api/admin")>]
 type AdminController() =
