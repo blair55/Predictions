@@ -9,6 +9,6 @@ body { padding-top: 70px; padding-bottom: 70px;}
 
 .team-label {width:50%;text-align: left;}
 
-.diff-up{color:#80ff80;}
+.diff-up{color:#3c763d;}
 .diff-none{color:#808080;}
-.diff-down{color:#ff8080;}
+.diff-down{color:#a94442;}

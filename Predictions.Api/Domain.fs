@@ -168,7 +168,7 @@ module Domain =
     let getLeagueTable players fixtures =
         players
         |> List.map(fun p -> getPlayerBracketProfile fixtures p)
-        |> List.sortBy(fun (_, _, _, totalPoints) -> -totalPoints)
+        |> List.sortBy(fun (_, cs, co, totalPoints) -> -totalPoints, -cs, -co)
         |> List.mapi(fun i (p, cs, co, tp) -> (i+1), p, cs, co, tp)
 
     let getPlayerPointsForGameWeeks allPlayers player gameWeeks =
