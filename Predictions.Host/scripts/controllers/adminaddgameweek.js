@@ -14,9 +14,9 @@ angular.module('frontendApp')
 
         $scope.gameweek = {
             fixtures: [
-                { home: "", away: "", kickoff: new Date() },
-                { home: "", away: "", kickoff: new Date() },
-                { home: "", away: "", kickoff: new Date() }
+                { home: "", away: "", kickoff: "" },
+                { home: "", away: "", kickoff: "" },
+                { home: "", away: "", kickoff: "" }
             ]
         };
 

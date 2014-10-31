@@ -215,6 +215,14 @@ module Domain =
         |> List.find(fun (_, plr, _, _, _) -> plr = player)
         |> (fun (pos, _, _, _, _) -> gw, pos)
 
+        
+    let rec GetOutcomeCounts (p:Prediction list) (hw, aw, d) =
+        match p with
+        | h::t -> match getResultOutcome h.score with
+                  | HomeWin -> GetOutcomeCounts t (hw+1, aw, d)
+                  | AwayWin -> GetOutcomeCounts t (hw, aw+1, d)
+                  | Draw -> GetOutcomeCounts t (hw, aw, d+1)
+        | [] -> (hw, aw, d)
 
     // Rules 
     

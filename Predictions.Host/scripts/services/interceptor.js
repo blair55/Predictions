@@ -42,8 +42,9 @@ angular.module('frontendApp')
           ,
           // optional method
          'responseError': function(rejection) {
-            // do something on error
-            notify.fail(rejection.statusText + " - " + rejection.data);
+             // do something on error
+             var msg = rejection.statusText + " - " + rejection.data;
+             notify.fail(msg);
 
             // if (canRecover(rejection)) {
             //   return responseOrNewPromise

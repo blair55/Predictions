@@ -86,7 +86,6 @@
     <Content Include="scripts\controllers\leaguetable.js" />
     <Content Include="scripts\controllers\main.js" />
     <Content Include="scripts\controllers\nav.js" />
-    <Content Include="scripts\controllers\notifications.js" />
     <Content Include="scripts\controllers\openfixtures.js" />
     <Content Include="scripts\controllers\pastgameweeks.js" />
     <Content Include="scripts\controllers\player.js" />
@@ -106,7 +105,6 @@
     <Content Include="views\directives\loading.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />
-    <Content Include="views\notifications.html" />
     <Content Include="views\openfixtures.html" />
     <Content Include="views\pastgameweeks.html" />
     <Content Include="views\player.html" />

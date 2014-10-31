@@ -8,26 +8,18 @@
  * Service in the frontendApp.
  */
 angular.module('frontendApp')
-  .service('notify', function notify() {
-    
-	var notifications = [];
+  .service('notify', function notify(ngToast) {
 
-	var success = function(msg){
-		notifications.push({ type: 'success', msg: msg });
-	};
+      var success = function (msg) {
+          ngToast.create({ class: 'success', content: msg });
+      };
 
-	var fail = function(msg){
-		notifications.push({ type: 'danger', msg: msg });
-	};
+      var fail = function (msg) {
+          ngToast.create({ class: 'danger', content: msg });
+      };
 
-	var close = function(index){
-		notifications.splice(index, 1);
-	};
-
-	return {
-		notifications: notifications,
-		success: success,
-		fail: fail,
-		close: close
-	};
-});
+      return {
+          success: success,
+          fail: fail
+      };
+  });

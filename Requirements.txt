@@ -23,21 +23,26 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 
 // gravatars
-// server side validation on score
 // make mono-able
 // deployment package
 // organise service/domain layer
-// gameweek winner draw - deciding metrics? avg delta, #correct scoreline, #correct outcome 
-// league position movement indicator
+// avg delta /accuracy index?
 // home page dashboard (# of open fixtures / current league position)
 // fixtures in play
-// fixture prediction histogram
-// players league position line graph
+// fixture prediction pie chart (homewin/awaywin/draw) & (prediction score)
 // consistent link text and link target
-// disable links to view open fixture
-// add fixtures & results to gameweek view
+// add fixtures to gameweek view
 // standardise alerts
+// history by month / gameweek
+// make open fixtures editable
+// disable button feedback when submitting prediction/result/gw
 
+
+// gameweek winner draw - deciding metrics? #correct scoreline, #correct outcome 
+// disable links to view open fixture
+// players league position line graph
+// league position movement indicator
+// server side validation on score
 // edit fixtures
 // fixture server side validation two teams cannot play each other
 // view by fixture - who called the fixture correctly?

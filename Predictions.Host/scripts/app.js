@@ -19,6 +19,7 @@ angular
     'LocalStorageModule',
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
+    'ngToast'
   ])
   .config(function ($routeProvider) {
     $routeProvider

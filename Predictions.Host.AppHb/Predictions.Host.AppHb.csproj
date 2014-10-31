@@ -93,7 +93,6 @@
     <Content Include="views\leaguetable.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />
-    <Content Include="views\notifications.html" />
     <Content Include="views\openfixtures.html" />
     <Content Include="views\pastgameweeks.html" />
     <Content Include="views\player.html" />

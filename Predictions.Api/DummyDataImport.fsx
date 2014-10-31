@@ -81,7 +81,7 @@ let results = getSaveResultCommandList gameWeeks
 initAll players saveSeasonCommand gameWeeks results predictions
 
 let pidtos pid = pid |> getPlayerId |> str
-let localUrl = "http://localhost:3/api/auth/"
+let localUrl = "http://localhost:49782/api/auth/"
 let liveUrl = "http://predictions.apphb.com/api/auth/"
 let publishPlayers url =
     players

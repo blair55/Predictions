@@ -9,8 +9,24 @@
  */
 angular.module('frontendApp')
   .controller('FixtureCtrl', function ($scope, $http, $routeParams) {
+
       var url = '/api/fixture/' + $routeParams.fxid;
       $http.get(url).success(function (data) {
           $scope.model = data;
       });
+
+      var graphUrl = '/api/fixturepredictiongraph/' + $routeParams.fxid;
+      $http.get(graphUrl).success(function (graphData) {
+          c3.generate({
+              bindto: '#outcome-chart',
+              data: {
+                  columns: graphData,
+                  type: 'donut'
+              },
+              donut: {
+                  title: "Predicted Result"
+              }
+          });
+      });
+
   });

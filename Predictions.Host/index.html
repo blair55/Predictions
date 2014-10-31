@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css" />
     <link rel="stylesheet" href="bower_components/c3/c3.css" />
+    <link rel="stylesheet" href="bower_components/ngtoast/dist/ngToast.min.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -23,12 +24,11 @@
     <![endif]-->
 
     <!-- Fixed navbar -->
-      <div class="navbar navbar-default navbar-fixed-top" role="navigation" ng-include src="'views/nav.html'">
-      </div>
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation" ng-include src="'views/nav.html'"></div>
+
+      <ng-toast></ng-toast>
 
     <div class="container">
-
-      <div ng-include src="'views/notifications.html'"></div>
 
       <div ng-view=""></div>
 
@@ -68,6 +68,7 @@
     <script src="bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js"></script>
     <script src="bower_components/d3/d3.js"></script>
     <script src="bower_components/c3/c3.js"></script>
+    <script src="bower_components/ngtoast/dist/ngToast.min.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -83,10 +84,9 @@
     <script src="scripts/controllers/adminaddresults.js"></script>
     <script src="scripts/services/auth.js"></script>
     <script src="scripts/services/interceptor.js"></script>
+    <script src="scripts/services/notify.js"></script>
     <script src="scripts/directives/submitscore.js"></script>
     <script src="scripts/directives/loading.js"></script>
-    <script src="scripts/services/notify.js"></script>
-    <script src="scripts/controllers/notifications.js"></script>
     <script src="scripts/controllers/pastgameweeks.js"></script>
     <script src="scripts/controllers/gameweekscores.js"></script>
     <script src="scripts/controllers/fixture.js"></script>

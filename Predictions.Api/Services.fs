@@ -93,7 +93,7 @@ module Services =
            >> bind viewFixture
            >> bind (switch getFixtureViewDetails))
 
-    let getGameWeeks() = readGameWeeks() |> List.sortBy(fun gw -> gw.number)
+    //let getGameWeeks() = readGameWeeks() |> List.sortBy(fun gw -> gw.number)
     let leagueTableRowToViewModel (diffPos, pos, pl, cs, co, pts) = { LeagueTableRowViewModel.diffPos=diffPos; position=pos; player=getPlayerViewModel pl; correctScores=cs; correctOutcomes=co; points=pts }
 
     let getLeagueTableView() =
@@ -164,6 +164,24 @@ module Services =
         players
         |> List.map(fun plr -> (plr, gws |> List.map(fun gw -> getLeaguePositionForGameWeekForPlayer gw players plr) |> List.map(fun (_, pos) -> pos)))
         |> List.map(fun (plr, posList) -> plr.name::(posList |> List.map(str)))
+
+    let getFixturePredictionGraphData fxid =
+        let gws = gameWeeks()
+        let makeSureFixtureExists fxid =
+            let fixture = tryFindFixture gws (fxid|>FxId)
+            match fixture with
+            | Some f -> Success f
+            | None -> Failure "fixture does not exist"
+        let createGraphArray (hw, aw, d) =
+            [
+                ["home win"; str hw]
+                ["away win"; str aw]
+                ["draw"; str d]
+            ]
+        fxid |> (makeSureFixtureExists
+             >> bind (switch fixtureToFixtureData)
+             >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
+             >> bind (switch createGraphArray))
 
     // persistence
 
