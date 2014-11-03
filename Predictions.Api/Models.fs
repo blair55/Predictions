@@ -58,7 +58,17 @@ module ViewModels =
     type PastGameWeeksViewModel = { rows:PastGameWeekRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list }
+    type HistoryByMonthRowViewModel = { month:string; winner:PlayerViewModel; points:int }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type HistoryByMonthViewModel = { rows:HistoryByMonthRowViewModel list }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type HistoryByMonthWithMonthViewModel = { month:string; rows:LeagueTableRowViewModel list; gameweeks:int list }
+
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
@@ -67,7 +77,10 @@ module ViewModels =
     type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; rows:FixturePointsRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeaguePositionGraphDataRow = { gameweekno:int; position:int }
+    type LeaguePositionGraphData = { data:int list list; labels:string list }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixturePredictionGraphData = { data:int list; labels:string list }
 
 [<AutoOpen>]
 module PostModels =

@@ -58,12 +58,6 @@ module Services =
                    |> List.map(fun (gw, fd, _) -> toFixtureViewModel fd gw)
         { FixturesAwaitingResultsViewModel.rows = rows }
         
-    let getPastGameWeeksWithWinner() =
-        let players = getPlayers()
-        let rows = (getPastGameWeeksWithWinner (gameWeeks()) players)
-                   |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts })
-        { PastGameWeeksViewModel.rows = rows }
-
     let getFixtureViewDetails (gw, (fd:FixtureData), r, players) =
         let getPredictionScoreViewModel (prediction:Prediction option) =
             match prediction with
@@ -73,7 +67,7 @@ module Services =
             match result with
             | Some r -> toScoreViewModel r.score
             | None -> { ScoreViewModel.home=0; away=0 }
-        let rows = players |> List.sort
+        let rows = players
                    |> List.map(fun plr -> plr, (fd.predictions |> List.tryFind(fun pr -> pr.player = plr)))
                    |> List.map(fun (plr, pr) -> plr, pr, (getBracketForPredictionComparedToResult pr r) |> getPointsForBracket)
                    |> List.map(fun (plr, pr, pts) -> { FixturePointsRowViewModel.player=(getPlayerViewModel plr); predictionSubmitted=pr.IsSome; prediction=(getPredictionScoreViewModel pr); points=pts })
@@ -120,8 +114,9 @@ module Services =
     let getGameWeekPointsView gwno =
         let players = getPlayers()
         let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
+        let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString("MMMM")
         let rows = (getLeagueTable players fixtures) |> List.map(fun (pos, pl, cs, co, pts) -> leagueTableRowToViewModel (0, pos, pl, cs, co, pts))
-        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows }
+        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month }
         
     let getPlayerFromGuid guid =
         let player = getPlayers() |> List.tryFind(fun plr -> plr.id = PlId guid)
@@ -140,6 +135,26 @@ module Services =
         let x = getPlayerPointsForGameWeeks players player gameWeeks
         let rows = x |> List.map(getPlayerGameWeeksViewModelRow)
         { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=rows }
+        
+    let getPastGameWeeksWithWinner() =
+        let players = getPlayers()
+        let rows = (getPastGameWeeksWithWinner (gameWeeks()) players)
+                   |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts })
+        { PastGameWeeksViewModel.rows = rows }
+
+    let getPastMonthsWithWinner() =
+        let players = getPlayers()
+        let rows = (getPastMonthsWithWinner (gameWeeks()) players)
+                   |> List.map(fun (m, plr, pts) -> { HistoryByMonthRowViewModel.month=m; winner=(getPlayerViewModel plr); points=pts })
+        { HistoryByMonthViewModel.rows = rows }
+    
+    let getMonthPointsView month =
+        let players = getPlayers()
+        let gws = month |> getGameWeeksForMonth (gameWeeks())
+        let fixtures = gws |> getFixturesForGameWeeks
+        let rows = (getLeagueTable players fixtures) |> List.map(fun (pos, pl, cs, co, pts) -> leagueTableRowToViewModel (0, pos, pl, cs, co, pts))
+        { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo) }
+    
 
     let getPlayerGameWeek playerId gameWeekNo =
         let players = getPlayers()
@@ -158,12 +173,39 @@ module Services =
         let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
-    let getLeaguePositionGraphData() =
+    // [1;2;3;4;5]  []
+    // [2;3;4;5]    [[1]]
+    // [3;4;5]      [[1];[1;2]]
+    // [4;5]        [[1];[1;2];[1;2;3]]
+    // [5]          [[1];[1;2];[1;2;3];[1,2,3,4]]
+    // []           [[1];[1;2];[1;2;3];[1,2,3,4];[1;2;3;4;5]]
+    
+    let rec compoundList comp collection =
+        match collection with
+        | h::t -> compoundList ((h::t)::comp) t
+        | [] -> comp
+
+    let getLeaguePositionGraphDataForPlayer playerId =
         let players = getPlayers()
         let gws = gameWeeks()
-        players
-        |> List.map(fun plr -> (plr, gws |> List.map(fun gw -> getLeaguePositionForGameWeekForPlayer gw players plr) |> List.map(fun (_, pos) -> pos)))
-        |> List.map(fun (plr, posList) -> plr.name::(posList |> List.map(str)))
+        let fixtures = gameWeeks() |> compoundList [] |> List.map(getFixturesForGameWeeks)
+        let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+        let data = players
+                   |> List.filter(fun p -> p.id = playerId)
+                   |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
+                   |> List.map(fun (_, posList) -> posList)
+        { LeaguePositionGraphData.data=data; labels=labels }
+
+//    let getLeaguePositionGraphData() =
+//        let players = getPlayers()
+//        let gws = gameWeeks()
+//        let fixtures = gameWeeks() |> compoundList [] |> List.map(getFixturesForGameWeeks)
+//        let series = players |> List.map(fun p -> p.name)
+//        let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+//        let data = players
+//                   |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
+//                   |> List.map(fun (_, posList) -> posList)
+//        { LeaguePositionGraphDataRow.data=data; series=series; labels=labels }
 
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
@@ -172,16 +214,10 @@ module Services =
             match fixture with
             | Some f -> Success f
             | None -> Failure "fixture does not exist"
-        let createGraphArray (hw, aw, d) =
-            [
-                ["home win"; str hw]
-                ["away win"; str aw]
-                ["draw"; str d]
-            ]
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
-             >> bind (switch createGraphArray))
+             >> bind (switch (fun (hw, aw, d) -> { FixturePredictionGraphData.data=[hw; aw; d]; labels=["home win"; "away win"; "draw"] })))
 
     // persistence
 

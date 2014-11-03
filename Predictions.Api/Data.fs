@@ -152,7 +152,7 @@ module Data =
         seasonPairs |> List.find(fun (_, model) -> model.year = year) |> snd
         
 
-    let getPlayers() = readPlayers() |> List.map(toPlayer)
+    let getPlayers() = readPlayers() |> List.map(toPlayer) |> List.sortBy(fun p -> p.name)
 
 
     let getPlayerById playerId =

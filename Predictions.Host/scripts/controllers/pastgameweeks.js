@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
   .controller('PastgameweeksCtrl', function ($scope, $http) {
-      $http.get('/api/pastgameweeks').success(function (data) {
+      $http.get('/api/history/gameweek').success(function (data) {
           $scope.model = data;
       });
   });

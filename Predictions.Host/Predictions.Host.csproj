@@ -83,6 +83,10 @@
     <Content Include="scripts\controllers\editpredictions.js" />
     <Content Include="scripts\controllers\fixture.js" />
     <Content Include="scripts\controllers\gameweekscores.js" />
+    <Content Include="scripts\controllers\historybygameweek.js" />
+    <Content Include="scripts\controllers\historybygameweekwithgameweek.js" />
+    <Content Include="scripts\controllers\historybymonth.js" />
+    <Content Include="scripts\controllers\historybymonthwithmonth.js" />
     <Content Include="scripts\controllers\leaguetable.js" />
     <Content Include="scripts\controllers\main.js" />
     <Content Include="scripts\controllers\nav.js" />
@@ -101,6 +105,10 @@
     <Content Include="views\editpredictions.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\gameweekscores.html" />
+    <Content Include="views\historybygameweek.html" />
+    <Content Include="views\historybygameweekwithgameweek.html" />
+    <Content Include="views\historybymonth.html" />
+    <Content Include="views\historybymonthwithmonth.html" />
     <Content Include="views\leaguetable.html" />
     <Content Include="views\directives\loading.html" />
     <Content Include="views\main.html" />

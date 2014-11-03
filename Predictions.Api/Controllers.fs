@@ -67,21 +67,29 @@ type HomeController() =
                      >> bind (tryEditPrediction prediction)
                      >> resultToHttp)
 
-    [<Route("pastgameweeks")>]
+    [<Route("history/month")>]
+    member this.GetHistoryByMonth() =
+        () |> ((switch getPastMonthsWithWinner) >> resultToHttp)
+        
+    [<Route("history/month/{month}")>]
+    member this.GetHistoryByMonth month =
+        month |> ((switch getMonthPointsView) >> resultToHttp)
+        
+    [<Route("history/gameweek")>]
     member this.GetPastGameWeeks() =
         () |> (switch getPastGameWeeksWithWinner >> resultToHttp)
         
-    [<Route("gameweekscores/{gwno:int}")>]
-    member this.GetGameWeekPoints (gwno:int) =
+    [<Route("history/gameweek/{gwno:int}")>]
+    member this.GetGameWeekPoints gwno =
         GwNo gwno |> (switch getGameWeekPointsView >> resultToHttp)
-        
+
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
     
-    [<Route("leaguepositiongraph")>]
-    member this.GetLeaguePositionGraph() =
-        () |> ((switch getLeaguePositionGraphData) >> resultToHttp)
+    [<Route("leaguepositiongraphforplayer/{plId:Guid}")>]
+    member this.GetLeaguePositionGraph (plId:Guid) =
+        PlId plId |> ((switch getLeaguePositionGraphDataForPlayer) >> resultToHttp)
     
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =

@@ -10,7 +10,10 @@
 angular.module('frontendApp')
     .controller('AdminaddgameweekCtrl', function ($scope, $http, $location, $modal, localStorageService, notify) {
 
-        $scope.teams = ["Arsenal", "Chelsea", "Liverpool", "Everton", "WestHam", "Qpr", "Man Utd", "Man City", "Newcastle", "Sunderland", "Stoke", "Leicester", "Spurs", "Aston Villa", "West Brom", "Crystal Palace", "Hull", "Burnley", "Southampton", "Swansea"];
+        $scope.teams = ["Arsenal", "Aston Villa", "Burnley", "Chelsea", "Crystal Palace", "Everton",
+                        "Hull", "Leicester", "Liverpool", "Man City", "Man Utd",
+                        "Manchester United", "Newcastle", "QPR", "Southampton", "Stoke",
+                        "Sunderland", "Swansea", "Tottenham", "West Brom", "West Ham"];
 
         $scope.gameweek = {
             fixtures: [

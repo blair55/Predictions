@@ -1,0 +1,1 @@
+<h4>Game Week History</h4> <loading model="model" no-rows-msg="no results"></loading> <table class="table table-striped"> <thead> <tr> <th> <th>Winner <th>Pts   <tbody> <tr ng-repeat="row in model.rows"> <td> <a href="#/history/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>  <td> <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>  <td>{{row.points}}   </table>

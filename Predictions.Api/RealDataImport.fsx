@@ -20,9 +20,13 @@ let realData = RealData.Load("../import.csv")
 
 let saveSeasonCommand = { SaveSeasonCommand.id=seasonId; year=seasonYear; }
 
-let getSavePlayerCommandList() =
-    ["Biggs Nick"; "Blair Nick"; "Bourke Dan"; "Curmi Ant"; "Dunphy Paul"; "Fergus Martin"; "Jones Matt"; "Jones Nick"; "Lewis Michael"; "Manfield Michael"; "Penman Matt"; "Russell Adam"; "Satar Salim"; "Sims Mark"; "Walsh James"; "West Dan"; "Woolley Michael"]
-    |> List.map(fun p -> { SavePlayerCommand.id=newPlId(); name=p; email=""; role=Admin })
+let playersListDtos = readPlayers()
+//let playersListDtos =
+//    ["Biggs Nick"; "Blair Nick"; "Bourke Dan"; "Curmi Ant"; "Dunphy Paul"; "Fergus Martin"; "Jones Matt"; "Jones Nick"; "Lewis Michael"; "Manfield Michael"; "Penman Matt"; "Russell Adam"; "Satar Salim"; "Sims Mark"; "Walsh James"; "West Dan"; "Woolley Michael"]
+//    |> List.map(fun p -> { PlayerDto.id=nguid(); name=p; role="Admin"; email="" })
+
+let getSavePlayerCommandList (playerDtos:PlayerDto list) =
+    playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email="" })
 
 let getPlIdForPlayer (plrs:SavePlayerCommand list) name = plrs |> List.find(fun p -> p.name = name) |> (fun cmd -> cmd.id)
 
@@ -104,12 +108,12 @@ let initAll (plrs:SavePlayerCommand list) (sn:SaveSeasonCommand) (gws:SaveGameWe
     rs |> List.iter(saveResult)
     prs |> List.iter(savePrediction)
 
-let players = getSavePlayerCommandList()
+let players = getSavePlayerCommandList playersListDtos
 let gameWeeks = getSaveGameWeekCommandList()
 let results = getSaveResultCommandList()
 let predictions = getSavePredictionCommandList players
         
-initAll players saveSeasonCommand gameWeeks results predictions
+//initAll players saveSeasonCommand gameWeeks results predictions
 
 
 let pidtos pid = pid |> getPlayerId |> str

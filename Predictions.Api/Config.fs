@@ -9,7 +9,7 @@ open System.Web.Http
 open System.Web.Routing
 open System.Web.Http.Filters
 
-type HttpRoute = { controller:string; id:RouteParameter }
+//type HttpRoute = { controller:string; id:RouteParameter }
 
 type ErrorFilter() =
     inherit ExceptionFilterAttribute()

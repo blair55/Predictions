@@ -1,4 +1,4 @@
-<h4>Previous Game Weeks</h4>
+<h4>Game Week History</h4>
 <loading model="model" no-rows-msg="no results"></loading>
 
 <table class="table table-striped">
@@ -12,7 +12,7 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/gameweekscores/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
+                <a href="#/history/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
             </td>
             <td>
                 <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>

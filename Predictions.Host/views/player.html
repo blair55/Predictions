@@ -1,10 +1,9 @@
-<h3>Player: {{model.player.name}}</h3>
+<h4>{{model.player.name}}</h4>
 <loading model="model" no-rows-msg="no results"></loading>
-
+<canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
 <table class="table table-striped">
     <thead>
         <tr>
-            <th></th>
             <th></th>
             <th>Pos</th>
             <th>W</th>
@@ -15,10 +14,7 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/gameweekscores/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
-            </td>
-            <td>
-                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">fixtures</a>
+                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
             </td>
             <td>{{row.position}}</td>
             <td>{{row.correctScores}}</td>

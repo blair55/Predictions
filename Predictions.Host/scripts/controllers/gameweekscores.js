@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
   .controller('GameweekscoresCtrl', function ($scope, $http, $routeParams) {
-      var url = '/api/gameweekscores/' + $routeParams.gameWeekNo;
+      var url = '/api/history/gameweek/' + $routeParams.gameWeekNo;
       $http.get(url).success(function (data) {
           $scope.model = data;
       });

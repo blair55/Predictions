@@ -71,14 +71,6 @@ module Domain =
     let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek list) =
         gws |> List.filter(fun gw -> gw.fixtures |> List.exists(isFixtureClosedAndHaveResult))
         
-    let getPlayersForGameWeeks (gws:GameWeek list) =
-        gws
-        |> List.collect(fun gw -> gw.fixtures)
-        |> List.map(fixtureToFixtureData)
-        |> List.collect(fun fd -> fd.predictions)
-        |> List.map(fun pr -> pr.player)
-        |> Seq.distinct |> Seq.toList
-
     let getPredictionsForGameWeeksForPlayer (gws:GameWeek list) pl =
         gws
         |> List.collect(fun gw -> gw.fixtures)
@@ -106,6 +98,19 @@ module Domain =
         |> List.map(fun fd -> fd, fd.predictions)
         |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
         |> List.tryFind(fun (_, p) -> p.id = prid)
+
+
+    let getMonthForGameWeek (gw:GameWeek) =
+        gw.fixtures
+        |> List.map(fixtureToFixtureData)
+        |> List.minBy(fun fd -> fd.kickoff)
+        |> fun fd -> fd.kickoff.ToString("MMMM")
+
+    let getGameWeeksForMonth (gws:GameWeek list) (month) =
+        gws
+        |> List.map(fun gw -> gw, (gw.fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff)))
+        |> List.filter(fun (_, f) -> f.kickoff.ToString("MMMM") = month)
+        |> List.map(fun (gw, _) -> gw)
 
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
@@ -209,11 +214,21 @@ module Domain =
         |> List.map(fun (gw, lgtbl) -> gw, lgtbl.Head)
         |> List.map(fun (gw, (_, plr, _, _, pts)) -> gw, plr, pts)
 
-    let getLeaguePositionForGameWeekForPlayer (gw:GameWeek) players player =
-        gw.fixtures
+    let getPastMonthsWithWinner (gws:GameWeek list) players =
+        gws
+        |> Seq.groupBy(getMonthForGameWeek)
+        |> Seq.toList
+        |> List.map(fun (m, gws) -> m, getFixturesForGameWeeks (gws|>Seq.toList))
+        |> List.map(fun (m, fixtures) -> m, getLeagueTable players fixtures)
+        |> List.map(fun (m, lgtbl) -> m, lgtbl.Head)
+        |> List.map(fun (m, (_, plr, _, _, pts)) -> m, plr, pts)
+
+
+    let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players player =
+        fixtures
         |> getLeagueTable players
         |> List.find(fun (_, plr, _, _, _) -> plr = player)
-        |> (fun (pos, _, _, _, _) -> gw, pos)
+        |> (fun (pos, _, _, _, _) -> pos)
 
         
     let rec GetOutcomeCounts (p:Prediction list) (hw, aw, d) =

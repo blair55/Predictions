@@ -90,6 +90,10 @@
     <Content Include="views\editpredictions.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\gameweekscores.html" />
+    <Content Include="views\historybygameweek.html" />
+    <Content Include="views\historybygameweekwithgameweek.html" />
+    <Content Include="views\historybymonth.html" />
+    <Content Include="views\historybymonthwithmonth.html" />
     <Content Include="views\leaguetable.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />

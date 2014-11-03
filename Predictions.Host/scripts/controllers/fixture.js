@@ -17,16 +17,12 @@ angular.module('frontendApp')
 
       var graphUrl = '/api/fixturepredictiongraph/' + $routeParams.fxid;
       $http.get(graphUrl).success(function (graphData) {
-          c3.generate({
-              bindto: '#outcome-chart',
-              data: {
-                  columns: graphData,
-                  type: 'donut'
-              },
-              donut: {
-                  title: "Predicted Result"
-              }
-          });
+          $scope.labels = graphData.labels;
+          $scope.data = graphData.data;
+          $scope.options = {
+              animationSteps: 10,
+              animateRotate: false,
+              animateScale: true
+          };
       });
-
   });
