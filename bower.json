@@ -14,7 +14,6 @@
     "angular-local-storage": "~0.1.0",
     "angular-bootstrap": "~0.11.2",
     "angular-bootstrap-datetimepicker": "~0.3.0",
-    "c3": "~0.3.0",
     "ngtoast": "~1.2.0",
     "angular-chart.js": "~0.3.7"
   },
