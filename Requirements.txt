@@ -33,7 +33,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // add fixtures to gameweek view
 // make open fixtures editable
 // disable button feedback when submitting prediction/result/gw
-
+// 'horizontal' navigation
 
 // history by month / gameweek
 // fixture prediction pie chart (homewin/awaywin/draw) & (prediction score)

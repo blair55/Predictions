@@ -24,19 +24,27 @@ module Services =
         let createVm isOpen = { FixtureViewModel.home=fd.home; away=fd.away; fxId=(getFxId fd.id)|>str; kickoff=fd.kickoff; gameWeekNumber=(getGameWeekNo gw.number); isOpen=isOpen }
         f |> isFixtureOpen |> createVm
     let toEditPredictionViewModelRow (f:FixtureData) (gw:GameWeek) (p:Prediction) = { EditPredictionsViewModelRow.home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number); predictionId=(getPrId p.id); score=(toScoreViewModel p.score) }
-        
     let season() = buildSeason currentSeason
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
     let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
+
+        
+    let predictionOptionToScoreViewModel (pr:Prediction option) =
+        match pr with
+        | Some p -> toScoreViewModel p.score
+        | None -> noScoreViewModel
+
+    let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) =
+        { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); scoreSubmitted=pr.IsSome; newScore=None; existingScore=pr|>predictionOptionToScoreViewModel }
 
     let getOpenFixturesForPlayer (playerId:string) =
         let plId = PlId (sToGuid playerId)
         let players = getPlayers()
         let rows = season().gameWeeks
-                   |> List.map(fun gw -> gw, getOpenFixturesWithNoPredictionForPlayer [gw] players plId)
-                   |> List.map(fun (gw, fds) -> fds |> List.map(fun fd -> toFixtureViewModel fd gw))
-                   |> List.collect(fun fvm -> fvm)
-                   |> List.sortBy(fun fvm -> fvm.kickoff)
+                   |> List.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [gw] players plId)
+                   |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd, p) -> toOpenFixtureViewModelRow(gw,fd,p)))
+                   |> List.collect(fun ofvmr -> ofvmr)
+                   |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
     let getOpenFixturesWithPredictionsForPlayer(playerId:string) =
@@ -217,7 +225,7 @@ module Services =
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
-             >> bind (switch (fun (hw, aw, d) -> { FixturePredictionGraphData.data=[hw; aw; d]; labels=["home win"; "away win"; "draw"] })))
+             >> bind (switch (fun (hw, d, aw) -> { FixturePredictionGraphData.data=[hw; d; aw;]; labels=["home win"; "draw"; "away win"] })))
 
     // persistence
 
@@ -236,27 +244,30 @@ module Services =
            >> bind makeSureFixtureExists
            >> bind (switch saveResult))
 
-    let trySavePredictionPostModel (ppm:PredictionPostModel) (playerId:string) =
-        let plId = PlId (sToGuid playerId)
-        let fxId = FxId (sToGuid ppm.fixtureId)
-        let player = getPlayers() |> List.find(fun p -> p.id = plId)
-        let gws = gameWeeks()
-        let createScore() = tryToCreateScoreFromSbm ppm.score.home ppm.score.away
-        let createPrediction score = createPrediction player score
-        let makeSureFixtureExists p =
-            match (tryFindFixture gws fxId) with
-            | Some f -> Success (f, p)
-            | None -> Failure "fixture does not exist"
-        let trySavePrediction (f, (p:Prediction)) =
-            let fd = fixtureToFixtureData f
-            let addPredictionWithReturn() = savePrediction { SavePredictionCommand.id=p.id; fixtureId=fd.id; playerId=player.id; score=p.score }; ()
-            tryToWithReturn addPredictionWithReturn
-        // todo: make sure player exists
-        () |> (createScore
-               >> bind (switch createPrediction)
-               >> bind makeSureFixtureExists
-               >> bind tryAddPredictionToFixture
-               >> bind trySavePrediction)
+//    let trySavePredictionPostModel (ppm:PredictionPostModel) (playerId:string) =
+//        let plId = PlId (sToGuid playerId)
+//        let fxId = FxId (sToGuid ppm.fixtureId)
+//        let player = getPlayers() |> List.find(fun p -> p.id = plId)
+//        let gws = gameWeeks()
+//        let findPlayer p = match p with | Some p -> Success p | None -> Failure "could not find player"
+//        let createScore() = tryToCreateScoreFromSbm ppm.score.home ppm.score.away
+//        let createPrediction score = createPrediction player score
+//        let makeSureFixtureExists p =
+//            match (tryFindFixture gws fxId) with
+//            | Some f -> Success (f, p)
+//            | None -> Failure "fixture does not exist"
+//        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) = match fixtureDataToFixture f None with | OpenFixture f -> Success pr | ClosedFixture f -> Failure "fixture is closed"
+//        let trySavePrediction (f, (p:Prediction)) =
+//            let fd = fixtureToFixtureData f
+//            let addPredictionWithReturn() = savePrediction { SavePredictionCommand.id=p.id; fixtureId=fd.id; playerId=player.id; score=p.score }; ()
+//            tryToWithReturn addPredictionWithReturn
+//        player |> (findPlayer
+//               >> bind makeSureFixtureExists
+//               >> bind makeSureFixtureIsOpen
+//               >> bind createScore
+//               >> bind (switch createPrediction)
+//               >> bind tryAddPredictionToFixture
+//               >> bind trySavePrediction)
     
     let rec tryCreateFixturesFromPostModels (viewModels:FixturePostModel list) fixtures =
         match viewModels with
@@ -275,22 +286,26 @@ module Services =
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))
 
-    let tryEditPrediction (eppm:EditPredictionPostModel) (playerId:string) =
+    let trySavePrediction (ppm:PredictionPostModel) (playerId:string) =
         let players = getPlayers()
         let gws = gameWeeks()
         let plid = playerId |> sToGuid |> PlId
-        let prid = PrId eppm.predictionId
+        //let prid = PrId ppm.predictionId
+        let fxId = FxId (sToGuid ppm.fixtureId)
         let player = players |> List.tryFind(fun p -> p.id = plid)
-        let findPlayer p = match p with | Some p -> Success p | None -> Failure "could not find player" 
-        let fdp = tryFindPredictionWithFixture gws prid
-        let findPrediction plr = match fdp with | Some (fd, p) -> Success (plr, fd, p) | None -> Failure "could not find prediction" 
-        let makeSurePredictionBelongsToPlayer (plr:Player, f, pr:Prediction) = if plr = pr.player then Success (plr, f, pr) else Failure "prediction is not player's to edit"
-        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) = match fixtureDataToFixture f None with | OpenFixture f -> Success pr | ClosedFixture f -> Failure "fixture is closed"
-        let createScore pr = match tryToCreateScoreFromSbm eppm.score.home eppm.score.away with | Success s -> Success(pr, s) | Failure msg -> Failure msg
-        let updatePrediction ((pr:Prediction), s) = updatePrediction { UpdatePredictionCommand.id=pr.id; score=s }
+        let findPlayer plr = match plr with | Some p -> Success p | None -> Failure "could not find player" 
+        let makeSureFixtureExists p = match (tryFindFixture gws fxId) with | Some f -> Success (p, f) | None -> Failure "fixture does not exist"
+        let makeSureFixtureIsOpen (plr, f:Fixture) = match f with | OpenFixture fd -> Success (plr, fd) | ClosedFixture f -> Failure "fixture is closed"
+        let createScore (plr, fd) = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(plr, fd, s) | Failure msg -> Failure msg
+        let createPrediction (plr, fd, s) = (plr, fd, (createPrediction plr s))
+        //let findPrediction plr = match tryFindPredictionWithFixture gws prid with | Some (fd, p) -> Success (plr, fd, p) | None -> Failure "could not find prediction" 
+        //let makeSurePredictionBelongsToPlayer (plr:Player, f, pr:Prediction) = if plr = pr.player then Success (plr, f, pr) else Failure "prediction is not player's to edit"
+        let updatePrediction ((plr:Player), (fd:FixtureData), (pr:Prediction)) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=fd.id; playerId=plr.id; score=pr.score }
         player |> (findPlayer
-               >> bind findPrediction
-               >> bind makeSurePredictionBelongsToPlayer
+               >> bind makeSureFixtureExists
                >> bind makeSureFixtureIsOpen
                >> bind createScore
+               >> bind (switch createPrediction)
+//               >> bind findPrediction
+//               >> bind makeSurePredictionBelongsToPlayer
                >> bind (switch updatePrediction))

@@ -1,30 +1,33 @@
-<h4>League Table</h4>
 <loading model="model" no-rows-msg="no results"></loading>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Pos.</th>
-            <th>Player</th>
-            <th title="Correct Scores">CS</th>
-            <th title="Correct Results">CR</th>
-            <th>Pts.</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in model.rows">
-            <td>
-                <span ng-if="row.diffPos > 0" class="diff-up glyphicon glyphicon-chevron-up"></span>
-                <span ng-if="row.diffPos == 0" class="diff-none grey glyphicon glyphicon-minus"></span>
-                <span ng-if="row.diffPos < 0" class="diff-down glyphicon glyphicon-chevron-down"></span>
-            </td>
-            <td>{{row.position}}</td>
-            <td>
-                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
-            </td>
-            <td>{{row.correctScores}}</td>
-            <td>{{row.correctOutcomes}}</td>
-            <td>{{row.points}}</td>
-        </tr>
-    </tbody>
-</table>
+
+<div ng-if="model">
+    <h4>League Table</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Pos.</th>
+                <th>Player</th>
+                <th title="Correct Scores">CS</th>
+                <th title="Correct Results">CR</th>
+                <th>Pts.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in model.rows">
+                <td>
+                    <span ng-if="row.diffPos > 0" class="diff-up glyphicon glyphicon-chevron-up"></span>
+                    <span ng-if="row.diffPos == 0" class="diff-none grey glyphicon glyphicon-minus"></span>
+                    <span ng-if="row.diffPos < 0" class="diff-down glyphicon glyphicon-chevron-down"></span>
+                </td>
+                <td>{{row.position}}</td>
+                <td>
+                    <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+                </td>
+                <td>{{row.correctScores}}</td>
+                <td>{{row.correctOutcomes}}</td>
+                <td>{{row.points}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

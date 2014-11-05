@@ -1,25 +1,40 @@
-<h4>{{model.player.name}}</h4>
 <loading model="model" no-rows-msg="no results"></loading>
-<canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Pos</th>
-            <th>W</th>
-            <th>D</th>
-            <th>Pts</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in model.rows">
-            <td>
-                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
-            </td>
-            <td>{{row.position}}</td>
-            <td>{{row.correctScores}}</td>
-            <td>{{row.correctOutcomes}}</td>
-            <td>{{row.points}}</td>
-        </tr>
-    </tbody>
-</table>
+
+<div ng-if="model">
+
+    <h4>{{model.player.name}}</h4>
+    <div class="btn-group">
+        <a href="/#/leaguetable" class="btn btn-default">
+            <span class="glyphicon glyphicon-chevron-left"></span> Russell Adam
+        </a>
+        <a href="/#/leaguetable" class="btn btn-default">
+            <span class="glyphicon glyphicon-chevron-up"></span> League Table
+        </a>
+        <a href="/#/leaguetable" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-chevron-right"></span> Curmi Antony
+        </a>
+    </div>
+    <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Pos</th>
+                <th>W</th>
+                <th>D</th>
+                <th>Pts</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in model.rows">
+                <td>
+                    <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
+                </td>
+                <td>{{row.position}}</td>
+                <td>{{row.correctScores}}</td>
+                <td>{{row.correctOutcomes}}</td>
+                <td>{{row.points}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

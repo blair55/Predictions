@@ -188,14 +188,14 @@ module Domain =
         |> List.map(fun (fd, r) -> (fd, r, tryFindPlayerPrediction fd.predictions player))
         |> List.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
 
-    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
+    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
         let player = findPlayerById players plId
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
         |> List.map(fixtureToFixtureData)
-        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player) = false)
-        |> List.sortBy(fun fd -> fd.kickoff)
+        |> List.map(fun fd -> fd, fd.predictions |> List.tryFind(fun p -> p.player = player))
+        |> List.sortBy(fun (fd, _) -> fd.kickoff)
     
     let getOpenFixturesWithPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
         let player = findPlayerById players plId
@@ -231,13 +231,13 @@ module Domain =
         |> (fun (pos, _, _, _, _) -> pos)
 
         
-    let rec GetOutcomeCounts (p:Prediction list) (hw, aw, d) =
+    let rec GetOutcomeCounts (p:Prediction list) (hw, d, aw) =
         match p with
         | h::t -> match getResultOutcome h.score with
-                  | HomeWin -> GetOutcomeCounts t (hw+1, aw, d)
-                  | AwayWin -> GetOutcomeCounts t (hw, aw+1, d)
-                  | Draw -> GetOutcomeCounts t (hw, aw, d+1)
-        | [] -> (hw, aw, d)
+                  | HomeWin -> GetOutcomeCounts t (hw+1, d, aw)
+                  | Draw -> GetOutcomeCounts t (hw, d+1, aw)
+                  | AwayWin -> GetOutcomeCounts t (hw, d, aw+1)
+        | [] -> (hw, d, aw)
 
     // Rules 
     

@@ -30,6 +30,8 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixtureViewModel = { home:string; away:string; fxId:string; kickoff:DateTime; gameWeekNumber:int; isOpen:bool; }
     
+    
+
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; resultSubmitted:bool; result:ScoreViewModel; points:int }
     
@@ -38,9 +40,21 @@ module ViewModels =
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type OpenGameWeeksViewModel = { rows:int list }
+
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type OpenFixturesViewModel = { rows:FixtureViewModel list }
+    type OpenFixturesViewModelRow = { fixture:FixtureViewModel; scoreSubmitted:bool; newScore:string option; existingScore:ScoreViewModel; }
+
+//    [<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+//    type OpenFixturesViewModelRow(fixture, score option) = 
+//         private this.sc : Score
+//         member val fixture:FixtureViewModel = fixture with get, set
+//         member val score:ScoreViewModel = score with get, set
+//         member this.scoreSubmitted = (box score) = null
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type OpenFixturesViewModel = { rows:OpenFixturesViewModelRow list }
+
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturesAwaitingResultsViewModel = { rows:FixtureViewModel list }

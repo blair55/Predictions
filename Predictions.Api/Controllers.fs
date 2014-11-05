@@ -52,7 +52,7 @@ type HomeController() =
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
         base.Request |> (getPlayerIdCookie
-                     >> bind (trySavePredictionPostModel prediction)
+                     >> bind (trySavePrediction prediction)
                      >> resultToHttp)
                      
     [<Route("editpredictions")>]
@@ -60,12 +60,12 @@ type HomeController() =
         base.Request |> (getPlayerIdCookie
                      >> bind (switch getOpenFixturesWithPredictionsForPlayer)
                      >> resultToHttp)
-                
-    [<HttpPost>][<Route("editprediction")>]
-    member this.EditPrediction (prediction) =
-        base.Request |> (getPlayerIdCookie
-                     >> bind (tryEditPrediction prediction)
-                     >> resultToHttp)
+//                
+//    [<HttpPost>][<Route("editprediction")>]
+//    member this.EditPrediction (prediction) =
+//        base.Request |> (getPlayerIdCookie
+//                     >> bind (tryEditPrediction prediction)
+//                     >> resultToHttp)
 
     [<Route("history/month")>]
     member this.GetHistoryByMonth() =
