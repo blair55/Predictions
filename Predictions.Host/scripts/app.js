@@ -84,6 +84,10 @@ angular
             templateUrl: 'views/historybygameweekwithgameweek.html',
             controller: 'HistorybygameweekwithgameweekCtrl'
         })
+        .when('/admin/addresults/:gameweekno', {
+          templateUrl: 'views/adminaddresultsforgameweek.html',
+          controller: 'AdminaddresultsforgameweekCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

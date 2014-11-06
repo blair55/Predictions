@@ -1,1 +1,1 @@
-<h4>Add Results</h4> <loading model="model" no-rows-msg="no fixtures are ready to have results added"></loading> <div ng-repeat-start="row in model.rows"></div> <submitscore></submitscore> <div ng-repeat-end></div>
+<loading model="model" no-rows-msg="no gameweeks with closed fixtures yet"></loading> <div ng-if="model"> <h4>Add Results</h4> <table class="table table-striped"> <thead> <tr> <th> <th>   <tbody> <tr ng-repeat="row in model.rows"> <td> <a href="#/admin/addresults/{{row}}">GW#{{row}}</a>  <td>{{row.points}}   </table> </div>

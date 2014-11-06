@@ -204,17 +204,6 @@ module Services =
                    |> List.map(fun (_, posList) -> posList)
         { LeaguePositionGraphData.data=data; labels=labels }
 
-//    let getLeaguePositionGraphData() =
-//        let players = getPlayers()
-//        let gws = gameWeeks()
-//        let fixtures = gameWeeks() |> compoundList [] |> List.map(getFixturesForGameWeeks)
-//        let series = players |> List.map(fun p -> p.name)
-//        let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
-//        let data = players
-//                   |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
-//                   |> List.map(fun (_, posList) -> posList)
-//        { LeaguePositionGraphDataRow.data=data; series=series; labels=labels }
-
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
@@ -226,6 +215,26 @@ module Services =
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
              >> bind (switch (fun (hw, d, aw) -> { FixturePredictionGraphData.data=[hw; d; aw;]; labels=["home win"; "draw"; "away win"] })))
+
+    let getGameWeeksWithClosedFixtures() =
+        let rows = gameWeeks()
+                   |> getGameWeeksWithClosedFixtures
+                   |> List.map(fun gw -> gw.number|>getGameWeekNo)
+        { GameWeeksWithClosedFixturesViewModel.rows=rows }
+
+    let resultToScoreViewModel (result:Result option) =
+        match result with
+        | Some r -> toScoreViewModel r.score
+        | None -> noScoreViewModel
+
+    let getClosedFixturesForGameWeek gwno =
+        let rows = gameWeeks()
+                   |> List.filter(fun gw -> gw.number = gwno)
+                   |> List.map(fun gw -> gw, getClosedFixturesForGameWeeks [gw])
+                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) -> { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); newScore=None; scoreSubmitted=r.IsSome; existingScore=r|>resultToScoreViewModel }))
+                   |> List.collect(fun o -> o)
+        { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
+
 
     // persistence
 
@@ -244,31 +253,6 @@ module Services =
            >> bind makeSureFixtureExists
            >> bind (switch saveResult))
 
-//    let trySavePredictionPostModel (ppm:PredictionPostModel) (playerId:string) =
-//        let plId = PlId (sToGuid playerId)
-//        let fxId = FxId (sToGuid ppm.fixtureId)
-//        let player = getPlayers() |> List.find(fun p -> p.id = plId)
-//        let gws = gameWeeks()
-//        let findPlayer p = match p with | Some p -> Success p | None -> Failure "could not find player"
-//        let createScore() = tryToCreateScoreFromSbm ppm.score.home ppm.score.away
-//        let createPrediction score = createPrediction player score
-//        let makeSureFixtureExists p =
-//            match (tryFindFixture gws fxId) with
-//            | Some f -> Success (f, p)
-//            | None -> Failure "fixture does not exist"
-//        let makeSureFixtureIsOpen (plr, f:FixtureData, pr) = match fixtureDataToFixture f None with | OpenFixture f -> Success pr | ClosedFixture f -> Failure "fixture is closed"
-//        let trySavePrediction (f, (p:Prediction)) =
-//            let fd = fixtureToFixtureData f
-//            let addPredictionWithReturn() = savePrediction { SavePredictionCommand.id=p.id; fixtureId=fd.id; playerId=player.id; score=p.score }; ()
-//            tryToWithReturn addPredictionWithReturn
-//        player |> (findPlayer
-//               >> bind makeSureFixtureExists
-//               >> bind makeSureFixtureIsOpen
-//               >> bind createScore
-//               >> bind (switch createPrediction)
-//               >> bind tryAddPredictionToFixture
-//               >> bind trySavePrediction)
-    
     let rec tryCreateFixturesFromPostModels (viewModels:FixturePostModel list) fixtures =
         match viewModels with
         | h::t -> let fixtureData = tryToCreateFixtureDataFromSbm h.home h.away h.kickOff

@@ -1,9 +1,13 @@
-<h4>Open Fixtures</h4>
-
 <loading model="model" no-rows-msg="there are no open fixtures"></loading>
 
-<div ng-repeat-start="row in model.rows"></div>
+<div ng-if="model">
 
-	<submitscore></submitscore>
-	
-<div ng-repeat-end></div>
+    <h4>Open Fixtures</h4>
+    
+    <div ng-repeat-start="row in model.rows"></div>
+
+    <submitscore row="row" post-url="/api/prediction"></submitscore>
+
+    <div ng-repeat-end></div>
+
+</div>

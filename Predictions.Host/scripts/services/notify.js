@@ -11,11 +11,13 @@ angular.module('frontendApp')
   .service('notify', function notify(ngToast) {
 
       var success = function (msg) {
-          ngToast.create({ class: 'success', content: msg });
+          var content = "<span class='glyphicon glyphicon-ok'></span> " + msg;
+          ngToast.create({ class: 'success', content: content });
       };
 
       var fail = function (msg) {
-          ngToast.create({ class: 'danger', content: msg });
+          var content = "<span class='glyphicon glyphicon-ban-circle'></span> " + msg;
+          ngToast.create({ class: 'danger', content: content });
       };
 
       return {

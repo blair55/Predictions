@@ -9,18 +9,7 @@
  */
 angular.module('frontendApp')
 	.controller('AdminaddresultsCtrl', function ($scope, $http) {
-
-	    $http.get('/api/admin/getfixturesawaitingresults').success(function (data) {
+	    $http.get('/api/admin/getgameweekswithclosedfixtures').success(function (data) {
 	        $scope.model = data;
 	    });
-
-	    $scope.submitResult = function (row, index) {
-	        var result = {
-	            fixtureId: row.fxId,
-	            score: row.score
-	        };
-	        $http.post('/api/admin/result', result).success(function (data) {
-	            row.submitted = true;
-	        });
-	    };
 	});

@@ -113,11 +113,18 @@ type AdminController() =
         base.Request |> (makeSurePlayerIsAdmin
                      >> bind saveGameWeek
                      >> resultToHttp)
-        
-    [<Route("getfixturesawaitingresults")>]
-    member this.GetFixturesAwaitingResults() =
+    
+    [<Route("getgameweekswithclosedfixtures")>]
+    member this.GetGameWeeksWithClosedFixtures() =
         base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch getFixturesAwaitingResults)
+                     >> bind (switch getGameWeeksWithClosedFixtures)
+                     >> resultToHttp)
+
+    [<Route("getclosedfixturesforgameweek/{gwno:int}")>]
+    member this.GetClosedFixturesForGameWeek gwno =
+        let getFixtures() = gwno |> GwNo |> getClosedFixturesForGameWeek
+        base.Request |> (makeSurePlayerIsAdmin
+                     >> bind (switch getFixtures)
                      >> resultToHttp)
 
     [<HttpPost>][<Route("result")>]

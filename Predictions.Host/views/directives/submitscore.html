@@ -1,11 +1,12 @@
-<div class="well">
+<div class="panel panel-default">
 
-	<div class="form">
+	<div class="form panel-body">
 		
 		<div class="form-group">
 			<span class="label label-default">GW #{{ row.fixture.gameWeekNumber }}</span>
 			<span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
 		</div>
+
 
         <!--no score exists editable-->
         <form ng-if="!row.scoreSubmitted" name="createScoreForm" role="form">
@@ -27,6 +28,7 @@
             <button type="submit" class="btn btn-primary" ng-disabled="createScoreForm.$invalid" ng-click="createScore(row)">Submit</button>
 
         </form>
+
 
         <div ng-if="row.scoreSubmitted">
             

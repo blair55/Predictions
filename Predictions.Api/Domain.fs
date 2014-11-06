@@ -239,6 +239,17 @@ module Domain =
                   | AwayWin -> GetOutcomeCounts t (hw, d, aw+1)
         | [] -> (hw, d, aw)
 
+    let getClosedFixturesForGameWeeks gws =
+        gws
+        |> getFixturesForGameWeeks
+        |> List.choose(onlyClosedFixtures)
+        |> List.map(fixtureToFixtureDataWithResult)
+
+    let getGameWeeksWithClosedFixtures (gws:GameWeek list) =
+        gws
+        |> List.filter(fun gw -> [gw] |> getClosedFixturesForGameWeeks |> List.isEmpty = false)
+
+
     // Rules 
     
     // when adding gameweek:

@@ -7,17 +7,58 @@
  * # submitscore
  */
 angular.module('frontendApp')
-	.directive('submitscore', function () {
-    return {
-		templateUrl: 'views/directives/submitscore.html'
-		,restrict: 'E'
-		// ,link: function postLink(scope, element, attrs) {
-		// 	//element.text('this is the submitScore directive');
-		// 	// console.log(scope);
-			
-		// }
-		// ,scope: {
-		//     fixture: '=row'
-		// }
-    };
-});
+	.directive('submitscore', function ($http, notify) {
+	    return {
+	        templateUrl: 'views/directives/submitscore.html',
+	        restrict: 'E',
+	        scope: {
+	            row: '=',
+                postUrl: '@'
+	        },
+	        link: function postLink(scope, element, attrs) {
+	            //element.text('this is the submitScore directive');
+	            console.log("IS");
+	            console.log(scope);
+
+	            function getMessage(row, score) {
+	                return ['Successfully submitted ', row.fixture.home, ' ', score.home, ' v ', score.away, ' ', row.fixture.away].join('');
+	            }
+
+	            scope.enterEditMode = function (row) {
+	                row.editing = true;
+	                row.existingScoreOriginal = angular.copy(row.existingScore);
+	            };
+
+	            scope.exitEditMode = function (row) {
+	                row.editing = false;
+	                row.existingScore = row.existingScoreOriginal;
+	            };
+	            
+	            scope.createScore = function (row) {
+	                var msg = getMessage(row, row.newScore);
+	                var prediction = {
+	                    fixtureId: row.fixture.fxId,
+	                    score: row.newScore
+	                };
+	                $http.post(scope.postUrl, prediction).success(function (data) {
+	                    notify.success(msg);
+	                    row.scoreSubmitted = true;
+	                    row.existingScore = row.newScore;
+	                });
+	            };
+
+	            scope.editScore = function (row) {
+	                var msg = getMessage(row, row.existingScore);
+	                var prediction = {
+	                    fixtureId: row.fixture.fxId,
+	                    score: row.existingScore
+	                };
+	                $http.post(scope.postUrl, prediction).success(function (data) {
+	                    notify.success(msg);
+	                    row.existingScoreOriginal = row.existingScore;
+	                    scope.exitEditMode(row);
+	                });
+	            };
+	        },
+	    };
+	});

@@ -80,6 +80,7 @@
     <Content Include="scripts\app.js" />
     <Content Include="scripts\controllers\adminaddgameweek.js" />
     <Content Include="scripts\controllers\adminaddresults.js" />
+    <Content Include="scripts\controllers\adminaddresultsforgameweek.js" />
     <Content Include="scripts\controllers\editpredictions.js" />
     <Content Include="scripts\controllers\fixture.js" />
     <Content Include="scripts\controllers\gameweekscores.js" />
@@ -102,6 +103,7 @@
     <Content Include="styles\main.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
+    <Content Include="views\adminaddresultsforgameweek.html" />
     <Content Include="views\editpredictions.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\gameweekscores.html" />

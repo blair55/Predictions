@@ -68,7 +68,6 @@ module Data =
     type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
     type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string }
     type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
-    //type UpdatePredictionCommand = { id:PrId; score:Score }
     
     let roleToString r = match r with | User -> "User" | Admin -> "Admin"
     let stringToRole s = match s with | "User" -> User | "Admin" -> Admin | _ -> User
@@ -80,8 +79,8 @@ module Data =
     let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
     let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
     let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email
-    //let getUpdatePredictionQuery { UpdatePredictionCommand.id=id; score=(home, away) } = sprintf "update predictions set homeScore=%i, awayScore=%i where id='%s'" home away (id|>getPrId|>str)
     let getDeletePredictionQuery (p:PredictionDto) = sprintf "delete from predictions where fixtureId = '%s' and playerId = '%s'" (str p.fixtureId) (str p.playerId)
+    let getDeleteResultQuery (p:ResultDto) = sprintf "delete from results where fixtureId = '%s'" (str p.fixtureId)
 
     let getSeasonDto (cmd:SaveSeasonCommand) = { SeasonDto.id=cmd.id|>getSnId; year=cmd.year|>getSnYr; }
     let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=cmd.number|>getGameWeekNo; seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
@@ -92,7 +91,10 @@ module Data =
 
     let savePlayer (cmd:SavePlayerCommand) = cmd |> getPlayerDto |> getInsertPlayerQuery |> executeNonQuery
     let saveSeason (cmd:SaveSeasonCommand) = cmd |> getSeasonDto |> getInsertSeasonQuery |> executeNonQuery
-    let saveResult (cmd:SaveResultCommand) = cmd |> getResultDto |> getInsertResultQuery |> executeNonQuery
+    let saveResult (cmd:SaveResultCommand) =
+        let rdto = cmd |> getResultDto
+        rdto |> getDeleteResultQuery |> executeNonQuery
+        rdto |> getInsertResultQuery |> executeNonQuery
     let savePrediction (cmd:SavePredictionCommand) =
         let pdto = cmd |> getPredictionDto
         pdto |> getDeletePredictionQuery |> executeNonQuery
@@ -101,7 +103,6 @@ module Data =
         let saveFixtureCommands = cmd.fixtures |> List.map(fun fd -> { SaveFixtureCommand.id=fd.id; gameWeekId=cmd.id; home=fd.home; away=fd.away; ko=fd.kickoff })
         cmd |> getGameWeekDto |> getInsertGameWeekQuery |> executeNonQuery
         saveFixtureCommands |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
-    //let updatePrediction (cmd:UpdatePredictionCommand) = cmd |> getUpdatePredictionQuery |> executeNonQuery
 
 
     // reading
