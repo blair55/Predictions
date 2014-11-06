@@ -85,6 +85,7 @@
     <Content Include="styles\vendor.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
+    <Content Include="views\adminaddresultsforgameweek.html" />
     <Content Include="views\directives\loading.html" />
     <Content Include="views\directives\submitscore.html" />
     <Content Include="views\editpredictions.html" />
