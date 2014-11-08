@@ -60,7 +60,7 @@ type HomeController() =
         base.Request |> (getPlayerIdCookie
                      >> bind (switch getOpenFixturesWithPredictionsForPlayer)
                      >> resultToHttp)
-//                
+
 //    [<HttpPost>][<Route("editprediction")>]
 //    member this.EditPrediction (prediction) =
 //        base.Request |> (getPlayerIdCookie
@@ -95,17 +95,28 @@ type HomeController() =
     member this.GetFixturePredictionGraph (fxId:Guid) =
         fxId |> (getFixturePredictionGraphData >> resultToHttp)
 
+    [<Route("getleaguepositionforplayer")>]
+    member this.GetLeaguePositionForPlayer() =
+        base.Request |> (getPlayerIdCookie
+                     >> bind getLeaguePositionForPlayer
+                     >> resultToHttp)
+                     
+    [<Route("getlastgameweekandwinner")>]
+    member this.GetLastGameWeekAndWinner() =
+        () |> (switch getLastGameWeekAndWinner >> resultToHttp)
+
+    
 
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
-
-    [<Route("getnewgameweekno")>]
-    member this.GetNewGameWeekNo () =
-        base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch getNewGameWeekNo)
-                     >> bind (switch (fun gwno -> getGameWeekNo gwno))
-                     >> resultToHttp)
+//
+//    [<Route("getnewgameweekno")>]
+//    member this.GetNewGameWeekNo () =
+//        base.Request |> (makeSurePlayerIsAdmin
+//                     >> bind (switch getNewGameWeekNo)
+//                     >> bind (switch (fun gwno -> getGameWeekNo gwno))
+//                     >> resultToHttp)
 
     [<HttpPost>][<Route("gameweek")>]
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =

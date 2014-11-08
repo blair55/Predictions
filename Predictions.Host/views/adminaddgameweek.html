@@ -40,7 +40,7 @@
         <button ng-click="addFixture()" class="btn btn-default" title="add another fixture">
             <span class="glyphicon glyphicon-plus"></span>
         </button>
-        <button ng-click="submit()" class="btn btn-primary" ng-disabled="form.$invalid">Submit</button>
+        <button ng-click="submit()" class="btn btn-primary" ng-disabled="form.$invalid || inSubmission">Submit</button>
     </div>
 </div>
 

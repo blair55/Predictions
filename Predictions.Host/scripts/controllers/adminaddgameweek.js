@@ -23,10 +23,6 @@ angular.module('frontendApp')
             ]
         };
 
-        $http.get('/api/admin/getnewgameweekno').success(function (data) {
-            $scope.newGameweekNumber = data;
-        });
-
         $scope.addFixture = function () {
             var latestFixture = $scope.gameweek.fixtures[$scope.gameweek.fixtures.length - 1];
             var newKickOff = angular.copy(latestFixture.kickoff);
@@ -38,9 +34,13 @@ angular.module('frontendApp')
         }
 
         $scope.submit = function () {
+            $scope.inSubmission = true;
             $http.post('/api/admin/gameweek', $scope.gameweek).success(function (data) {
-                notify.success('gameweek added')
+                $scope.inSubmission = false;
+                notify.success('gameweek added');
                 $location.path('openfixtures');
+            }).error(function (data, status, headers, config) {
+                $scope.inSubmission = false;
             });
         };
 

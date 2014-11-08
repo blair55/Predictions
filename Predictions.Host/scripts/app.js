@@ -20,7 +20,8 @@ angular
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
     'ngToast',
-    'chart.js'
+    'chart.js',
+    'ordinal'
   ])
   .config(function ($routeProvider) {
       $routeProvider

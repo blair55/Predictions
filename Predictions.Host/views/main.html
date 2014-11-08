@@ -6,7 +6,8 @@
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                Last gameweek winner was {{}}
+                <p>Last Week's Winner was <strong>{{ lastgw.winner.name }}</strong></p>
+                <a href="#/history/gameweek/{{lastgw.gameWeekNo}}">Game Week #{{lastgw.gameWeekNo}}</a>
             </div>
         </div>
 
@@ -14,7 +15,8 @@
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                Your current league position is {{}}
+                <p>Your league position is <strong>{{ leaguePosition | ordinal }}</strong></p>
+                <a href="#leaguetable">League Table</a>
             </div>
         </div>
 
@@ -23,6 +25,7 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 There are {{}} open fixtures
+                <a href="#openfixtures">Open Fixtures</a>
             </div>
         </div>
 

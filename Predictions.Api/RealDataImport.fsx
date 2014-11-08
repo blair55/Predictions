@@ -51,7 +51,7 @@ let getSaveGameWeekCommandList() =
     realData.Rows
     |> Seq.map(fun r -> r.GW)
     |> Seq.distinct
-    |> Seq.map(fun gwno -> { SaveGameWeekCommand.id=newGwId(); number=(GwNo gwno); seasonId=seasonId; description=""; fixtures=getFixtureDataList gwno })
+    |> Seq.map(fun gwno -> { SaveGameWeekCommand.id=newGwId(); seasonId=seasonId; description=""; fixtures=getFixtureDataList gwno })
     |> Seq.toList
 
 let getSaveResultCommandList() =
@@ -98,7 +98,7 @@ let getSavePredictionCommandList (plCmds:SavePlayerCommand list) =
 let initAll (plrs:SavePlayerCommand list) (sn:SaveSeasonCommand) (gws:SaveGameWeekCommand list) (rs:SaveResultCommand list) (prs:SavePredictionCommand list) =
     executeNonQuery "drop table if exists players; create table players (id uuid, name text, role text, email text)"
     executeNonQuery "drop table if exists seasons; create table seasons (id uuid, year text)"
-    executeNonQuery "drop table if exists gameweeks; create table gameweeks (id uuid, seasonId uuid, number int, description text)"
+    executeNonQuery "drop table if exists gameweeks; create table gameweeks (id uuid, seasonId uuid, number SERIAL, description text)"
     executeNonQuery "drop table if exists fixtures; create table fixtures (id uuid, gameWeekid uuid, home text, away text, kickoff timestamp)"
     executeNonQuery "drop table if exists results; create table results (id uuid, fixtureId uuid, homeScore int, awayScore int)"
     executeNonQuery "drop table if exists predictions; create table predictions (id uuid, fixtureId uuid, homeScore int, awayScore int, playerId uuid)" 
@@ -113,7 +113,7 @@ let gameWeeks = getSaveGameWeekCommandList()
 let results = getSaveResultCommandList()
 let predictions = getSavePredictionCommandList players
         
-//initAll players saveSeasonCommand gameWeeks results predictions
+initAll players saveSeasonCommand gameWeeks results predictions
 
 
 let pidtos pid = pid |> getPlayerId |> str

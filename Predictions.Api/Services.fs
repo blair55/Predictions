@@ -26,7 +26,7 @@ module Services =
     let toEditPredictionViewModelRow (f:FixtureData) (gw:GameWeek) (p:Prediction) = { EditPredictionsViewModelRow.home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number); predictionId=(getPrId p.id); score=(toScoreViewModel p.score) }
     let season() = buildSeason currentSeason
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
-    let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
+    //let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
 
     let getImmediateSiblings collection item =
         match collection |> List.tryFindIndex(fun c -> c = item) with
@@ -243,8 +243,19 @@ module Services =
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
+    let optionToResult x msg = match x with | Some y -> Success y | None -> Failure msg
 
 
+    let getLeaguePositionForPlayer playerId =
+        let plId = PlId (sToGuid playerId)
+        let players = getPlayers()
+        let findP id = players |> List.tryFind(fun p -> p.id = id)
+        let fixtures = gameWeeks() |> getFixturesForGameWeeks
+        let tryFindPlayer id = optionToResult (findP id) "could not find player"
+        let getLeaguePosition = getLeaguePositionForFixturesForPlayer fixtures players
+        plId |> (tryFindPlayer >> bind (switch getLeaguePosition))
+
+    let getLastGameWeekAndWinner() = getPastGameWeeksWithWinner().rows |> Seq.last
 
     // persistence
 
@@ -272,10 +283,10 @@ module Services =
         | [] -> Success fixtures
 
     let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
-        let gwno = getNewGameWeekNo()
+        //let gwno = getNewGameWeekNo()
         let snid = season().id
         let createFixtures viewModels = tryCreateFixturesFromPostModels viewModels []
-        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=snid; number=gwno; fixtures=fixtures; description="" }
+        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=snid; fixtures=fixtures; description="" }
         gwpm.fixtures |> (createFixtures
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))

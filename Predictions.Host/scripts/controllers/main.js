@@ -9,13 +9,10 @@
  */
 angular.module('frontendApp')
   .controller('MainCtrl', function ($scope, $http) {
-      //$http.get('/api/leaguepositiongraph').success(function (data) {
-      //    //c3.generate({
-      //    //    bindto: '#chart',
-      //    //    data: {
-      //    //        columns: data
-      //    //    }
-      //    //});
-
-      //});
+      $http.get('/api/getleaguepositionforplayer').success(function (data) {
+          $scope.leaguePosition = data;
+      });
+      $http.get('/api/getlastgameweekandwinner').success(function (data) {
+          $scope.lastgw = data;
+      });
   });

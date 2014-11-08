@@ -63,7 +63,7 @@ module Data =
     type PlayerDto = { id:Guid; name:string; role:string; email:string }
     
     type SaveSeasonCommand = { id:SnId; year:SnYr; }
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; number:GwNo; description:string; fixtures:FixtureData list }
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
     type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
     type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
     type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string }
@@ -74,7 +74,7 @@ module Data =
     let kostr (k:DateTime) = String.Format("{0:u}", k)
 
     let getInsertSeasonQuery (s:SeasonDto) = sprintf "insert into seasons values ('%s', '%s')" (str s.id) s.year
-    let getInsertGameWeekQuery (g:GameWeekDto) = sprintf "insert into gameweeks values ('%s', '%s', %i, '%s')" (str g.id) (str g.seasonId) g.number g.description
+    let getInsertGameWeekQuery (g:GameWeekDto) = sprintf "insert into gameweeks (id, seasonId, description) values ('%s', '%s', '%s')" (str g.id) (str g.seasonId) g.description
     let getInsertFixtureQuery (f:FixtureDto) = sprintf "insert into fixtures values ('%s', '%s', '%s', '%s', '%s')" (str f.id) (str f.gameWeekId) f.home f.away (kostr f.kickoff)
     let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
     let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
@@ -83,7 +83,7 @@ module Data =
     let getDeleteResultQuery (p:ResultDto) = sprintf "delete from results where fixtureId = '%s'" (str p.fixtureId)
 
     let getSeasonDto (cmd:SaveSeasonCommand) = { SeasonDto.id=cmd.id|>getSnId; year=cmd.year|>getSnYr; }
-    let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=cmd.number|>getGameWeekNo; seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
+    let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=0(*cmd.number|>getGameWeekNo*); seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
     let getFixtureDto (cmd:SaveFixtureCommand) = { FixtureDto.id=cmd.id|>getFxId; gameWeekId=cmd.gameWeekId|>getGwId; home=cmd.home; away=cmd.away; kickoff=cmd.ko }
     let getResultDto (cmd:SaveResultCommand) = { ResultDto.id=cmd.id|>getRsId; fixtureId=cmd.fixtureId|>getFxId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
     let getPredictionDto (cmd:SavePredictionCommand) = { PredictionDto.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
@@ -101,7 +101,7 @@ module Data =
         pdto |> getInsertPredictionQuery |> executeNonQuery
     let saveGameWeek (cmd:SaveGameWeekCommand) =
         let saveFixtureCommands = cmd.fixtures |> List.map(fun fd -> { SaveFixtureCommand.id=fd.id; gameWeekId=cmd.id; home=fd.home; away=fd.away; ko=fd.kickoff })
-        cmd |> getGameWeekDto |> getInsertGameWeekQuery |> executeNonQuery
+        cmd |> getGameWeekDto |> getInsertGameWeekQuery |> fun igwq -> printfn "%s" |> ignore; igwq |> executeNonQuery
         saveFixtureCommands |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
 
 
@@ -163,11 +163,11 @@ module Data =
     let getPlayerById playerId =
         readPlayers() |> List.tryFind(fun p -> p.id = playerId)
 
-    let getNewGameWeekNo() =
-        let readIntAt0 r = readIntAtPosition r 0
-        let gwn = getFirst (executeQuery "select number from gameweeks ORDER BY number DESC LIMIT 1" readIntAt0)
-        match gwn with
-        | Some n -> n+1
-        | None -> 1
+//    let getNewGameWeekNo() =
+//        let readIntAt0 r = readIntAtPosition r 0
+//        let gwn = getFirst (executeQuery "select number from gameweeks ORDER BY number DESC LIMIT 1" readIntAt0)
+//        match gwn with
+//        | Some n -> n+1
+//        | None -> 1
 
     
