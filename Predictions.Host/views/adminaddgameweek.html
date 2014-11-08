@@ -51,8 +51,6 @@
         <h4 class="modal-title">{{fixture.home}} v {{fixture.away}}</h4>
     </div>
     <div class="modal-body">
-        <ul>
-            <datetimepicker ng-model="fixture.kickoff" data-on-set-time="onTimeSet(newDate, oldDate)" />
-        </ul>
+        <datetimepicker ng-model="fixture.kickoff" data-on-set-time="onTimeSet(newDate, oldDate)" />
     </div>
 </script>
