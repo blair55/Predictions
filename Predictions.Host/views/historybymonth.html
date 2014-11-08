@@ -1,23 +1,26 @@
-<h4>Month History</h4>
-<loading model="model" no-rows-msg="no results"></loading>
+<div ng-if="model">
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Winner</th>
-            <th>Pts</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in model.rows">
-            <td>
-                <a href="#/history/month/{{row.month}}">{{row.month}}</a>
-            </td>
-            <td>
-                <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
-            </td>
-            <td>{{row.points}}</td>
-        </tr>
-    </tbody>
-</table>
+    <h4>Month History</h4>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Winner</th>
+                <th>Pts</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in model.rows">
+                <td>
+                    <a href="#/history/month/{{row.month}}">{{row.month}}</a>
+                </td>
+                <td>
+                    <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
+                </td>
+                <td>{{row.points}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<loading model="model" no-rows-msg="no results"></loading>

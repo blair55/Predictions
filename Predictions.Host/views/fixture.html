@@ -1,37 +1,37 @@
+<div ng-if="model">
 
-<h4>{{model.fixture.home}} v {{model.fixture.away}}</h4>
+    <h4>{{model.fixture.home}} v {{model.fixture.away}}</h4>
 
-<span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
-<span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
-<br />
-<span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-<br />
-<a href="#/gameweekscores/{{model.fixture.gameWeekNumber}}">GW#{{model.fixture.gameWeekNumber}}</a>
-<br />
+    <span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
+    <span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
+    <br />
+    <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
+    <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+    <br />
+    <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>
+    <br />
 
-<canvas class="chart chart-doughnut" height="60" data="data" legend="true" labels="labels" options="options"></canvas>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Prediction</th>
+                <th>Pts</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in model.rows">
+                <td>
+                    <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+                </td>
+                <td>
+                    <span ng-if="row.predictionSubmitted">{{row.prediction.home}} v {{row.prediction.away}}</span>
+                    <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
+                </td>
+                <td>{{row.points}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 <loading model="model" no-rows-msg="no results"></loading>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Player</th>
-            <th>Prediction</th>
-            <th>Pts</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in model.rows">
-            <td>
-                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
-            </td>
-            <td>
-                <span ng-if="row.predictionSubmitted">{{row.prediction.home}} v {{row.prediction.away}}</span>
-                <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
-            </td>
-            <td>{{row.points}}</td>
-        </tr>
-    </tbody>
-</table>
-

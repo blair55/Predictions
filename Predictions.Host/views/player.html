@@ -1,39 +1,19 @@
 <loading model="model" no-rows-msg="no results"></loading>
 
-<div ng-if="model" class="panel panel-default">
+<div ng-if="model">
 
-    <div class="panel-heading">
-    {{model.player.name}}
-    </div>
-    <div class="panel-body">
-        <nav>
-            <ul class="pager">
-                <li class="previous"><a href="#">&larr; Older</a></li>
-                <li class="next"><a href="#">Newer &rarr;</a></li>
-            </ul>
-        </nav>
-        <div class="btn-group">
-            <a href="/#/leaguetable" class="btn btn-default">
-                <span class="glyphicon glyphicon-chevron-left"></span> Russell Adam
-            </a>
-            <a href="/#/leaguetable" class="btn btn-default">
-                <span class="glyphicon glyphicon-chevron-up"></span> League Table
-            </a>
-            <a href="/#/leaguetable" type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-chevron-right"></span> Curmi Antony
-            </a>
-        </div>
-        <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
-    </div>
-
+    <h4>{{model.player.name}}</h4>
+    
+    <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
+    <br />
     <table class="table">
         <thead>
             <tr>
                 <th></th>
-                <th>Pos</th>
-                <th>W</th>
-                <th>D</th>
-                <th>Pts</th>
+                <th>Pos.</th>
+                <th title="Correct Scores">CS</th>
+                <th title="Correct Results">CR</th>
+                <th>Pts.</th>
             </tr>
         </thead>
         <tbody>

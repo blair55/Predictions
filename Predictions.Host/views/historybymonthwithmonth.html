@@ -1,30 +1,32 @@
-<h4>{{model.month}}</h4>
+<div ng-if="model">
+    <h4>{{model.month}}</h4>
+    <p>
+        Includes
+        <span ng-repeat="gw in model.gameweeks">
+            <a href="#/history/gameweek/{{model.gw}}">GW#{{gw}}</a>
+        </span>
+    </p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Pos.</th>
+                <th>Player</th>
+                <th title="Correct Scores">CS</th>
+                <th title="Correct Results">CR</th>
+                <th>Pts.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in model.rows">
+                <td>{{row.position}}</td>
+                <td>
+                    <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+                </td>
+                <td>{{row.correctScores}}</td>
+                <td>{{row.correctOutcomes}}</td>
+                <td>{{row.points}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <loading model="model" no-rows-msg="no results"></loading>
-<p>
-    Includes
-    <span ng-repeat="gw in model.gameweeks">
-        <a href="#/history/gameweek/{{model.gw}}">GW#{{gw}}</a>
-    </span>
-</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Pos.</th>
-            <th>Player</th>
-            <th title="Correct Scores">CS</th>
-            <th title="Correct Results">CR</th>
-            <th>Pts.</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in model.rows">
-            <td>{{row.position}}</td>
-            <td>
-                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
-            </td>
-            <td>{{row.correctScores}}</td>
-            <td>{{row.correctOutcomes}}</td>
-            <td>{{row.points}}</td>
-        </tr>
-    </tbody>
-</table>

@@ -28,6 +28,14 @@ module Services =
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
     let getNewGameWeekNo() = getNewGameWeekNo() |> GwNo
 
+    let getImmediateSiblings collection item =
+        match collection |> List.tryFindIndex(fun c -> c = item) with
+        | None -> (None, None)
+        | Some i -> let p = i - 1
+                    let n = i + 1
+                    let prev = if (p >= 0) then collection.[p] else None
+                    let next = if (n <= collection.Length) then collection.[p] else None
+                    (prev, next)
         
     let predictionOptionToScoreViewModel (pr:Prediction option) =
         match pr with
@@ -140,8 +148,8 @@ module Services =
         let players = getPlayers()
         let gameWeeks = gameWeeks()
         let player = findPlayerById players (playerId|>PlId)
-        let x = getPlayerPointsForGameWeeks players player gameWeeks
-        let rows = x |> List.map(getPlayerGameWeeksViewModelRow)
+        let rows = (getPlayerPointsForGameWeeks players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
+
         { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); rows=rows }
         
     let getPastGameWeeksWithWinner() =
@@ -236,6 +244,8 @@ module Services =
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
 
+
+
     // persistence
 
     let trySaveResultPostModel (rpm:ResultPostModel) =
@@ -274,7 +284,6 @@ module Services =
         let players = getPlayers()
         let gws = gameWeeks()
         let plid = playerId |> sToGuid |> PlId
-        //let prid = PrId ppm.predictionId
         let fxId = FxId (sToGuid ppm.fixtureId)
         let player = players |> List.tryFind(fun p -> p.id = plid)
         let findPlayer plr = match plr with | Some p -> Success p | None -> Failure "could not find player" 
@@ -282,14 +291,10 @@ module Services =
         let makeSureFixtureIsOpen (plr, f:Fixture) = match f with | OpenFixture fd -> Success (plr, fd) | ClosedFixture f -> Failure "fixture is closed"
         let createScore (plr, fd) = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(plr, fd, s) | Failure msg -> Failure msg
         let createPrediction (plr, fd, s) = (plr, fd, (createPrediction plr s))
-        //let findPrediction plr = match tryFindPredictionWithFixture gws prid with | Some (fd, p) -> Success (plr, fd, p) | None -> Failure "could not find prediction" 
-        //let makeSurePredictionBelongsToPlayer (plr:Player, f, pr:Prediction) = if plr = pr.player then Success (plr, f, pr) else Failure "prediction is not player's to edit"
         let updatePrediction ((plr:Player), (fd:FixtureData), (pr:Prediction)) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=fd.id; playerId=plr.id; score=pr.score }
         player |> (findPlayer
                >> bind makeSureFixtureExists
                >> bind makeSureFixtureIsOpen
                >> bind createScore
                >> bind (switch createPrediction)
-//               >> bind findPrediction
-//               >> bind makeSurePredictionBelongsToPlayer
                >> bind (switch updatePrediction))

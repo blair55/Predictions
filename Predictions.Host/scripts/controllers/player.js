@@ -21,7 +21,7 @@ angular.module('frontendApp')
           $scope.data = data.data;
           $scope.options = {
               animationSteps: 10,
-              showScale: false,
+              showScale: !window.mobilecheck(),
               scaleOverride: true,
               // ** Required if scaleOverride is true **
               // Number - The number of steps in a hard coded scale
