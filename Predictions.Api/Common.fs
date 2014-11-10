@@ -23,6 +23,8 @@ module Common =
 
     let switch f x = f x |> Success
 
+    let optionToResult x msg = match x with | Some y -> Success y | None -> Failure msg
+
     let log msg =
         printfn "%s" msg
         System.Diagnostics.Debug.WriteLine(msg)

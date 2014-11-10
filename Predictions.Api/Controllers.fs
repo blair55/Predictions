@@ -61,12 +61,6 @@ type HomeController() =
                      >> bind (switch getOpenFixturesWithPredictionsForPlayer)
                      >> resultToHttp)
 
-//    [<HttpPost>][<Route("editprediction")>]
-//    member this.EditPrediction (prediction) =
-//        base.Request |> (getPlayerIdCookie
-//                     >> bind (tryEditPrediction prediction)
-//                     >> resultToHttp)
-
     [<Route("history/month")>]
     member this.GetHistoryByMonth() =
         () |> ((switch getPastMonthsWithWinner) >> resultToHttp)

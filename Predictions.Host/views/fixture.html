@@ -2,12 +2,16 @@
 
     <h4>{{model.fixture.home}} v {{model.fixture.away}}</h4>
 
-    <span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
-    <span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
-    <br />
-    <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
-    <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-    <br />
+    <p>
+        <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
+        <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+    </p>
+
+    <p>
+        <span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
+        <span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
+    </p>
+    
     <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>
     <br />
 

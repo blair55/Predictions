@@ -3,7 +3,9 @@
 <div ng-if="model">
 
     <h4>{{model.player.name}}</h4>
-    
+    <p>
+        League Position: {{ model.position | ordinal }}
+    </p>
     <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
     <br />
     <table class="table">

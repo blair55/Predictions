@@ -1,11 +1,14 @@
 <div ng-if="model">
     <h4>{{model.player.name}} / GW#{{model.gameWeekNo}}</h4>
+    <p>
+        Total Points: {{model.totalPoints}}
+    </p>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Fixture</th>
-                <th>Result</th>
                 <th>Prediction</th>
+                <th>Result</th>
                 <th>Pts</th>
             </tr>
         </thead>
@@ -20,21 +23,21 @@
                     </a>
                 </td>
                 <td>
-                    <div ng-if="row.fixture.isOpen">
-                        <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-                    </div>
-                    <div ng-if="!row.fixture.isOpen">
-                        <span ng-if="row.resultSubmitted">{{row.result.home}} v {{row.result.away}}</span>
-                        <span ng-if="!row.resultSubmitted"><i>result not yet submitted</i></span>
-                    </div>
-                </td>
-                <td>
                     <div ng-if="!row.fixture.isOpen">
                         <span ng-if="row.predictionSubmitted">{{row.prediction.home}} v {{row.prediction.away}}</span>
                         <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
                     </div>
                     <div ng-if="row.fixture.isOpen">
                         <i>will be shown after kick off</i>
+                    </div>
+                </td>
+                <td>
+                    <div ng-if="row.fixture.isOpen">
+                        <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+                    </div>
+                    <div ng-if="!row.fixture.isOpen">
+                        <span ng-if="row.resultSubmitted">{{row.result.home}} v {{row.result.away}}</span>
+                        <span ng-if="!row.resultSubmitted"><i>result not yet submitted</i></span>
                     </div>
                 </td>
                 <td>{{row.points}}</td>

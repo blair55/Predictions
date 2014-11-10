@@ -22,7 +22,7 @@ module ViewModels =
     type PlayerGameWeeksViewModelRow = { gameWeekNo:int; position:int; correctScores:int; correctOutcomes:int; points:int; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeeksViewModel = { player:PlayerViewModel; rows:PlayerGameWeeksViewModelRow list }
+    type PlayerGameWeeksViewModel = { player:PlayerViewModel; position:int; rows:PlayerGameWeeksViewModelRow list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ScoreViewModel = { home:int; away:int; }
