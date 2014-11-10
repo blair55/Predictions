@@ -16,7 +16,7 @@ open Predictions.Api.Common
 [<AutoOpen>]
 module WebUtils =
     
-    let playerIdCookieName = "playerId"
+    let cookieName = "auth-token"
 
     let getCookieValue (request:HttpRequestMessage) key =
         let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
@@ -24,9 +24,9 @@ module WebUtils =
         | Some c -> Success c.[key].Value
         | None -> Failure "No cookie found"
 
-    let logPlayerIn (request:HttpRequestMessage) (player:PlayerViewModel) =
+    let logPlayerIn (request:HttpRequestMessage) (player:Player) =
         let nd d = new Nullable<DateTimeOffset>(d)
-        let c = new CookieHeaderValue(playerIdCookieName, player.id)
+        let c = new CookieHeaderValue(cookieName, player.authToken)
         let july1025 = new DateTime(2015, 7, 1)        
         let r = new HttpResponseMessage(HttpStatusCode.Redirect)
         c.Expires <- new DateTimeOffset(july1025) |> nd
@@ -39,11 +39,9 @@ module WebUtils =
         r.Headers.Location <- new Uri(url)
         r
 
-    // get player cookie value
-    let getPlayerIdCookie r =
-        getCookieValue r playerIdCookieName
+    let getLoggedInPlayerAuthToken r =
+        getCookieValue r cookieName
 
-    // convert value to guid
     let convertStringToGuid v =
         let (isParsed, guid) = trySToGuid v
         if isParsed then Success guid else Failure (sprintf "could not convert %s to guid" v)
@@ -68,17 +66,18 @@ module WebUtils =
         | Success player -> logPlayerIn req player
         | Failure msg -> unauthorised msg 
 
-    let checkPlayerIsAdmin (player:PlayerViewModel) =
-        match player.isAdmin with
-        | true -> Success ()
-        | false -> Failure "player not admin"
+    let checkPlayerIsAdmin (player:Player) =
+        match player.role with
+        | Admin -> Success ()
+        | _ -> Failure "player not admin"
 
     let makeSurePlayerIsAdmin req =
-        req |> (getPlayerIdCookie
-            >> bind convertStringToGuid
-            >> bind getPlayerFromGuid
+        req |> (getLoggedInPlayerAuthToken
+            >> bind getPlayerFromAuthToken
             >> bind checkPlayerIsAdmin)
     
+    //let getErrorMessage
+
     let resultToHttp result =
         match result with
         | Success body -> getOkResponseWithBody body

@@ -24,17 +24,15 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 // gravatars
 // make mono-able
-// deployment package
 // organise service/domain layer
 // avg delta /accuracy index?
-// home page dashboard (# of open fixtures / current league position)
+// 'horizontal' navigation
 // fixtures in play
+
+// home page dashboard (# of open fixtures / current league position)
 // consistent link text and link target
-// add fixtures to gameweek view
 // make open fixtures editable
 // disable button feedback when submitting prediction/result/gw
-// 'horizontal' navigation
-
 // history by month / gameweek
 // fixture prediction pie chart (homewin/awaywin/draw) & (prediction score)
 // standardise alerts

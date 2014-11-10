@@ -21,15 +21,15 @@ type HomeController() =
     
     [<Route("whoami")>]
     member this.GetWhoAmI() =
-        base.Request |> (getPlayerIdCookie
-        >> bind convertStringToGuid
-        >> bind getPlayerFromGuid
-        >> getWhoAmIResponse)
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
+                     >> bind (switch getPlayerViewModel)
+                     >> getWhoAmIResponse)
 
-    [<Route("auth/{playerId:Guid}")>]
-    member this.GetAuthenticate (playerId:Guid) =
-        playerId |> (getPlayerFromGuid >> doLogin base.Request)
-    
+    [<Route("auth/{authToken}")>]
+    member this.GetAuthenticate (authToken:string) =
+        authToken |> (getPlayerFromAuthToken >> doLogin base.Request)
+
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
         () |> (switch getLeagueTableView >> resultToHttp)
@@ -45,22 +45,18 @@ type HomeController() =
         
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =
-        base.Request |> (getPlayerIdCookie
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
                      >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
                 
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
-        base.Request |> (getPlayerIdCookie
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
                      >> bind (trySavePrediction prediction)
                      >> resultToHttp)
-                     
-    [<Route("editpredictions")>]
-    member this.GetEditPredictions() =
-        base.Request |> (getPlayerIdCookie
-                     >> bind (switch getOpenFixturesWithPredictionsForPlayer)
-                     >> resultToHttp)
-
+                    
     [<Route("history/month")>]
     member this.GetHistoryByMonth() =
         () |> ((switch getPastMonthsWithWinner) >> resultToHttp)
@@ -91,7 +87,8 @@ type HomeController() =
 
     [<Route("getleaguepositionforplayer")>]
     member this.GetLeaguePositionForPlayer() =
-        base.Request |> (getPlayerIdCookie
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
                      >> bind getLeaguePositionForPlayer
                      >> resultToHttp)
                      
@@ -99,18 +96,17 @@ type HomeController() =
     member this.GetLastGameWeekAndWinner() =
         () |> (switch getLastGameWeekAndWinner >> resultToHttp)
 
-    
+    [<Route("getopenfixtureswithnopredictionsforplayercount")>]
+    member this.GetOpenFixturesWithNoPredictionsForPlayerCount() =
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
+                     >> bind (switch getOpenFixturesWithNoPredictionsForPlayerCount)
+                     >> resultToHttp)
+                     
 
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
-//
-//    [<Route("getnewgameweekno")>]
-//    member this.GetNewGameWeekNo () =
-//        base.Request |> (makeSurePlayerIsAdmin
-//                     >> bind (switch getNewGameWeekNo)
-//                     >> bind (switch (fun gwno -> getGameWeekNo gwno))
-//                     >> resultToHttp)
 
     [<HttpPost>][<Route("gameweek")>]
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =

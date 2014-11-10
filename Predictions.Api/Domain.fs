@@ -37,7 +37,7 @@ module Domain =
 
     type Score = int * int
 
-    type Player = { id:PlId; name:string; role:Role }
+    type Player = { id:PlId; name:string; role:Role; authToken:string }
     type Prediction = { id:PrId; score:Score; player:Player }
     type Result = { id:RsId; score:Score }
     type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
@@ -46,6 +46,13 @@ module Domain =
         | ClosedFixture of (FixtureData * Result option)
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
+    
+    type Outcome = HomeWin | AwayWin | Draw
+    type Bracket = CorrectScore | CorrectOutcome | Incorrect
+    type ClosedFixtureStatus = AwaitingResult | ResultAdded
+    type FixtureStatus = Open | ClosedFixtureStatus
+
+    type AppError = NotLoggedIn | Forbidden | InternalError
 
     let fixtureDataToFixture fd r =
         match fd.kickoff > DateTime.Now with
@@ -99,23 +106,19 @@ module Domain =
         |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
         |> List.tryFind(fun (_, p) -> p.id = prid)
 
+    let monthFormat = "MMMM yyyy"
 
     let getMonthForGameWeek (gw:GameWeek) =
         gw.fixtures
         |> List.map(fixtureToFixtureData)
         |> List.minBy(fun fd -> fd.kickoff)
-        |> fun fd -> fd.kickoff.ToString("MMMM")
+        |> fun fd -> fd.kickoff.ToString(monthFormat)
 
     let getGameWeeksForMonth (gws:GameWeek list) (month) =
         gws
         |> List.map(fun gw -> gw, (gw.fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff)))
-        |> List.filter(fun (_, f) -> f.kickoff.ToString("MMMM") = month)
+        |> List.filter(fun (_, f) -> f.kickoff.ToString(monthFormat) = month)
         |> List.map(fun (gw, _) -> gw)
-
-    type Outcome = HomeWin | AwayWin | Draw
-    type Bracket = CorrectScore | CorrectOutcome | Incorrect
-    type ClosedFixtureStatus = AwaitingResult | ResultAdded
-    type FixtureStatus = Open | ClosedFixtureStatus
 
     let isPlayerAdmin (player:Player) =
         match player.role with
@@ -188,8 +191,7 @@ module Domain =
         |> List.map(fun (fd, r) -> (fd, r, tryFindPlayerPrediction fd.predictions player))
         |> List.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
 
-    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
-        let player = findPlayerById players plId
+    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) (players:Player list) player =
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
@@ -197,8 +199,7 @@ module Domain =
         |> List.map(fun fd -> fd, fd.predictions |> List.tryFind(fun p -> p.player = player))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
     
-    let getOpenFixturesWithPredictionForPlayer (gws:GameWeek list) (players:Player list) (plId:PlId) =
-        let player = findPlayerById players plId
+    let getOpenFixturesWithPredictionForPlayer (gws:GameWeek list) (players:Player list) (player:Player) =
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
@@ -206,6 +207,14 @@ module Domain =
         |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player))
         |> List.map(fun fd -> fd, fd.predictions |> List.find(fun p -> p.player = player))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
+
+    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (players:Player list) (player:Player) =
+        gws
+        |> getFixturesForGameWeeks
+        |> List.choose(onlyOpenFixtures)
+        |> List.map(fixtureToFixtureData)
+        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player) = false)
+        |> List.sortBy(fun fd -> fd.kickoff)
 
     let getPastGameWeeksWithWinner (gws:GameWeek list) players =
         gws

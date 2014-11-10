@@ -15,4 +15,8 @@ angular.module('frontendApp')
       $http.get('/api/getlastgameweekandwinner').success(function (data) {
           $scope.lastgw = data;
       });
+      $http.get('/api/getopenfixtureswithnopredictionsforplayercount').success(function (data) {
+          $scope.openfixturecount = data;
+          $scope.openfixturecountLoaded = true;
+      });
   });

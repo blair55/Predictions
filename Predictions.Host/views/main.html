@@ -1,31 +1,49 @@
 <h4>Predictions</h4>
 
 <div class="row">
+
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                <p>Last Week's Winner was <strong>{{ lastgw.winner.name }}</strong></p>
-                <a href="#/history/gameweek/{{lastgw.gameWeekNo}}">Game Week #{{lastgw.gameWeekNo}}</a>
+                <loading model="openfixturecountLoaded"></loading>
+                <div ng-if="openfixturecountLoaded">
+                    <p ng-if="openfixturecount == 0">
+                        You have no fixtures to predict
+                    </p>
+                    <p ng-if="openfixturecount == 1">
+                        You have <span class='badge'>1</span> fixture to predict
+                    </p>
+                    <p ng-if="openfixturecount > 1">
+                        You have <span class='badge'>{{openfixturecount}}</span> fixtures to predict
+                    </p>
+                    <a href="#openfixtures">Open Fixtures</a>
+                </div>
             </div>
         </div>
-
     </div>
+
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                <p>Your league position is <strong>{{ leaguePosition | ordinal }}</strong></p>
-                <a href="#leaguetable">League Table</a>
+                <loading model="lastgw"></loading>
+                <div ng-if="lastgw">
+                    <p>Last Week's Winner was <strong>{{ lastgw.winner.name }}</strong></p>
+                    <a href="#/history/gameweek/{{lastgw.gameWeekNo}}">Game Week #{{lastgw.gameWeekNo}}</a>
+                </div>
             </div>
         </div>
-
     </div>
+
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                There are {{}} open fixtures
-                <a href="#openfixtures">Open Fixtures</a>
+                <loading model="leaguePosition"></loading>
+                <div ng-if="leaguePosition">
+                    <p>Your league position is <strong>{{ leaguePosition | ordinal }}</strong></p>
+                    <a href="#leaguetable">League Table</a>
+                </div>
             </div>
         </div>
-
     </div>
+
 </div>

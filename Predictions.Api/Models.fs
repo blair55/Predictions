@@ -94,7 +94,10 @@ module ViewModels =
     type FixturePredictionGraphData = { data:int list; labels:string list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeeksWithClosedFixturesViewModel = { rows:int list; }
+    type GameWeeksWithClosedFixturesRowViewModel = { gwno:int; closedFixtureCount:int }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeeksWithClosedFixturesViewModel = { rows:GameWeeksWithClosedFixturesRowViewModel list; }
 
 [<AutoOpen>]
 module PostModels =

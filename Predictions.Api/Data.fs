@@ -60,13 +60,13 @@ module Data =
     type FixtureDto = { id:Guid; gameWeekId:Guid; home:string; away:string; kickoff:DateTime }
     type ResultDto = { id:Guid; fixtureId:Guid; homeScore:int; awayScore:int }
     type PredictionDto = { id:Guid; fixtureId:Guid; playerId:Guid; homeScore:int; awayScore:int }
-    type PlayerDto = { id:Guid; name:string; role:string; email:string }
+    type PlayerDto = { id:Guid; name:string; role:string; email:string; authToken:string }
     
     type SaveSeasonCommand = { id:SnId; year:SnYr; }
     type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
     type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
     type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
-    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string }
+    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
     type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
     
     let roleToString r = match r with | User -> "User" | Admin -> "Admin"
@@ -78,7 +78,7 @@ module Data =
     let getInsertFixtureQuery (f:FixtureDto) = sprintf "insert into fixtures values ('%s', '%s', '%s', '%s', '%s')" (str f.id) (str f.gameWeekId) f.home f.away (kostr f.kickoff)
     let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
     let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
-    let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email
+    let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email p.authToken
     let getDeletePredictionQuery (p:PredictionDto) = sprintf "delete from predictions where fixtureId = '%s' and playerId = '%s'" (str p.fixtureId) (str p.playerId)
     let getDeleteResultQuery (p:ResultDto) = sprintf "delete from results where fixtureId = '%s'" (str p.fixtureId)
 
@@ -87,7 +87,7 @@ module Data =
     let getFixtureDto (cmd:SaveFixtureCommand) = { FixtureDto.id=cmd.id|>getFxId; gameWeekId=cmd.gameWeekId|>getGwId; home=cmd.home; away=cmd.away; kickoff=cmd.ko }
     let getResultDto (cmd:SaveResultCommand) = { ResultDto.id=cmd.id|>getRsId; fixtureId=cmd.fixtureId|>getFxId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
     let getPredictionDto (cmd:SavePredictionCommand) = { PredictionDto.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
-    let getPlayerDto (cmd:SavePlayerCommand) = { PlayerDto.id=cmd.id|>getPlayerId; name=(cmd.name); role=(roleToString cmd.role); email=cmd.email }
+    let getPlayerDto (cmd:SavePlayerCommand) = { PlayerDto.id=cmd.id|>getPlayerId; name=(cmd.name); role=(roleToString cmd.role); email=cmd.email; authToken=cmd.authToken }
 
     let savePlayer (cmd:SavePlayerCommand) = cmd |> getPlayerDto |> getInsertPlayerQuery |> executeNonQuery
     let saveSeason (cmd:SaveSeasonCommand) = cmd |> getSeasonDto |> getInsertSeasonQuery |> executeNonQuery
@@ -117,7 +117,7 @@ module Data =
     let readerToFixtureDto (r) = { FixtureDto.id = (readGuidAtPosition r 0); gameWeekId=(readGuidAtPosition r 1); home=(readStringAtPosition r 2); away=(readStringAtPosition r 3); kickoff=(readDateTimeAtPosition r 4) }
     let readerToResultDto (r) = { ResultDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3) }
     let readerToPredictionDto (r) = { PredictionDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3); playerId=(readGuidAtPosition r 4) }
-    let readerToPlayerDto (r) = { PlayerDto.id = (readGuidAtPosition r 0); name=(readStringAtPosition r 1); role=(readStringAtPosition r 2); email=(readStringAtPosition r 3) }
+    let readerToPlayerDto (r) = { PlayerDto.id = (readGuidAtPosition r 0); name=(readStringAtPosition r 1); role=(readStringAtPosition r 2); email=(readStringAtPosition r 3); authToken=(readStringAtPosition r 4) }
     
     let readPlayers() = (executeQuery "select * from players" readerToPlayerDto)
     let readResults() = (executeQuery "select * from results" readerToResultDto)
@@ -126,7 +126,7 @@ module Data =
     let readGameWeeks() = (executeQuery "select * from gameweeks" readerToGameWeekDto)
     let readSeasons() = (executeQuery "select * from seasons" readerToSeasonDto)
 
-    let toPlayer (p:PlayerDto) = { Player.id=PlId p.id; name=p.name; role=(stringToRole p.role) }
+    let toPlayer (p:PlayerDto) = { Player.id=PlId p.id; name=p.name; role=(stringToRole p.role); authToken=p.authToken }
     let toResult (r:ResultDto) = { Result.id=RsId r.id; score=(r.homeScore, r.awayScore) }
     let toPrediction (p:PredictionDto) player = { Prediction.id=PrId p.id; score=(p.homeScore, p.awayScore); player=player }
     let toFixture (f:FixtureDto) predictions = { FixtureData.id=FxId f.id; home=f.home; away=f.away; kickoff=f.kickoff; predictions=predictions }
@@ -162,12 +162,5 @@ module Data =
 
     let getPlayerById playerId =
         readPlayers() |> List.tryFind(fun p -> p.id = playerId)
-
-//    let getNewGameWeekNo() =
-//        let readIntAt0 r = readIntAtPosition r 0
-//        let gwn = getFirst (executeQuery "select number from gameweeks ORDER BY number DESC LIMIT 1" readIntAt0)
-//        match gwn with
-//        | Some n -> n+1
-//        | None -> 1
 
     

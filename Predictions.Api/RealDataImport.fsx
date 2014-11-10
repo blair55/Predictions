@@ -20,13 +20,15 @@ let realData = RealData.Load("../import.csv")
 
 let saveSeasonCommand = { SaveSeasonCommand.id=seasonId; year=seasonYear; }
 
+let newAuthId() = Guid.NewGuid().ToString().Substring(0, 7) 
+
 let playersListDtos = readPlayers()
 //let playersListDtos =
 //    ["Biggs Nick"; "Blair Nick"; "Bourke Dan"; "Curmi Ant"; "Dunphy Paul"; "Fergus Martin"; "Jones Matt"; "Jones Nick"; "Lewis Michael"; "Manfield Michael"; "Penman Matt"; "Russell Adam"; "Satar Salim"; "Sims Mark"; "Walsh James"; "West Dan"; "Woolley Michael"]
-//    |> List.map(fun p -> { PlayerDto.id=nguid(); name=p; role="Admin"; email="" })
+//    |> List.map(fun p -> { PlayerDto.id=nguid(); name=p; role="Admin"; email=""; authToken=newAuthId() })
 
 let getSavePlayerCommandList (playerDtos:PlayerDto list) =
-    playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email="" })
+    playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email=""; authToken=p.authToken })
 
 let getPlIdForPlayer (plrs:SavePlayerCommand list) name = plrs |> List.find(fun p -> p.name = name) |> (fun cmd -> cmd.id)
 
@@ -96,7 +98,7 @@ let getSavePredictionCommandList (plCmds:SavePlayerCommand list) =
 //    playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email="" })
 
 let initAll (plrs:SavePlayerCommand list) (sn:SaveSeasonCommand) (gws:SaveGameWeekCommand list) (rs:SaveResultCommand list) (prs:SavePredictionCommand list) =
-    executeNonQuery "drop table if exists players; create table players (id uuid, name text, role text, email text)"
+    executeNonQuery "drop table if exists players; create table players (id uuid, name text, role text, email text, authToken text)"
     executeNonQuery "drop table if exists seasons; create table seasons (id uuid, year text)"
     executeNonQuery "drop table if exists gameweeks; create table gameweeks (id uuid, seasonId uuid, number SERIAL, description text)"
     executeNonQuery "drop table if exists fixtures; create table fixtures (id uuid, gameWeekid uuid, home text, away text, kickoff timestamp)"
@@ -113,7 +115,7 @@ let gameWeeks = getSaveGameWeekCommandList()
 let results = getSaveResultCommandList()
 let predictions = getSavePredictionCommandList players
         
-initAll players saveSeasonCommand gameWeeks results predictions
+//initAll players saveSeasonCommand gameWeeks results predictions
 
 
 let pidtos pid = pid |> getPlayerId |> str
@@ -121,7 +123,7 @@ let localUrl = "http://localhost:49782/api/auth/"
 let liveUrl = "http://predictions.apphb.com/api/auth/"
 let publishPlayers url =
     players
-    |> List.map(fun p -> (p.name, sprintf "%s%s" url (pidtos p.id)))
+    |> List.map(fun p -> (p.name, sprintf "%s%s" url p.authToken))
     |> List.sortBy(fun (p, _) -> p)
     |> List.iter(fun (name, url) -> printf "%s %s %s" name url Environment.NewLine)
 
