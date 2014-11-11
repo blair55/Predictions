@@ -52,7 +52,7 @@ module Domain =
     type ClosedFixtureStatus = AwaitingResult | ResultAdded
     type FixtureStatus = Open | ClosedFixtureStatus
 
-    type AppError = NotLoggedIn | Forbidden | InternalError
+    type AppError = NotLoggedIn | Forbidden | Invalid | InternalError
 
     let fixtureDataToFixture fd r =
         match fd.kickoff > DateTime.Now with

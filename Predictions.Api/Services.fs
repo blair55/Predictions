@@ -55,14 +55,6 @@ module Services =
                    |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
-    let getFixturesAwaitingResults() =
-        let rows = gameWeeks()
-                   |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fixtures) -> gw, (fixtures |> List.choose(onlyClosedFixtures) |> List.map(fixtureToFixtureDataWithResult)))
-                   |> List.collect(fun (gw, fdrs) -> fdrs |> List.map(fun (fd, r) -> gw, fd, r))
-                   |> List.filter(fun (_, _, r) -> r.IsNone)
-                   |> List.map(fun (gw, fd, _) -> toFixtureViewModel fd gw)
-        { FixturesAwaitingResultsViewModel.rows = rows }
         
     let getFixtureViewDetails (gw, (fd:FixtureData), r, players) =
         let getPredictionScoreViewModel (prediction:Prediction option) =
@@ -98,8 +90,7 @@ module Services =
     let getLeagueTableView() =
         let players = getPlayers()
         let gwsWithResults = gameWeeksWithResults()
-        let mxGw = gwsWithResults |> List.max
-        let gwsWithResultsWithoutMax = gwsWithResults |> List.filter(fun gw -> gw <> mxGw)
+        let gwsWithResultsWithoutMax = gwsWithResults |> List.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> List.tail
         let recentFixtures = getFixturesForGameWeeks gwsWithResults
         let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
         let recentLge = getLeagueTable players recentFixtures
@@ -190,20 +181,24 @@ module Services =
     // [5]          [[1];[1;2];[1;2;3];[1,2,3,4]]
     // []           [[1];[1;2];[1;2;3];[1,2,3,4];[1;2;3;4;5]]
     
-    let rec compoundList comp collection =
-        match collection with
-        | h::t -> compoundList ((h::t)::comp) t
-        | [] -> comp
+    let compoundList collection =
+        collection
+        |> List.scan (fun x y -> x @ [y]) [] 
+        |> List.tail
 
     let getLeaguePositionGraphDataForPlayer playerId =
         let players = getPlayers()
         let gws = gameWeeksWithResults()
-        let fixtures = gameWeeks() |> compoundList [] |> List.map(getFixturesForGameWeeks)
+        let sw1 = System.Diagnostics.Stopwatch.StartNew()
+        let fixtures = gws |> compoundList |> List.map(getFixturesForGameWeeks)
+        log (sprintf "compound list %i" sw1.ElapsedMilliseconds)
         let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+        let sw2 = System.Diagnostics.Stopwatch.StartNew()
         let data = players
                    |> List.filter(fun p -> p.id = playerId)
                    |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
                    |> List.map(fun (_, posList) -> posList)
+        log (sprintf "get graph data %i" sw2.ElapsedMilliseconds)
         { LeaguePositionGraphData.data=data; labels=labels }
 
     let getFixturePredictionGraphData fxid =
