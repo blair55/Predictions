@@ -52,7 +52,11 @@ module Domain =
     type ClosedFixtureStatus = AwaitingResult | ResultAdded
     type FixtureStatus = Open | ClosedFixtureStatus
 
-    type AppError = NotLoggedIn | Forbidden | Invalid | InternalError
+    type AppError =
+        | NotLoggedIn of string
+        | Forbidden of string
+        | Invalid of string
+        | InternalError of string
 
     let fixtureDataToFixture fd r =
         match fd.kickoff > DateTime.Now with
@@ -273,22 +277,23 @@ module Domain =
     // cannot save prediction to fixture with ko in past
     // cannot view fixture with ko in future
 
+    let invalid msg = Invalid msg |> Failure
     
     let createPrediction player score = { Prediction.id=newPrId(); player=player; score=score }
 
     let tryAddResultToFixture r f =
         match f with
-        | OpenFixture f -> Failure "cannot add result to fixture with ko in future"
+        | OpenFixture f -> invalid "cannot add result to fixture with ko in future"
         | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some r))
 
     let checkFixtureIsOpen (f, p) =
         match f with
         | OpenFixture fd -> Success (fd, p)
-        | ClosedFixture _ -> Failure "cannot add prediction to fixture with ko in past"
+        | ClosedFixture _ -> invalid "cannot add prediction to fixture with ko in past"
 
     let checkPlayerHasNoSubmittedPredictionsForFixture ((fd:FixtureData), (pr:Prediction)) =
         let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
-        if hasAlreadySubmitted then Failure "cannot submit more than one prediction for fixture" else Success (fd, pr)
+        if hasAlreadySubmitted then invalid "cannot submit more than one prediction for fixture" else Success (fd, pr)
 
     let tryAddPredictionToFixture (f, p) =
         let addPredictionToFixture(fd, p) = (OpenFixture({fd with predictions=p::fd.predictions}), p)
@@ -298,16 +303,16 @@ module Domain =
 
     let tryViewFixture f =
         match f with
-        | OpenFixture _ -> Failure "cannot view fixture with ko in future"
+        | OpenFixture _ -> invalid "cannot view fixture with ko in future"
         | ClosedFixture(fd, r) -> Success(fd, r)
 
     let tryToCreateScoreFromSbm home away =
-        if home >= 0 && away >= 0 then Success(home, away) else Failure "cannot submit negative score"
+        if home >= 0 && away >= 0 then Success(home, away) else invalid "cannot submit negative score"
 
     let tryToCreateFixtureDataFromSbm home away (ko:string) =
         let (isKoValid, kickoff) = DateTime.TryParse(ko)
-        if isKoValid=false then Failure "fixture kickoff time is invalid"
-        else if kickoff < DateTime.Now then Failure "fixture kickoff cannot be in the past"
-        else if home = away then Failure "fixture home and away team cannot be the same"
+        if isKoValid=false then invalid "fixture kickoff time is invalid"
+        else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
+        else if home = away then invalid "fixture home and away team cannot be the same"
         else Success({id=newFxId(); home=home; away=away; kickoff=kickoff; predictions=[]})
     

@@ -76,7 +76,7 @@ module Services =
         let findFixtureAndGameWeek() =
             match tryFindFixtureWithGameWeek (gameWeeks()) fxid with
             | Some f -> Success f
-            | None -> Failure "could not find fixture"
+            | None -> InternalError "could not find fixture" |> Failure
         let viewFixture (gw, f, _) =
             match tryViewFixture f with
             | Success (fd, r) -> Success(gw, fd, r, players)
@@ -115,7 +115,7 @@ module Services =
     let getPlayerFromAuthToken authToken =
         let pls = getPlayers()
         let player = pls |> List.tryFind(fun plr -> plr.authToken = authToken)
-        optionToResult player (sprintf "no player found with auth token %s" authToken)
+        NotLoggedIn (sprintf "no player found with auth token %s" authToken) |> optionToResult player 
 
     let getLeaguePositionForPlayer player =
         let players = getPlayers()
@@ -205,7 +205,7 @@ module Services =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
             let fixture = tryFindFixture gws (fxid|>FxId)
-            optionToResult fixture "fixture does not exist" 
+            Invalid "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
@@ -248,7 +248,7 @@ module Services =
         let makeSureFixtureExists r =
             match (tryFindFixture gws fxid) with
             | Some _ -> Success (fxid,r)
-            | None -> Failure "fixture does not exist"
+            | None -> invalid "fixture does not exist"
         let saveResult (fxid,(r:Result)) = saveResult { SaveResultCommand.id=r.id; fixtureId=fxid; score=r.score }
         () |> (createScore
            >> bind (switch createResult)
@@ -275,8 +275,8 @@ module Services =
         let players = getPlayers()
         let gws = gameWeeks()
         let fxId = FxId (sToGuid ppm.fixtureId)
-        let makeSureFixtureExists p = match (tryFindFixture gws fxId) with | Some f -> Success (p, f) | None -> Failure "fixture does not exist"
-        let makeSureFixtureIsOpen (plr, f:Fixture) = match f with | OpenFixture fd -> Success (plr, fd) | ClosedFixture f -> Failure "fixture is closed"
+        let makeSureFixtureExists p = match (tryFindFixture gws fxId) with | Some f -> Success (p, f) | None -> Invalid "fixture does not exist" |> Failure
+        let makeSureFixtureIsOpen (plr, f:Fixture) = match f with | OpenFixture fd -> Success (plr, fd) | ClosedFixture f -> Invalid "fixture is closed" |> Failure
         let createScore (plr, fd) = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(plr, fd, s) | Failure msg -> Failure msg
         let createPrediction (plr, fd, s) = (plr, fd, (createPrediction plr s))
         let updatePrediction ((plr:Player), (fd:FixtureData), (pr:Prediction)) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=fd.id; playerId=plr.id; score=pr.score }

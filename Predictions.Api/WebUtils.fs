@@ -22,7 +22,7 @@ module WebUtils =
         let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
         match cookie with
         | Some c -> Success c.[key].Value
-        | None -> Failure "No cookie found"
+        | None -> NotLoggedIn "No cookie found" |> Failure
 
     let logPlayerIn (request:HttpRequestMessage) (player:Player) =
         let nd d = new Nullable<DateTimeOffset>(d)
@@ -42,43 +42,31 @@ module WebUtils =
     let getLoggedInPlayerAuthToken r =
         getCookieValue r cookieName
 
-    let convertStringToGuid v =
-        let (isParsed, guid) = trySToGuid v
-        if isParsed then Success guid else Failure (sprintf "could not convert %s to guid" v)
-
     let getOkResponseWithBody (body:'T) =
         let response = new HttpResponseMessage(HttpStatusCode.OK)
         response.Content <- new ObjectContent<'T>(body, new Formatting.JsonMediaTypeFormatter())
         response
     
-    let unauthorised msg =
-        let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
+    let errorResponse status msg =
+        let response = new HttpResponseMessage(status)
         response.Content <- new StringContent(msg)
         response
-
-    let getWhoAmIResponse result =
-        match result with
-        | Success player -> getOkResponseWithBody player
-        | Failure msg -> unauthorised msg
-
-    let doLogin req result =
-        match result with
-        | Success player -> logPlayerIn req player
-        | Failure msg -> unauthorised msg 
 
     let checkPlayerIsAdmin (player:Player) =
         match player.role with
         | Admin -> Success ()
-        | _ -> Failure "player not admin"
+        | _ -> Forbidden "player not admin" |> Failure 
 
     let makeSurePlayerIsAdmin req =
         req |> (getLoggedInPlayerAuthToken
             >> bind getPlayerFromAuthToken
             >> bind checkPlayerIsAdmin)
-    
-    //let getErrorMessage
 
     let resultToHttp result =
         match result with
         | Success body -> getOkResponseWithBody body
-        | Failure msg -> unauthorised msg 
+        | Failure appError -> match appError with
+                              | Invalid msg -> errorResponse HttpStatusCode.BadRequest msg
+                              | InternalError msg -> errorResponse HttpStatusCode.InternalServerError msg
+                              | Forbidden msg -> errorResponse HttpStatusCode.Forbidden msg
+                              | NotLoggedIn msg -> errorResponse HttpStatusCode.Unauthorized msg

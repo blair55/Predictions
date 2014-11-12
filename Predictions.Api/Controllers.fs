@@ -24,11 +24,12 @@ type HomeController() =
         base.Request |> (getLoggedInPlayerAuthToken
                      >> bind getPlayerFromAuthToken
                      >> bind (switch getPlayerViewModel)
-                     >> getWhoAmIResponse)
+                     >> resultToHttp)
 
     [<Route("auth/{authToken}")>]
     member this.GetAuthenticate (authToken:string) =
-        authToken |> (getPlayerFromAuthToken >> doLogin base.Request)
+        let login = logPlayerIn base.Request
+        authToken |> (getPlayerFromAuthToken >> bind (switch login))
 
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
