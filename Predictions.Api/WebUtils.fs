@@ -24,21 +24,33 @@ module WebUtils =
         | Some c -> Success c.[key].Value
         | None -> NotLoggedIn "No cookie found" |> Failure
 
-    let logPlayerIn (request:HttpRequestMessage) (player:Player) =
+    let createCookie name (value:string) expiry =
+        let cookie = new CookieHeaderValue(name, value)
         let nd d = new Nullable<DateTimeOffset>(d)
-        let c = new CookieHeaderValue(cookieName, player.authToken)
-        let july1025 = new DateTime(2015, 7, 1)        
-        let r = new HttpResponseMessage(HttpStatusCode.Redirect)
-        c.Expires <- new DateTimeOffset(july1025) |> nd
-        c.Path <- "/"
-        r.Headers.AddCookies([c])
+        cookie.Expires <- new DateTimeOffset(expiry) |> nd
+        cookie.Path <- "/"
+        cookie
+       
+    let getRedirectToResponseWithCookie (request:HttpRequestMessage) cookie =
+        let res = new HttpResponseMessage(HttpStatusCode.Redirect)
+        res.Headers.AddCookies([cookie])
         let components = match request.IsLocal() with
-                            | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
-                            | false -> UriComponents.Scheme ||| UriComponents.Host
+                         | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
+                         | false -> UriComponents.Scheme ||| UriComponents.Host
         let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
-        r.Headers.Location <- new Uri(url)
-        r
+        res.Headers.Location <- new Uri(url)
+        res
 
+    let logPlayerIn request (player:Player) =
+        let july1025 = new DateTime(2015, 7, 1)
+        let cookie = createCookie cookieName player.authToken july1025
+        getRedirectToResponseWithCookie request cookie
+
+    let logPlayerOut (request:HttpRequestMessage) =
+        let yesterday = DateTime.Now.AddDays(-1.0)
+        let cookie = createCookie cookieName "" yesterday
+        getRedirectToResponseWithCookie request cookie
+        
     let getLoggedInPlayerAuthToken r =
         getCookieValue r cookieName
 
@@ -62,11 +74,19 @@ module WebUtils =
             >> bind getPlayerFromAuthToken
             >> bind checkPlayerIsAdmin)
 
+    let getErrorResponseFromAppError appError =
+        match appError with
+        | Invalid msg -> errorResponse HttpStatusCode.BadRequest msg
+        | InternalError msg -> errorResponse HttpStatusCode.InternalServerError msg
+        | Forbidden msg -> errorResponse HttpStatusCode.Forbidden msg
+        | NotLoggedIn msg -> errorResponse HttpStatusCode.Unauthorized msg
+
+    let httpResponseFromResult result =
+        match result with
+        | Success httpResponse -> httpResponse
+        | Failure appError -> getErrorResponseFromAppError appError
+
     let resultToHttp result =
         match result with
         | Success body -> getOkResponseWithBody body
-        | Failure appError -> match appError with
-                              | Invalid msg -> errorResponse HttpStatusCode.BadRequest msg
-                              | InternalError msg -> errorResponse HttpStatusCode.InternalServerError msg
-                              | Forbidden msg -> errorResponse HttpStatusCode.Forbidden msg
-                              | NotLoggedIn msg -> errorResponse HttpStatusCode.Unauthorized msg
+        | Failure appError -> getErrorResponseFromAppError appError

@@ -32,8 +32,9 @@ compare outcome variation each week to see which game weeks are more/less predic
 // google analytics
 // logging
 // favicon
-// logout
+// datepicker size
 
+// logout
 // home page dashboard (# of open fixtures / current league position)
 // consistent link text and link target
 // make open fixtures editable

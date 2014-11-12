@@ -29,7 +29,13 @@ type HomeController() =
     [<Route("auth/{authToken}")>]
     member this.GetAuthenticate (authToken:string) =
         let login = logPlayerIn base.Request
-        authToken |> (getPlayerFromAuthToken >> bind (switch login))
+        authToken |> (getPlayerFromAuthToken
+                  >> bind (switch login)
+                  >> httpResponseFromResult)
+        
+    [<Route("logout")>]
+    member this.GetLogOut() =
+        base.Request |> logPlayerOut
 
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =

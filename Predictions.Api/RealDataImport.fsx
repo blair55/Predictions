@@ -15,8 +15,8 @@ let rnd = new System.Random()
 let seasonId = newSnId()
 let seasonYear = SnYr "2014/15"
 
-type RealData = CsvProvider<"../import.csv">
-let realData = RealData.Load("../import.csv")
+type RealData = CsvProvider<"../import-gw1-gw10.csv">
+let realData = RealData.Load("../import-gw1-gw10.csv")
 
 let saveSeasonCommand = { SaveSeasonCommand.id=seasonId; year=seasonYear; }
 
@@ -36,7 +36,7 @@ let getScore (s:string):Score option =
     let e = s.ToLower().Split('v') |> Seq.toList
     let clean (v:string) = printfn "conv %s" v; Convert.ToInt32(v.Trim())
     match e with
-    | h::t -> if h = "n/a" then None else Some (h|>clean, t|>Seq.head|>clean)
+    | h::t -> if h.Trim() = "n/a" then None else Some (h|>clean, t|>Seq.head|>clean)
     | _ -> None
 
 let getko (s:string) =
@@ -115,7 +115,7 @@ let gameWeeks = getSaveGameWeekCommandList()
 let results = getSaveResultCommandList()
 let predictions = getSavePredictionCommandList players
         
-//initAll players saveSeasonCommand gameWeeks results predictions
+initAll players saveSeasonCommand gameWeeks results predictions
 
 
 let pidtos pid = pid |> getPlayerId |> str

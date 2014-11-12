@@ -8,7 +8,10 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('MainCtrl', function ($scope, $http) {
+  .controller('MainCtrl', function ($scope, $http, auth) {
+      auth.withPlayer(function (player) {
+          $scope.loggedInPlayer = player;
+      });
       $http.get('/api/getleaguepositionforplayer').success(function (data) {
           $scope.leaguePosition = data;
       });
