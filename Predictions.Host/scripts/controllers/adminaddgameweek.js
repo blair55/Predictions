@@ -45,11 +45,11 @@ angular.module('frontendApp')
         };
 
         $scope.open = function (index, fixture) {
-
+            
             var modalInstance = $modal.open({
                 templateUrl: 'addfixturemodal.html',
                 controller: 'AddfixturemodalCtrl',
-                //size: 'sm',
+                size: 'sm',
                 resolve: {
                     index: function () { return index; },
                     fixture: function () { return fixture; }
