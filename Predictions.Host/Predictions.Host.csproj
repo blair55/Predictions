@@ -73,6 +73,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="apple-touch-icon.png" />
+    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="images\yeoman.png" />
     <Content Include="index.html" />
