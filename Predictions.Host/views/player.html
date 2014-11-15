@@ -8,14 +8,14 @@
     </p>
     <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
     <br />
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th></th>
-                <th>Pos.</th>
-                <th title="Correct Scores">CS</th>
-                <th title="Correct Results">CR</th>
-                <th>Pts.</th>
+                <th class="numeric-cell-heading">Pos.</th>
+                <th class="numeric-cell-heading" title="Correct Scores">CS</th>
+                <th class="numeric-cell-heading" title="Correct Results">CR</th>
+                <th class="numeric-cell-heading">Pts.</th>
             </tr>
         </thead>
         <tbody>
@@ -23,10 +23,10 @@
                 <td>
                     <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
                 </td>
-                <td>{{row.position}}</td>
-                <td>{{row.correctScores}}</td>
-                <td>{{row.correctOutcomes}}</td>
-                <td>{{row.points}}</td>
+                <td class="numeric-cell">{{row.position}}</td>
+                <td class="numeric-cell">{{row.correctScores}}</td>
+                <td class="numeric-cell">{{row.correctOutcomes}}</td>
+                <td class="numeric-cell">{{row.points}}</td>
             </tr>
         </tbody>
     </table>

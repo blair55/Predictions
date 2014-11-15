@@ -84,7 +84,6 @@
     <Content Include="scripts\controllers\adminaddresults.js" />
     <Content Include="scripts\controllers\adminaddresultsforgameweek.js" />
     <Content Include="scripts\controllers\fixture.js" />
-    <Content Include="scripts\controllers\gameweekscores.js" />
     <Content Include="scripts\controllers\historybygameweek.js" />
     <Content Include="scripts\controllers\historybygameweekwithgameweek.js" />
     <Content Include="scripts\controllers\historybymonth.js" />
@@ -105,7 +104,6 @@
     <Content Include="views\adminaddresults.html" />
     <Content Include="views\adminaddresultsforgameweek.html" />
     <Content Include="views\fixture.html" />
-    <Content Include="views\gameweekscores.html" />
     <Content Include="views\historybygameweek.html" />
     <Content Include="views\historybygameweekwithgameweek.html" />
     <Content Include="views\historybymonth.html" />

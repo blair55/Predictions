@@ -5,24 +5,24 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Pos.</th>
+                <th class="numeric-cell-heading">Pos.</th>
                 <th>Player</th>
-                <th title="Correct Scores">CS</th>
-                <th title="Correct Results">CR</th>
-                <th>Pts.</th>
+                <th class="numeric-cell-heading" title="Correct Scores">CS</th>
+                <th class="numeric-cell-heading" title="Correct Results">CR</th>
+                <th class="numeric-cell-heading">Pts.</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="row in model.rows">
-                <td>{{row.position}}</td>
+                <td class="numeric-cell">{{row.position}}</td>
                 <td>
                     <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
                 </td>
-                <td>{{row.correctScores}}</td>
-                <td>{{row.correctOutcomes}}</td>
-                <td>{{row.points}}</td>
+                <td class="numeric-cell">{{row.correctScores}}</td>
+                <td class="numeric-cell">{{row.correctOutcomes}}</td>
+                <td class="numeric-cell">{{row.points}}</td>
             </tr>
         </tbody>
     </table>
-</div ng-if="model">
+</div>
 <loading model="model" no-rows-msg="no results"></loading>

@@ -53,10 +53,6 @@ angular
             templateUrl: 'views/adminaddresults.html',
             controller: 'AdminaddresultsCtrl'
         })
-        .when('/gameweekscores/:gameWeekNo', {
-            templateUrl: 'views/gameweekscores.html',
-            controller: 'GameweekscoresCtrl'
-        })
         .when('/fixture/:fxid', {
             templateUrl: 'views/fixture.html',
             controller: 'FixtureCtrl'

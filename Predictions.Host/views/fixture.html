@@ -1,15 +1,15 @@
 <div ng-if="model">
 
-    <h4>{{model.fixture.home}} v {{model.fixture.away}}</h4>
+    <h4 ng-if="model.resultSubmitted">{{model.fixture.home}} {{model.result.home}} - {{model.result.away}} {{model.fixture.away}}</h4>
+    <h4 ng-if="!model.resultSubmitted">{{model.fixture.home}} v {{model.fixture.away}}</h4>
 
     <p>
         <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
         <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
     </p>
 
-    <p>
-        <span ng-if="model.resultSubmitted">{{model.result.home}} v {{model.result.away}}</span>
-        <span ng-if="!model.resultSubmitted"><i>Awaiting Result</i></span>
+    <p ng-if="!model.resultSubmitted">
+        <i>Awaiting Result</i>
     </p>
     
     <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>
@@ -19,8 +19,8 @@
         <thead>
             <tr>
                 <th>Player</th>
-                <th>Prediction</th>
-                <th>Pts</th>
+                <th class="score-cell-heading">Prediction</th>
+                <th class="numeric-cell-heading">Pts.</th>
             </tr>
         </thead>
         <tbody>
@@ -29,7 +29,7 @@
                     <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
                 </td>
                 <td>
-                    <span ng-if="row.predictionSubmitted">{{row.prediction.home}} v {{row.prediction.away}}</span>
+                    <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
                     <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
                 </td>
                 <td class="numeric-cell">{{row.points}}</td>
