@@ -2,6 +2,8 @@
 <div ng-if="model">
 
     <h4>Open Fixtures</h4>
+
+    <p ng-if="model.rows">Submitted predictions can be edited up until kick off</p>
     
     <div ng-repeat-start="row in model.rows"></div>
 
@@ -11,4 +13,4 @@
 
 </div>
 
-<loading model="model" no-rows-msg="there are no open fixtures"></loading>
+<loading model="model" no-rows-msg="There are no open fixtures"></loading>

@@ -14,3 +14,5 @@ body { padding-top: 70px; padding-bottom: 70px; background-color:#fefefe;}
 .diff-down{color:#a94442;}
 
 .datetimepicker{width:auto;}
+
+.numeric-cell{width:5%; text-align:right;}

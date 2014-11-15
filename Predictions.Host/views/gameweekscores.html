@@ -14,13 +14,13 @@
     </thead>
     <tbody>
         <tr ng-repeat="row in model.rows">
-            <td>{{row.position}}</td>
+            <td class="numeric-cell">{{row.position}}</td>
             <td>
                 <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
             </td>
-            <td>{{row.correctScores}}</td>
-            <td>{{row.correctOutcomes}}</td>
-            <td>{{row.points}}</td>
+            <td class="numeric-cell">{{row.correctScores}}</td>
+            <td class="numeric-cell">{{row.correctOutcomes}}</td>
+            <td class="numeric-cell">{{row.points}}</td>
         </tr>
     </tbody>
 </table>

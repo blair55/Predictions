@@ -83,7 +83,6 @@
     <Content Include="scripts\controllers\adminaddgameweek.js" />
     <Content Include="scripts\controllers\adminaddresults.js" />
     <Content Include="scripts\controllers\adminaddresultsforgameweek.js" />
-    <Content Include="scripts\controllers\editpredictions.js" />
     <Content Include="scripts\controllers\fixture.js" />
     <Content Include="scripts\controllers\gameweekscores.js" />
     <Content Include="scripts\controllers\historybygameweek.js" />
@@ -94,7 +93,6 @@
     <Content Include="scripts\controllers\main.js" />
     <Content Include="scripts\controllers\nav.js" />
     <Content Include="scripts\controllers\openfixtures.js" />
-    <Content Include="scripts\controllers\pastgameweeks.js" />
     <Content Include="scripts\controllers\player.js" />
     <Content Include="scripts\controllers\playergameweek.js" />
     <Content Include="scripts\directives\loading.js" />
@@ -106,7 +104,6 @@
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
     <Content Include="views\adminaddresultsforgameweek.html" />
-    <Content Include="views\editpredictions.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\gameweekscores.html" />
     <Content Include="views\historybygameweek.html" />
@@ -118,7 +115,6 @@
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />
     <Content Include="views\openfixtures.html" />
-    <Content Include="views\pastgameweeks.html" />
     <Content Include="views\player.html" />
     <Content Include="views\playergameweek.html" />
     <Content Include="views\directives\submitscore.html" />

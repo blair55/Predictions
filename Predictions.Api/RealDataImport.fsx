@@ -22,10 +22,10 @@ let saveSeasonCommand = { SaveSeasonCommand.id=seasonId; year=seasonYear; }
 
 let newAuthId() = Guid.NewGuid().ToString().Substring(0, 7) 
 
-let playersListDtos = readPlayers()
-//let playersListDtos =
-//    ["Biggs Nick"; "Blair Nick"; "Bourke Dan"; "Curmi Ant"; "Dunphy Paul"; "Fergus Martin"; "Jones Matt"; "Jones Nick"; "Lewis Michael"; "Manfield Michael"; "Penman Matt"; "Russell Adam"; "Satar Salim"; "Sims Mark"; "Walsh James"; "West Dan"; "Woolley Michael"]
-//    |> List.map(fun p -> { PlayerDto.id=nguid(); name=p; role="Admin"; email=""; authToken=newAuthId() })
+//let playersListDtos = readPlayers()
+let playersListDtos =
+    ["Biggs Nick"; "Blair Nick"; "Bourke Dan"; "Curmi Ant"; "Dunphy Paul"; "Fergus Martin"; "Jones Matt"; "Jones Nick"; "Lewis Michael"; "Manfield Michael"; "Penman Matt"; "Russell Adam"; "Satar Salim"; "Sims Mark"; "Walsh James"; "West Dan"; "Woolley Michael"]
+    |> List.map(fun p -> { PlayerDto.id=nguid(); name=p; role="Admin"; email=""; authToken=newAuthId() })
 
 let getSavePlayerCommandList (playerDtos:PlayerDto list) =
     playerDtos |> List.map(fun p -> { SavePlayerCommand.id=PlId p.id; name=p.name; role=Admin; email=""; authToken=p.authToken })

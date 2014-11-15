@@ -53,10 +53,6 @@ angular
             templateUrl: 'views/adminaddresults.html',
             controller: 'AdminaddresultsCtrl'
         })
-        .when('/pastgameweeks', {
-            templateUrl: 'views/pastgameweeks.html',
-            controller: 'PastgameweeksCtrl'
-        })
         .when('/gameweekscores/:gameWeekNo', {
             templateUrl: 'views/gameweekscores.html',
             controller: 'GameweekscoresCtrl'
@@ -64,10 +60,6 @@ angular
         .when('/fixture/:fxid', {
             templateUrl: 'views/fixture.html',
             controller: 'FixtureCtrl'
-        })
-        .when('/editpredictions', {
-            templateUrl: 'views/editpredictions.html',
-            controller: 'EditpredictionsCtrl'
         })
         .when('/history/month', {
             templateUrl: 'views/historybymonth.html',
