@@ -19,8 +19,8 @@ module Data =
         let port = if uri.Port > 0 then uri.Port else 5432
         String.Format("Server={0};Database={1};User Id={2};Password={3};Port={4}", uri.Host, db, user, passwd, port);
        
-    let getConn() = new NpgsqlConnection("Server=127.0.0.1;Port=5433;User Id=vagrant; Password=password; Database=vagrant;")
-    //let getConn() = new NpgsqlConnection(connStr)
+    //let getConn() = new NpgsqlConnection("Server=127.0.0.1;Port=5433;User Id=vagrant; Password=password; Database=vagrant;")
+    let getConn() = new NpgsqlConnection(connStr)
     let getQuery cn s = new NpgsqlCommand(s, cn)
 
     let executeNonQuery nq =
