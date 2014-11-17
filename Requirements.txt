@@ -28,12 +28,13 @@ compare outcome variation each week to see which game weeks are more/less predic
 // avg delta /accuracy index?
 // 'horizontal' navigation
 // fixtures in play
-// right align numerical columns
 // google analytics
 // logging
-// favicon
 // datepicker size
+// conn string from config
 
+// right align numerical columns
+// favicon
 // logout
 // home page dashboard (# of open fixtures / current league position)
 // consistent link text and link target
