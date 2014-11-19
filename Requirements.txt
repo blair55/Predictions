@@ -31,8 +31,9 @@ compare outcome variation each week to see which game weeks are more/less predic
 // google analytics
 // logging
 // datepicker size
-// conn string from config
+// edit fixture
 
+// conn string from config
 // right align numerical columns
 // favicon
 // logout

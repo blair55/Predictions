@@ -81,13 +81,6 @@ module Domain =
         
     let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek list) =
         gws |> List.filter(fun gw -> gw.fixtures |> List.exists(isFixtureClosedAndHaveResult))
-        
-    let getPredictionsForGameWeeksForPlayer (gws:GameWeek list) pl =
-        gws
-        |> List.collect(fun gw -> gw.fixtures)
-        |> List.map(fixtureToFixtureData)
-        |> List.collect(fun fd -> fd.predictions)
-        |> List.filter(fun pr -> pr.player = pl)
 
     let tryFindFixture (gws:GameWeek list) fxid =
         gws
@@ -123,11 +116,6 @@ module Domain =
         |> List.map(fun gw -> gw, (gw.fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff)))
         |> List.filter(fun (_, f) -> f.kickoff.ToString(monthFormat) = month)
         |> List.map(fun (gw, _) -> gw)
-
-    let isPlayerAdmin (player:Player) =
-        match player.role with
-        | Admin -> true
-        | _ -> false
 
     let findPlayerById (players:Player list) id = players |> List.find(fun p -> p.id = id)
 
@@ -202,15 +190,6 @@ module Domain =
         |> List.map(fixtureToFixtureData)
         |> List.map(fun fd -> fd, fd.predictions |> List.tryFind(fun p -> p.player = player))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
-    
-    let getOpenFixturesWithPredictionForPlayer (gws:GameWeek list) (players:Player list) (player:Player) =
-        gws
-        |> getFixturesForGameWeeks
-        |> List.choose(onlyOpenFixtures)
-        |> List.map(fixtureToFixtureData)
-        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player))
-        |> List.map(fun fd -> fd, fd.predictions |> List.find(fun p -> p.player = player))
-        |> List.sortBy(fun (fd, _) -> fd.kickoff)
 
     let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (players:Player list) (player:Player) =
         gws
@@ -281,11 +260,6 @@ module Domain =
     
     let createPrediction player score = { Prediction.id=newPrId(); player=player; score=score }
 
-    let tryAddResultToFixture r f =
-        match f with
-        | OpenFixture f -> invalid "cannot add result to fixture with ko in future"
-        | ClosedFixture (f, _) -> Success(ClosedFixture(f, Some r))
-
     let checkFixtureIsOpen (f, p) =
         match f with
         | OpenFixture fd -> Success (fd, p)
@@ -294,12 +268,6 @@ module Domain =
     let checkPlayerHasNoSubmittedPredictionsForFixture ((fd:FixtureData), (pr:Prediction)) =
         let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
         if hasAlreadySubmitted then invalid "cannot submit more than one prediction for fixture" else Success (fd, pr)
-
-    let tryAddPredictionToFixture (f, p) =
-        let addPredictionToFixture(fd, p) = (OpenFixture({fd with predictions=p::fd.predictions}), p)
-        (f, p) |> (checkFixtureIsOpen
-               >> bind checkPlayerHasNoSubmittedPredictionsForFixture
-               >> bind (switch addPredictionToFixture))
 
     let tryViewFixture f =
         match f with

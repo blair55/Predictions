@@ -174,13 +174,6 @@ module Services =
         let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
-    // [1;2;3;4;5]  []
-    // [2;3;4;5]    [[1]]
-    // [3;4;5]      [[1];[1;2]]
-    // [4;5]        [[1];[1;2];[1;2;3]]
-    // [5]          [[1];[1;2];[1;2;3];[1,2,3,4]]
-    // []           [[1];[1;2];[1;2;3];[1,2,3,4];[1;2;3;4;5]]
-    
     let compoundList collection =
         collection
         |> List.scan (fun x y -> x @ [y]) [] 
