@@ -127,3 +127,14 @@ let publishPlayers url =
     |> List.sortBy(fun (p, _) -> p)
     |> List.iter(fun (name, url) -> printf "%s %s %s" name url Environment.NewLine)
 
+
+let flipPlayerNames() =
+    let getFlippedName (player:PlayerDto) =
+        let arr = player.name.Split(' ')
+        arr.[1] + " " + arr.[0]
+    let flipPlayersName player =
+        let flippedName = getFlippedName player
+        let updateQuery = sprintf "update players set name = '%s' where id = '%s'" flippedName (player.id|>str)
+        executeNonQuery updateQuery
+    readPlayers() |> List.iter(fun p -> flipPlayersName p)
+
