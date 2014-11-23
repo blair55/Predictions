@@ -61,7 +61,7 @@
                     {{player.name}} <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="#player/{{player.id}}">Profile</a></li>
+                    <li><a ng-click="navTo($event)" href="#player/{{player.id}}">Profile</a></li>
                     <li><a href="/api/logout">Log Out</a></li>
                 </ul>
             </li>
