@@ -108,6 +108,7 @@
     <Content Include="views\historybygameweekwithgameweek.html" />
     <Content Include="views\historybymonth.html" />
     <Content Include="views\historybymonthwithmonth.html" />
+    <Content Include="views\inplay.html" />
     <Content Include="views\leaguetable.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />

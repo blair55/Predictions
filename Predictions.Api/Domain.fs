@@ -49,8 +49,8 @@ module Domain =
     
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
-    type ClosedFixtureStatus = AwaitingResult | ResultAdded
-    type FixtureStatus = Open | ClosedFixtureStatus
+    //type ClosedFixtureStatus = AwaitingResult | ResultAdded
+    //type FixtureStatus = Open | ClosedFixtureStatus
 
     type AppError =
         | NotLoggedIn of string
@@ -74,11 +74,12 @@ module Domain =
         | ClosedFixture (fd, r) -> (fd, r)
 
     let isFixtureOpen f = match f with | OpenFixture _ -> true | ClosedFixture _ -> false
-    let isFixtureClosedAndHaveResult f = match f with | OpenFixture _ -> false | ClosedFixture (fd, r) -> r.IsSome
+    let isFixtureClosedAndHaveResult f = match f with | OpenFixture _ -> false | ClosedFixture (_, r) -> r.IsSome
+    let isFixtureClosedAndHaveNoResult f = match f with | OpenFixture _ -> false | ClosedFixture (_, r) -> r.IsNone
 
     let getFixturesForGameWeeks (gws:GameWeek list) =
         gws |> List.collect(fun gw -> gw.fixtures)
-        
+
     let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek list) =
         gws |> List.filter(fun gw -> gw.fixtures |> List.exists(isFixtureClosedAndHaveResult))
 
@@ -118,6 +119,9 @@ module Domain =
         |> List.map(fun (gw, _) -> gw)
 
     let findPlayerById (players:Player list) id = players |> List.find(fun p -> p.id = id)
+
+    let getFixturesInPlay gws =
+        gws |> List.map(fun gw -> gw, ([gw] |> getFixturesForGameWeeks |> List.filter(isFixtureClosedAndHaveNoResult)))
 
     // base calculations
 

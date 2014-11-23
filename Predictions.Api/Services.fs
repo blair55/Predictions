@@ -54,7 +54,6 @@ module Services =
                    |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
-        
     let getFixtureViewDetails (gw, (fd:FixtureData), r, players) =
         let getPredictionScoreViewModel (prediction:Prediction option) =
             match prediction with
@@ -122,14 +121,12 @@ module Services =
         let getLeaguePosition = getLeaguePositionForFixturesForPlayer fixtures players
         player |> (switch getLeaguePosition)
 
-
     let getGameWeeksPointsForPlayer playerId =
         let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
             match r with
             | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
             | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=0; correctScores=0; correctOutcomes=0; points=0}
         let players = getPlayers()
-        //let gameWeeks = gameWeeksWithClosedFixtures()
         let gameWeeks = gameWeeks()
         let player = findPlayerById players (playerId|>PlId)
         let rows = (getPlayerPointsForGameWeeks players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
@@ -156,7 +153,6 @@ module Services =
         let rows = (getLeagueTable players fixtures) |> List.map(fun (pos, pl, cs, co, pts) -> leagueTableRowToViewModel (0, pos, pl, cs, co, pts))
         { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo) }
     
-
     let getPlayerGameWeek playerId gameWeekNo =
         let players = getPlayers()
         let player = findPlayerById players (playerId|>PlId)
@@ -223,12 +219,20 @@ module Services =
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
-    
     let getLastGameWeekAndWinner() = getPastGameWeeksWithWinner().rows |> Seq.last
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =
         getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) (getPlayers()) player
         |> List.length
+
+    let getInPlay() =
+        let rows = gameWeeksWithClosedFixtures()
+                   |> getFixturesInPlay
+                   |> List.map(fun (gw, fs) -> fs |> List.map(fun f -> toFixtureViewModel (f|>fixtureToFixtureData) gw))
+                   |> List.collect(fun fvm -> fvm)
+                   |> List.sortBy(fun fvm -> fvm.kickoff)
+                   |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
+        { InPlayViewModel.rows = rows }
 
 
     // persistence

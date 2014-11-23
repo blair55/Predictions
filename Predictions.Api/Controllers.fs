@@ -109,6 +109,10 @@ type HomeController() =
                      >> bind getPlayerFromAuthToken
                      >> bind (switch getOpenFixturesWithNoPredictionsForPlayerCount)
                      >> resultToHttp)
+
+    [<Route("inplay")>]
+    member this.GetInPlay() =
+        () |> (switch getInPlay >> resultToHttp)
                      
 
 [<RoutePrefix("api/admin")>]

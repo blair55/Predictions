@@ -81,6 +81,12 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeeksWithClosedFixturesViewModel = { rows:GameWeeksWithClosedFixturesRowViewModel list; }
 
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type InPlayRowViewModel = { fixture:FixtureViewModel; }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type InPlayViewModel = { rows:InPlayRowViewModel list; }
+
 [<AutoOpen>]
 module PostModels =
 

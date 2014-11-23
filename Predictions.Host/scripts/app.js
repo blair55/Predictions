@@ -77,6 +77,10 @@ angular
           templateUrl: 'views/adminaddresultsforgameweek.html',
           controller: 'AdminaddresultsforgameweekCtrl'
         })
+        .when('/inplay', {
+          templateUrl: 'views/inplay.html',
+          controller: 'InplayCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });
