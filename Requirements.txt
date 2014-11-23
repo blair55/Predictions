@@ -27,7 +27,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 // organise service/domain layer
 // avg delta /accuracy index?
 // 'horizontal' navigation
-// fixtures in play
 // google analytics
 // logging
 // datepicker size?
@@ -36,6 +35,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // odds checker integration
 // form guide
 
+// fixtures in play
 // conn string from config
 // right align numerical columns
 // favicon

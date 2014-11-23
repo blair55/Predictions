@@ -1,6 +1,6 @@
 <div ng-if="model">
     <h4>Fixtures In-Play</h4>
-    <table class="table table-striped">
+    <table ng-if="model.rows" class="table table-striped">
         <thead>
             <tr>
                 <th>Fixture</th>
