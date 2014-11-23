@@ -23,7 +23,6 @@ module Services =
         let f = fixtureDataToFixture fd None
         let createVm isOpen = { FixtureViewModel.home=fd.home; away=fd.away; fxId=(getFxId fd.id)|>str; kickoff=fd.kickoff; gameWeekNumber=(getGameWeekNo gw.number); isOpen=isOpen }
         f |> isFixtureOpen |> createVm
-    let toEditPredictionViewModelRow (f:FixtureData) (gw:GameWeek) (p:Prediction) = { EditPredictionsViewModelRow.home=f.home; away=f.away; fxId=(getFxId f.id)|>str; kickoff=f.kickoff; gameWeekNumber=(getGameWeekNo gw.number); predictionId=(getPrId p.id); score=(toScoreViewModel p.score) }
     let season() = buildSeason currentSeason
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
     let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
@@ -130,7 +129,8 @@ module Services =
             | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
             | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=0; correctScores=0; correctOutcomes=0; points=0}
         let players = getPlayers()
-        let gameWeeks = gameWeeksWithClosedFixtures()
+        //let gameWeeks = gameWeeksWithClosedFixtures()
+        let gameWeeks = gameWeeks()
         let player = findPlayerById players (playerId|>PlId)
         let rows = (getPlayerPointsForGameWeeks players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
         let fixtures = gameWeeks |> getFixturesForGameWeeks
@@ -176,7 +176,7 @@ module Services =
 
     let compoundList collection =
         collection
-        |> List.scan (fun x y -> x @ [y]) [] 
+        |> List.scan (fun x y -> x @ [y]) []
         |> List.tail
 
     let getLeaguePositionGraphDataForPlayer playerId =
@@ -197,7 +197,7 @@ module Services =
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
-            let fixture = tryFindFixture gws (fxid|>FxId)
+            let fixture = tryFindFixture gws fxid
             Invalid "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)

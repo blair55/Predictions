@@ -56,14 +56,14 @@ type HomeController() =
                      >> bind getPlayerFromAuthToken
                      >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
-                
+
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
         base.Request |> (getLoggedInPlayerAuthToken
                      >> bind getPlayerFromAuthToken
                      >> bind (trySavePrediction prediction)
                      >> resultToHttp)
-                    
+
     [<Route("history/month")>]
     member this.GetHistoryByMonth() =
         () |> ((switch getPastMonthsWithWinner) >> resultToHttp)
@@ -90,7 +90,7 @@ type HomeController() =
     
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =
-        fxId |> (getFixturePredictionGraphData >> resultToHttp)
+        FxId fxId |> (getFixturePredictionGraphData >> resultToHttp)
 
     [<Route("getleaguepositionforplayer")>]
     member this.GetLeaguePositionForPlayer() =
