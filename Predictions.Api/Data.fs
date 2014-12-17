@@ -12,6 +12,7 @@ module Data =
     let connStr =
         let s = ConfigurationManager.AppSettings.["ELEPHANTSQL_URL"]
         let uriString = if String.IsNullOrEmpty(s) then "postgres://vagrant:password@127.0.0.1:5433/vagrant" else s
+        //let uriString = "postgres://awisbnpt:51Y0ezlLiSkMZWqB86qaKjCP6_au2mNa@horton.elephantsql.com:5432/awisbnpt"
         let uri = new Uri(uriString)
         let db = uri.AbsolutePath.Trim('/')
         let user = uri.UserInfo.Split(':').[0]

@@ -113,10 +113,9 @@ let initAll (plrs:SavePlayerCommand list) (sn:SaveSeasonCommand) (gws:SaveGameWe
 let players = getSavePlayerCommandList playersListDtos
 let gameWeeks = getSaveGameWeekCommandList()
 let results = getSaveResultCommandList()
-let predictions = getSavePredictionCommandList players
+//let predictions = getSavePredictionCommandList players
         
 //initAll players saveSeasonCommand gameWeeks results predictions
-
 
 let pidtos pid = pid |> getPlayerId |> str
 let localUrl = "http://localhost:49782/api/auth/"
@@ -137,4 +136,39 @@ let flipPlayerNames() =
         let updateQuery = sprintf "update players set name = '%s' where id = '%s'" flippedName (player.id|>str)
         executeNonQuery updateQuery
     readPlayers() |> List.iter(fun p -> flipPlayersName p)
+
+//let dunphyId = "ebd3cd36-db54-42b2-a354-7d5743b21082"
+//
+//let dunphyPredictions =
+//    [//(dunphyId,"5743dc91-8b38-42ff-b1eb-85a0fa97891a","0-2")
+//     (dunphyId,"ead66d56-17db-4b70-8dea-e36570734822","0-1")
+//     (dunphyId,"d4f2fc3e-59d5-442a-bf14-abafb9e86ee5","1-0")
+//     (dunphyId,"8ade3762-d02b-46e8-867d-eb7c909bc683","2-0")
+//     (dunphyId,"53f378e7-24b5-46e7-95a3-96bdb35ee2d3","0-2")
+//     (dunphyId,"30333cca-6678-4aa6-84f4-bf7a31581ace","3-0")
+//     (dunphyId,"356d0c74-4385-4b78-9d67-ed54786d6af7","1-2")
+//     (dunphyId,"4cafa48b-1fbb-474c-98fa-70432d5b4dba","0-4")
+//     (dunphyId,"d4b9efbf-359f-4fcf-b4dc-4054a8f4acb9","2-2")
+//     (dunphyId,"06bbf9c5-0502-4fbb-9c7b-f54ad3e92f5c","0-1")]
+//
+//let getScoreFromString (s:string) =
+//    let i (sd:string) = Convert.ToInt32(sd)
+//    let arr = s.Split('-')
+//    i arr.[0], i arr.[1]
+//
+//let fixts = readFixtures()
+//
+//let printFixtureAndScore (c:SavePredictionCommand) =
+//    let fixture = fixts |> List.find(fun f -> FxId f.id = c.fixtureId)
+//    printfn "|%20s|%-20s|%i - %i|" fixture.home fixture.away (fst c.score) (snd c.score)
+
+//let saveDunphyPreds() =
+//    dunphyPredictions
+//    |> List.map(fun (plid, fxid, scoreString) -> { SavePredictionCommand.id=newPrId(); fixtureId=fxid|>sToGuid|>FxId; playerId=plid|>sToGuid|>PlId; score=scoreString|>getScoreFromString })
+//    //|> List.iter(fun c -> printfn "%A" c)
+//    |> List.iter(printFixtureAndScore)
+//    //|> List.iter(savePrediction)
+
+
+// update gw 17 games to gw 16
 

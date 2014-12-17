@@ -1,62 +1,60 @@
 <div class="panel panel-default">
 
-	<div class="form panel-body">
-		
-		<div class="form-group">
-			<span class="label label-default">GW #{{ row.fixture.gameWeekNumber }}</span>
-			<span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-		</div>
+    <div class="form panel-body">
 
-        <!--no score exists editable-->
-        <form ng-if="!row.scoreSubmitted" name="createScoreForm" role="form">
+        <div class="form-group">
+            <span class="label label-default">GW #{{ row.fixture.gameWeekNumber }}</span>
+            <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+        </div>
 
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon team-label">{{row.fixture.home}}</div>
-                    <input type="number" class="form-control" ng-model="row.newScore.home" required />
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon team-label">{{row.fixture.away}}</div>
-                    <input type="number" class="form-control" ng-model="row.newScore.away" required />
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="createScore(row)">Submit</button>
-
-        </form>
-
-
-        <div ng-if="row.scoreSubmitted">
+        <div ng-switch="row.state">
             
-            <!--score exists read only-->
-            <form ng-if="!row.editing">
+            <div ng-switch-when="readonly">
+                <form name="readonlyScoreForm" >
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon team-label">{{row.fixture.home}}</div>
+                            <input type="number" class="form-control" ng-model="row.existingScore.home" ng-readonly="true" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon team-label">{{row.fixture.away}}</div>
+                            <input type="number" class="form-control" ng-model="row.existingScore.away" ng-readonly="true" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">
+                        <span class="glyphicon glyphicon-edit"></span>
+                    </button>
+
+                </form>
+
+            </div>
+
+            <form ng-switch-when="create" name="createScoreForm">
 
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon team-label">{{row.fixture.home}}</div>
-                        <input type="number" class="form-control" ng-model="row.existingScore.home" ng-readonly="true" />
+                        <input type="number" class="form-control" ng-model="row.newScore.home" required />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon team-label">{{row.fixture.away}}</div>
-                        <input type="number" class="form-control" ng-model="row.existingScore.away" ng-readonly="true" />
+                        <input type="number" class="form-control" ng-model="row.newScore.away" required />
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">
-                    <span class="glyphicon glyphicon-edit"></span>
-                </button>
+                <button type="submit" class="btn btn-primary" ng-init="setCreateScoreForm(createScoreForm)" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
             </form>
 
-
-            <!--score exists editable-->
-            <form ng-if="row.editing" name="editScoreForm" role="form">
+            <form ng-switch-when="edit" name="editScoreForm">
 
                 <div class="form-group">
                     <div class="input-group">
@@ -72,14 +70,15 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-default" ng-click="exitEditMode(row)">
+                <button type="submit" class="btn btn-default" ng-click="enterReadOnlyMode(row)">
                     <span class="glyphicon glyphicon-remove"></span>
                 </button>
-                <button type="submit" ng-d class="btn btn-primary" ng-disabled="editScoreForm.$invalid || inSubmission" ng-click="editScore(row)">Submit</button>
+                <button type="submit" class="btn btn-primary" ng-init="setEditScoreForm(editScoreForm)" ng-disabled="editScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
             </form>
 
         </div>
-    </div>
+
+</div>
 
 </div>

@@ -21,20 +21,33 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-
-// gravatars
-// make mono-able
+////// issues
 // organise service/domain layer
-// avg delta /accuracy index?
-// 'horizontal' navigation
-// google analytics
 // logging
 // datepicker size?
+// pie legend
+
+////// features
 // edit/delete fixture 
+// gravatars
+// make mono-able
+// 'horizontal' navigation
+// google analytics
 // leagues / registration
 // odds checker integration
 // form guide
+// head to head
+// 'captain' game double points
 
+////// player stats
+// avg points per game / gw
+// points per gw bar chart
+// best gw points
+// avg delta / accuracy index
+// # home wins # away wins # draws
+// top 5 most correctly predicted teams
+
+////// done
 // fixtures in play
 // conn string from config
 // right align numerical columns

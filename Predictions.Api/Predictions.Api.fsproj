@@ -59,6 +59,7 @@
     <Compile Include="WebUtils.fs" />
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
+    <None Include="AdhocTasks.fsx" />
     <None Include="packages.config" />
     <None Include="DummyDataImport.fsx" />
     <None Include="RealDataImport.fsx" />
