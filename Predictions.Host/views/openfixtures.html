@@ -12,11 +12,8 @@
     <div ng-repeat-end></div>
 
     <div class="panel panel-default">
-
         <div class="form panel-body">
-
-            <button type="submit" class="btn btn-primary" ng-disabled="" ng-click="submitAll()">Submit All</button>
-
+            <button type="submit" class="btn btn-primary" ng-disabled="anyEditableRows() == false || submittingAll" ng-click="submitAll()">Submit All</button>
         </div>
     </div>
 </div>

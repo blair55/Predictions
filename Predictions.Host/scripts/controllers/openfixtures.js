@@ -15,18 +15,31 @@ angular.module('frontendApp')
 	    });
 
 	    function submitRow(i) {
-	        if (i < $scope.model.rows.length) {
-	            var row = $scope.model.rows[i];
-	            row.submitWithCallBack(row, function () {
+	        var row = $scope.model.rows[i];
+	        row.submitWithCallBack(row, function () {
+	            if (i + 1 < $scope.model.rows.length) {
 	                submitRow(i + 1);
-	            });
-	        }
+	            } else {
+	                $scope.submittingAll = false;
+	            }
+	        });
 	    }
 
-	    $scope.anyEditableRows = false;
+	    $scope.anyEditableRows = function () {
+	        if ($scope.model) {
+	            for (var i = 0; i < $scope.model.rows.length; i++) {
+	                var row = $scope.model.rows[i];
+	                if (row.isSubmittable(row)) {
+	                    return true;
+	                }
+	            }
+	        }
+	        return false;
+	    };
 
 	    $scope.submitAll = function () {
+	        $scope.submittingAll = true;
 	        submitRow(0);
-	    }
+	    };
 
 	});

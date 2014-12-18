@@ -28,7 +28,6 @@ angular.module('frontendApp')
 
 	            function decideInitialState() {
 	                scope.row.state = scope.row.scoreSubmitted ? state.readonly : state.create;
-	                //scope.row.isSubmittable = false;
 	            }
 
 	            decideInitialState();
@@ -44,31 +43,15 @@ angular.module('frontendApp')
 	                editScoreForm = form;
 	            }
 
-	            scope.row.submit = function (row) {
-	                scope.row.submitWithCallBack(row, function () { });
-	            }
-
-	            scope.row.submitWithCallBack = function (row, cb) {
+	            scope.row.isSubmittable = function (row) {
 	                switch (row.state) {
 	                    case state.create:
-	                        if (createScoreForm.$valid) {
-	                            createScore(row, cb);
-	                        }
-	                        else {
-	                            cb();
-	                        }
-	                        break;
+	                        return createScoreForm && createScoreForm.$valid;
 	                    case state.edit:
-	                        if (editScoreForm.$valid) {
-	                            editScore(row, cb);
-	                        }
-	                        else {
-	                            cb();
-	                        }
-	                        break;
+	                        return editScoreForm && editScoreForm.$valid;
 	                    case state.readonly:
-	                        cb();
-	                        break;
+	                    default:
+	                        return false;
 	                }
 	            };
 
@@ -80,6 +63,33 @@ angular.module('frontendApp')
 	            scope.enterReadOnlyMode = function (row) {
 	                row.state = state.readonly;
 	                row.existingScore = row.existingScoreOriginal;
+	            };
+
+	            scope.row.submit = function (row) {
+	                scope.row.submitWithCallBack(row, function () { });
+	            }
+
+	            scope.row.submitWithCallBack = function (row, cb) {
+	                switch (row.state) {
+	                    case state.create:
+	                        if (createScoreForm.$valid) {
+	                            createScore(row, cb);
+	                        } else {
+	                            cb();
+	                        }
+	                        break;
+	                    case state.edit:
+	                        if (editScoreForm.$valid) {
+	                            editScore(row, cb);
+	                        } else {
+	                            cb();
+	                        }
+	                        break;
+	                    case state.readonly:
+	                    default:
+	                        cb();
+	                        break;
+	                }
 	            };
 
 	            var createScore = function (row, cb) {
