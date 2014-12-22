@@ -178,18 +178,20 @@ module Domain =
                   let newacc = (newi, g)::acc
                   bumprank newsumdelta newacc t
 
-        //|> List.mapi(fun i (p, cs, co, tp) -> (i+1), p, cs, co, tp)
-
-    let getLeagueTable players fixtures =
-        players
-        |> List.map(fun p -> getPlayerBracketProfile fixtures p)
-        |> List.map(fun (n, cs, co, tp) -> (n, (cs, co, tp)))
-        |> List.sortBy(fun (_, (cs, co, totalPoints)) -> -totalPoints, -cs, -co)
+    let rank rows =
+        rows        
         |> Seq.groupBy(fun (_, x) -> x)
         |> Seq.mapi(fun i (_, g) -> i+1, g) |> Seq.toList
         |> bumprank 0 []
         |> Seq.collect(fun (i, g) -> g |> Seq.map(fun x -> i, x))
-        |> Seq.map(fun (i, (p, (cs, co, tp))) -> (i, p, cs, co, tp))
+        
+    let getLeagueTable players fixtures =
+        players
+        |> List.map(fun p -> getPlayerBracketProfile fixtures p)
+        |> List.map(fun (p, cs, co, tp) -> (p, (cs, co, tp)))
+        |> List.sortBy(fun (_, (cs, co, totalPoints)) -> -totalPoints, -cs, -co)
+        |> rank
+        |> Seq.map(fun (r, (p, (cs, co, tp))) -> (r, p, cs, co, tp))
         |> Seq.toList
 
     let getPlayerPointsForGameWeeks allPlayers player gameWeeks =

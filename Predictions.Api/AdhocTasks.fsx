@@ -56,11 +56,11 @@ open Predictions.Api.Data
 
 // update gw 17 games to gw 16
 
-let readgw16Fixtures() = (executeQuery "select * from fixtures where gameweekid = 'b1b5d8cb-fc27-4587-b524-ff933dd00f17'" readerToFixtureDto)
-let readgw17Fixtures() = (executeQuery "select * from fixtures where gameweekid = 'a297c75f-bd4d-48ed-b82b-548ac53c087a'" readerToFixtureDto)
-
-let u = "update fixtures set gameweekid = 'b1b5d8cb-fc27-4587-b524-ff933dd00f17' where gameweekid = 'a297c75f-bd4d-48ed-b82b-548ac53c087a'"
-let m = "update players set name = 'Michael Mansfield' where name = 'Michael Manfield'"
+//let readgw16Fixtures() = (executeQuery "select * from fixtures where gameweekid = 'b1b5d8cb-fc27-4587-b524-ff933dd00f17'" readerToFixtureDto)
+//let readgw17Fixtures() = (executeQuery "select * from fixtures where gameweekid = 'a297c75f-bd4d-48ed-b82b-548ac53c087a'" readerToFixtureDto)
+//
+//let u = "update fixtures set gameweekid = 'b1b5d8cb-fc27-4587-b524-ff933dd00f17' where gameweekid = 'a297c75f-bd4d-48ed-b82b-548ac53c087a'"
+//let m = "update players set name = 'Michael Mansfield' where name = 'Michael Manfield'"
 
 
 // position grouping
@@ -98,3 +98,30 @@ let rank a =
     |> bumprank 0 []
     |> Seq.collect(fun (i, g) -> g |> Seq.map(fun x -> i, x))
     |> pr
+
+
+/// gameweek 17 data
+
+
+let fxs =
+    [("Chelsea", "West Ham", "12:45")
+     ("Burnley", "Liverpool", "15:00")
+     ("Crystal Palace", "Southampton", "15:00")
+     ("Everton", "Stoke", "15:00")
+     ("Leicester", "Tottenham", "15:00")
+     ("Man Utd", "Newcastle", "15:00")
+     ("Sunderland", "Hull", "15:00")
+     ("Swansea", "Aston Villa", "15:00")
+     ("West Brom", "Man City", "15:00")
+     ("Arsenal", "QPR", "17:30")]
+     
+let getCmd (h, a, t) =
+    {
+        SaveFixtureCommand.id=newFxId()
+        SaveFixtureCommand.home = h
+        SaveFixtureCommand.away = a
+        SaveFixtureCommand.ko = Convert.ToDateTime("2014-12-26 " + t + ":00")
+        SaveFixtureCommand.gameWeekId = Guid.Parse("a297c75f-bd4d-48ed-b82b-548ac53c087a") |> GwId
+    }
+
+let getCmds f = f |> List.map getCmd
