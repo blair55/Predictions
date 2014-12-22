@@ -169,11 +169,28 @@ module Domain =
         let totalCorrectOutcomes = CorrectOutcome |> (countBracket brackets)
         player, totalCorrectScores, totalCorrectOutcomes, totalPoints
 
+    let rec bumprank sumdelta acc a =
+        match a with
+        | [] -> List.rev acc
+        | h::t -> let (i, g) = h
+                  let newi = i + sumdelta
+                  let newsumdelta = sumdelta + ((Seq.length g)-1)
+                  let newacc = (newi, g)::acc
+                  bumprank newsumdelta newacc t
+
+        //|> List.mapi(fun i (p, cs, co, tp) -> (i+1), p, cs, co, tp)
+
     let getLeagueTable players fixtures =
         players
         |> List.map(fun p -> getPlayerBracketProfile fixtures p)
-        |> List.sortBy(fun (_, cs, co, totalPoints) -> -totalPoints, -cs, -co)
-        |> List.mapi(fun i (p, cs, co, tp) -> (i+1), p, cs, co, tp)
+        |> List.map(fun (n, cs, co, tp) -> (n, (cs, co, tp)))
+        |> List.sortBy(fun (_, (cs, co, totalPoints)) -> -totalPoints, -cs, -co)
+        |> Seq.groupBy(fun (_, x) -> x)
+        |> Seq.mapi(fun i (_, g) -> i+1, g) |> Seq.toList
+        |> bumprank 0 []
+        |> Seq.collect(fun (i, g) -> g |> Seq.map(fun x -> i, x))
+        |> Seq.map(fun (i, (p, (cs, co, tp))) -> (i, p, cs, co, tp))
+        |> Seq.toList
 
     let getPlayerPointsForGameWeeks allPlayers player gameWeeks =
         gameWeeks
@@ -287,4 +304,3 @@ module Domain =
         else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
         else if home = away then invalid "fixture home and away team cannot be the same"
         else Success({id=newFxId(); home=home; away=away; kickoff=kickoff; predictions=[]})
-    

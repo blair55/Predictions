@@ -63,3 +63,38 @@ let u = "update fixtures set gameweekid = 'b1b5d8cb-fc27-4587-b524-ff933dd00f17'
 let m = "update players set name = 'Michael Mansfield' where name = 'Michael Manfield'"
 
 
+// position grouping
+
+let np =
+    [ ("bob", (4, 2)) 
+      ("jon", (4, 8))
+      ("ert", (6, 2))
+      ("tyu", (4, 2))
+      ("uio", (4, 1))
+      ("tom", (4, 5)) 
+      ("dfg", (4, 6))
+      ("fgh", (4, 7))
+      ("jim", (2, 3)) 
+      ("rob", (4, 5)) 
+      ("ron", (4, 3)) ]
+
+let pr a = a |> Seq.iter(fun a -> printfn "%A" a)
+
+let rec bumprank sumdelta acc a =
+    match a with
+    | [] -> List.rev acc
+    | h::t -> let (i, g) = h
+              let newi = i + sumdelta
+              let newsumdelta = sumdelta + ((Seq.length g)-1)
+              let newacc = (newi, g)::acc
+              bumprank newsumdelta newacc t
+
+let rank a =
+    a
+    |> Seq.sortBy(fun (_, (s, p)) -> -p, -s)
+    |> Seq.groupBy(fun (_, x) -> x)
+    |> Seq.mapi(fun i (_, g) -> i+1, g)
+    |> Seq.toList
+    |> bumprank 0 []
+    |> Seq.collect(fun (i, g) -> g |> Seq.map(fun x -> i, x))
+    |> pr

@@ -26,6 +26,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // logging
 // datepicker size?
 // pie legend
+// 
 
 ////// features
 // edit/delete fixture 
@@ -38,6 +39,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // form guide
 // head to head
 // 'captain' game double points
+// 
 
 ////// player stats
 // avg points per game / gw
@@ -46,8 +48,10 @@ compare outcome variation each week to see which game weeks are more/less predic
 // avg delta / accuracy index
 // # home wins # away wins # draws
 // top 5 most correctly predicted teams
+//
 
 ////// done
+// position grouping
 // fixtures in play
 // conn string from config
 // right align numerical columns
@@ -71,3 +75,4 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fix menu scroll thing & double click for drop down
 // fix gameweek no when adding new gw
 // no prediction submitted view on gameweek score
+//
