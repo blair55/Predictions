@@ -179,7 +179,7 @@ module Domain =
                   bumprank newsumdelta newacc t
 
     let rank rows =
-        rows        
+        rows
         |> Seq.groupBy(fun (_, x) -> x)
         |> Seq.mapi(fun i (_, g) -> i+1, g) |> Seq.toList
         |> bumprank 0 []
@@ -238,14 +238,12 @@ module Domain =
         |> List.map(fun (m, lgtbl) -> m, lgtbl.Head)
         |> List.map(fun (m, (_, plr, _, _, pts)) -> m, plr, pts)
 
-
     let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players player =
         fixtures
         |> getLeagueTable players
         |> List.find(fun (_, plr, _, _, _) -> plr = player)
         |> (fun (pos, _, _, _, _) -> pos)
 
-        
     let rec GetOutcomeCounts (p:Prediction list) (hw, d, aw) =
         match p with
         | h::t -> match getResultOutcome h.score with

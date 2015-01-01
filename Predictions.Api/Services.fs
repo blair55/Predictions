@@ -178,16 +178,12 @@ module Services =
     let getLeaguePositionGraphDataForPlayer playerId =
         let players = getPlayers()
         let gws = gameWeeksWithResults()
-        let sw1 = System.Diagnostics.Stopwatch.StartNew()
         let fixtures = gws |> compoundList |> List.map(getFixturesForGameWeeks)
-        log (sprintf "compound list %i" sw1.ElapsedMilliseconds)
         let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
-        let sw2 = System.Diagnostics.Stopwatch.StartNew()
         let data = players
                    |> List.filter(fun p -> p.id = playerId)
                    |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
                    |> List.map(fun (_, posList) -> posList)
-        log (sprintf "get graph data %i" sw2.ElapsedMilliseconds)
         { LeaguePositionGraphData.data=data; labels=labels }
 
     let getFixturePredictionGraphData fxid =
@@ -198,7 +194,7 @@ module Services =
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
-             >> bind (switch (fun (hw, d, aw) -> { FixturePredictionGraphData.data=[hw; d; aw;]; labels=["home win"; "draw"; "away win"] })))
+             >> bind (switch (fun (hw, d, aw) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=["home win"; "draw"; "away win"] })))
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()
