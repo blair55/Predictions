@@ -10,6 +10,7 @@ open System.Web.Http.Cors
 open System.Net.Http.Headers
 open Newtonsoft.Json
 open Predictions.Api.Domain
+open Predictions.Api.FormGuide
 open Predictions.Api.Data
 open Predictions.Api.Common
 
@@ -42,14 +43,25 @@ module Services =
         | Some p -> toScoreViewModel p.score
         | None -> noScoreViewModel
 
-    let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) =
-        { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); scoreSubmitted=pr.IsSome; newScore=None; existingScore=pr|>predictionOptionToScoreViewModel }
+    let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) gameWeeks =
+        let getFormGuide team =
+            (getTeamFormGuide gameWeeks team)
+            |> List.map(fun o -> match o with | Win -> "w" | Draw -> "d" | Lose -> "l" )
+        {
+            OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
+            scoreSubmitted=pr.IsSome
+            newScore=None
+            existingScore=pr|>predictionOptionToScoreViewModel
+            homeFormGuide=getFormGuide fd.home
+            awayFormGuide=getFormGuide fd.away
+        }
 
     let getOpenFixturesForPlayer (player:Player) =
         let players = getPlayers()
-        let rows = gameWeeks()
+        let gws = gameWeeks()
+        let rows = gws
                    |> List.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [gw] players player)
-                   |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd, p) -> toOpenFixtureViewModelRow(gw,fd,p)))
+                   |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd, p) -> toOpenFixtureViewModelRow (gw,fd,p) gws))
                    |> List.collect(fun ofvmr -> ofvmr)
                    |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
@@ -208,10 +220,11 @@ module Services =
         | None -> noScoreViewModel
 
     let getClosedFixturesForGameWeek gwno =
-        let rows = gameWeeks()
+        let gws = gameWeeks()
+        let rows = gws
                    |> List.filter(fun gw -> gw.number = gwno)
                    |> List.map(fun gw -> gw, getClosedFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) -> { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); newScore=None; scoreSubmitted=r.IsSome; existingScore=r|>resultToScoreViewModel }))
+                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) -> { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); newScore=None; scoreSubmitted=r.IsSome; existingScore=r|>resultToScoreViewModel; homeFormGuide=[]; awayFormGuide=[] }))
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 

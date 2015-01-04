@@ -26,6 +26,16 @@ angular.module('frontendApp')
                         score.home, ' - ', score.away, ' ', row.fixture.away].join('');
 	            }
 
+	            scope.focused = "";
+	            scope.focus = function () {
+	                scope.focused = "focused";
+	            }
+	            scope.blur = function () {
+	                scope.focused = "";
+	            }
+
+                
+
 	            function decideInitialState() {
 	                scope.row.state = scope.row.scoreSubmitted ? state.readonly : state.create;
 	            }
@@ -54,6 +64,7 @@ angular.module('frontendApp')
 	                        return false;
 	                }
 	            };
+
 
 	            scope.enterEditMode = function (row) {
 	                row.state = state.edit;

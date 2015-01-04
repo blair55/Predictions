@@ -12,7 +12,7 @@ angular.module('frontendApp')
 
         $scope.teams = ["Arsenal", "Aston Villa", "Burnley", "Chelsea", "Crystal Palace", "Everton",
                         "Hull", "Leicester", "Liverpool", "Man City", "Man Utd",
-                        "Manchester United", "Newcastle", "QPR", "Southampton", "Stoke",
+                        "Newcastle", "QPR", "Southampton", "Stoke",
                         "Sunderland", "Swansea", "Tottenham", "West Brom", "West Ham"];
 
         $scope.gameweek = {

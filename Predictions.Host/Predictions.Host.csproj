@@ -95,6 +95,7 @@
     <Content Include="scripts\controllers\openfixtures.js" />
     <Content Include="scripts\controllers\player.js" />
     <Content Include="scripts\controllers\playergameweek.js" />
+    <Content Include="scripts\directives\formguide.js" />
     <Content Include="scripts\directives\loading.js" />
     <Content Include="scripts\directives\submitscore.js" />
     <Content Include="scripts\services\auth.js" />

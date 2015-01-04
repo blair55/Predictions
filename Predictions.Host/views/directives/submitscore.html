@@ -1,6 +1,6 @@
-<div class="panel panel-default">
+<div class="panel panel-default {{focused}}">
 
-    <div class="form panel-body">
+    <div class=" form panel-body">
 
         <div class="form-group">
             <span class="label label-default">GW #{{ row.fixture.gameWeekNumber }}</span>
@@ -8,49 +8,58 @@
         </div>
 
         <div ng-switch="row.state">
-            
-            <div ng-switch-when="readonly">
-                <form name="readonlyScoreForm" >
 
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-addon team-label">{{row.fixture.home}}</div>
-                            <input type="number" class="form-control" ng-model="row.existingScore.home" ng-readonly="true" />
+            <form ng-switch-when="readonly" name="readonlyScoreForm">
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.home}}
+                            <formguide guide="row.homeFormGuide"></formguide>
                         </div>
+                        <input type="number" class="form-control" ng-model="row.existingScore.home" ng-readonly="true" />
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-addon team-label">{{row.fixture.away}}</div>
-                            <input type="number" class="form-control" ng-model="row.existingScore.away" ng-readonly="true" />
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.away}}
+                            <formguide guide="row.awayFormGuide"></formguide>
                         </div>
+                        <input type="number" class="form-control" ng-model="row.existingScore.away" ng-readonly="true" />
                     </div>
+                </div>
 
-                    <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">
-                        <span class="glyphicon glyphicon-edit"></span>
-                    </button>
+                <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">
+                    <span class="glyphicon glyphicon-edit"></span>
+                </button>
 
-                </form>
-
-            </div>
+            </form>
 
             <form ng-switch-when="create" name="createScoreForm">
 
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon team-label">{{row.fixture.home}}</div>
-                        <input type="number" class="form-control" ng-model="row.newScore.home" required />
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.home}}
+                            <formguide guide="row.homeFormGuide"></formguide>
+                        </div>
+                        <input type="number" class="form-control" ng-model="row.newScore.home" required ng-focus="focus()" ng-blur="blur()" />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon team-label">{{row.fixture.away}}</div>
-                        <input type="number" class="form-control" ng-model="row.newScore.away" required />
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.away}}
+                            <formguide guide="row.awayFormGuide"></formguide>
+                        </div>
+                        <input type="number" class="form-control" ng-model="row.newScore.away" required ng-focus="focus()" ng-blur="blur()" />
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" ng-init="setCreateScoreForm(createScoreForm)" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
+                <button type="submit" class="btn btn-primary" ng-init="setCreateScoreForm(createScoreForm);" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
             </form>
 
@@ -58,15 +67,21 @@
 
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon team-label">{{row.fixture.home}}</div>
-                        <input type="number" class="form-control" ng-model="row.existingScore.home" required />
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.home}}
+                            <formguide guide="row.homeFormGuide"></formguide>
+                        </div>
+                        <input type="number" class="form-control" ng-model="row.existingScore.home" required ng-focus="focus()" ng-blur="blur()" />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon team-label">{{row.fixture.away}}</div>
-                        <input type="number" class="form-control" ng-model="row.existingScore.away" required />
+                        <div class="input-group-addon team-label">
+                            {{row.fixture.away}}
+                            <formguide guide="row.awayFormGuide"></formguide>
+                        </div>
+                        <input type="number" class="form-control" ng-model="row.existingScore.away" required ng-focus="focus()" ng-blur="blur()" />
                     </div>
                 </div>
 
@@ -79,6 +94,6 @@
 
         </div>
 
-</div>
+    </div>
 
 </div>

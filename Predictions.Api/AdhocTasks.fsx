@@ -180,3 +180,34 @@ let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
 // update ko to 15:00
 
 let updateto1500 = "update fixtures set kickoff = '2015-01-01 15:00:00' where kickoff = '2015-01-01 13:00:00'"
+
+// form guide
+
+type TeamOutcome = Win | Lose | Draw
+
+let isTeamInFixture (fd:FixtureData) team = fd.home = team || fd.away = team
+let getResultForTeam (fd:FixtureData, result:Result) team =
+    let isHomeTeam = fd.home = team
+    let outcome = getResultOutcome result.score
+    match outcome with
+    | Outcome.Draw -> TeamOutcome.Draw
+    | HomeWin -> if isHomeTeam then Win else Lose
+    | AwayWin -> if isHomeTeam then Lose else Win
+
+let getLastResultsForTeam fixtures team =
+    fixtures
+    |> List.choose(onlyClosedFixtures)
+    |> List.map(fixtureToFixtureDataWithResult)
+    |> List.filter(fun (_, r) -> r.IsSome)
+    |> List.map(fun (fd, r) -> fd, r.Value)
+    |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
+    |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
+    |> Seq.truncate 6
+    |> Seq.map(fun fdr -> getResultForTeam fdr team)
+    |> Seq.toList
+    
+
+// update "Manchester United" to Man Utd
+
+let updateToManUtd = "update fixtures set away = 'Man Utd' where away = 'Manchester United'"
+     //update fixtures set away = 'Man Utd' where away = 'Manchester United'"

@@ -205,7 +205,7 @@ module Domain =
         |> List.map(fixtureToFixtureDataWithResult)
         |> List.map(fun (fd, r) -> (fd, r, tryFindPlayerPrediction fd.predictions player))
         |> List.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
-
+        
     let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) (players:Player list) player =
         gws
         |> getFixturesForGameWeeks
@@ -304,3 +304,35 @@ module Domain =
         else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
         else if home = away then invalid "fixture home and away team cannot be the same"
         else Success({id=newFxId(); home=home; away=away; kickoff=kickoff; predictions=[]})
+
+
+module FormGuide =
+
+    open Domain
+
+    type FormGuideOutcome = Win | Lose | Draw
+
+    let private isTeamInFixture (fd:FixtureData) team = fd.home = team || fd.away = team
+    let private getResultForTeam (fd:FixtureData, result:Result) team =
+        let isHomeTeam = fd.home = team
+        let outcome = getResultOutcome result.score
+        match outcome with
+        | Outcome.Draw -> Draw
+        | HomeWin -> if isHomeTeam then Win else Lose
+        | AwayWin -> if isHomeTeam then Lose else Win
+
+    let getTeamFormGuide (gws:GameWeek list) team =
+        let a = gws
+                |> getFixturesForGameWeeks
+                |> List.choose(onlyClosedFixtures)
+                |> List.map(fixtureToFixtureDataWithResult)
+                |> List.filter(fun (_, r) -> r.IsSome)
+                |> List.map(fun (fd, r) -> fd, r.Value)
+                |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
+                |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
+        let b = a
+                |> Seq.truncate 6
+                |> Seq.map(fun fdr -> getResultForTeam fdr team)
+                |> Seq.toList
+        b
+    
