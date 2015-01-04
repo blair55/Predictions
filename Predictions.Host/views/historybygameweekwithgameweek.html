@@ -1,7 +1,6 @@
 <div ng-if="model">
-    <h4>Game Week #{{ model.gameWeekNo}}</h4>
-    <p>In Month <a href="#/history/month/{{model.month}}">{{model.month}}</a></p>
-
+    <h4>Game Week #{{model.gameWeekNo}}</h4>
+    <p>In Month <a href="#/history/month/{{model.month}}">{{model.month}}</a> / <a href="#/playergameweek/{{model.player.id}}/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Predictions</a></p>
     <table class="table table-striped">
         <thead>
             <tr>

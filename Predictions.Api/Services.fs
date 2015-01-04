@@ -115,12 +115,13 @@ module Services =
         let rows = recentLge |> List.map(toDiffLgeRow) |> List.map(leagueTableRowToViewModel)
         { LeagueTableViewModel.rows=rows }
 
-    let getGameWeekPointsView gwno =
+    let getGameWeekPointsView gwno player =
         let players = getPlayers()
         let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
         let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
         let rows = (getLeagueTable players fixtures) |> List.map(fun (pos, pl, cs, co, pts) -> leagueTableRowToViewModel (0, pos, pl, cs, co, pts))
-        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month }
+        let pvm = getPlayerViewModel player
+        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; player=pvm }
         
     let getPlayerFromAuthToken authToken =
         let pls = getPlayers()

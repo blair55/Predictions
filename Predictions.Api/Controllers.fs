@@ -78,7 +78,11 @@ type HomeController() =
         
     [<Route("history/gameweek/{gwno:int}")>]
     member this.GetGameWeekPoints gwno =
-        GwNo gwno |> (switch getGameWeekPointsView >> resultToHttp)
+        let getGwPointsView = (GwNo gwno) |> getGameWeekPointsView
+        base.Request |> (getLoggedInPlayerAuthToken
+                     >> bind getPlayerFromAuthToken
+                     >> bind (switch getGwPointsView)
+                     >> resultToHttp)
 
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =

@@ -119,6 +119,7 @@ module Data =
     let readerToPredictionDto (r) = { PredictionDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3); playerId=(readGuidAtPosition r 4) }
     let readerToPlayerDto (r) = { PlayerDto.id = (readGuidAtPosition r 0); name=(readStringAtPosition r 1); role=(readStringAtPosition r 2); email=(readStringAtPosition r 3); authToken=(readStringAtPosition r 4) }
     
+    let readPlayer authToken = (executeQuery (sprintf "select * from players where authtoken = '%s'" authToken) readerToPlayerDto)
     let readPlayers() = (executeQuery "select * from players" readerToPlayerDto)
     let readResults() = (executeQuery "select * from results" readerToResultDto)
     let readPredictions() = (executeQuery "select * from predictions" readerToPredictionDto)
@@ -156,11 +157,9 @@ module Data =
 
         seasonPairs |> List.find(fun (_, model) -> model.year = year) |> snd
         
-
+    let getPlayer authToken =
+        let p = readPlayer authToken
+        if p.IsEmpty then None else p.Head |> toPlayer |> Some
+    
     let getPlayers() = readPlayers() |> List.map(toPlayer) |> List.sortBy(fun p -> p.name)
-
-
-    let getPlayerById playerId =
-        readPlayers() |> List.tryFind(fun p -> p.id = playerId)
-
     

@@ -1,8 +1,6 @@
 <div ng-if="model">
     <h4>{{model.player.name}} / GW#{{model.gameWeekNo}}</h4>
-    <p>
-        Total Points: {{model.totalPoints}}
-    </p>
+    <p>Total Points: {{model.totalPoints}} / <a href="#/history/gameweek/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Table</a></p>
     <table class="table table-striped">
         <thead>
             <tr>

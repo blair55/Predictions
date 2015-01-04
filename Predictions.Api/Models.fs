@@ -61,7 +61,7 @@ module ViewModels =
     type HistoryByMonthWithMonthViewModel = { month:string; rows:LeagueTableRowViewModel list; gameweeks:int list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string }
+    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string; player:PlayerViewModel }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
