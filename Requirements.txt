@@ -32,11 +32,10 @@ compare outcome variation each week to see which game weeks are more/less predic
 // edit/delete fixture
 // gravatars
 // make mono-able
-// 'horizontal' navigation
 // google analytics
+// 'horizontal' navigation
 // leagues / registration
 // odds checker integration
-// form guide
 // head to head
 // 'captain' game double points
 // 
@@ -51,6 +50,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 //
 
 ////// done
+// form guide
 // position grouping
 // fixtures in play
 // conn string from config

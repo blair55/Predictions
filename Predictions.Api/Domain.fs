@@ -322,17 +322,16 @@ module FormGuide =
         | AwayWin -> if isHomeTeam then Lose else Win
 
     let getTeamFormGuide (gws:GameWeek list) team =
-        let a = gws
-                |> getFixturesForGameWeeks
-                |> List.choose(onlyClosedFixtures)
-                |> List.map(fixtureToFixtureDataWithResult)
-                |> List.filter(fun (_, r) -> r.IsSome)
-                |> List.map(fun (fd, r) -> fd, r.Value)
-                |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
-                |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
-        let b = a
-                |> Seq.truncate 6
-                |> Seq.map(fun fdr -> getResultForTeam fdr team)
-                |> Seq.toList
-        b
+        gws
+        |> getFixturesForGameWeeks
+        |> List.choose(onlyClosedFixtures)
+        |> List.map(fixtureToFixtureDataWithResult)
+        |> List.filter(fun (_, r) -> r.IsSome)
+        |> List.map(fun (fd, r) -> fd, r.Value)
+        |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
+        |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
+        |> Seq.truncate 6
+        |> Seq.map(fun fdr -> getResultForTeam fdr team)
+        |> Seq.toList
+        |> List.rev
     

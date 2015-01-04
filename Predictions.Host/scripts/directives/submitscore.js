@@ -1,5 +1,12 @@
 'use strict';
-
+angular.module('frontendApp')
+    .directive('focusOn', function () {
+        return function (scope, elem, attr) {
+            scope.$on(attr.focusOn, function (e) {
+                elem[0].focus();
+            });
+        };
+    });
 /**
  * @ngdoc directive
  * @name frontendApp.directive:submitscore
@@ -7,7 +14,7 @@
  * # submitscore
  */
 angular.module('frontendApp')
-	.directive('submitscore', function ($http, notify) {
+	.directive('submitscore', function ($http, $timeout, notify) {
 	    return {
 	        templateUrl: 'views/directives/submitscore.html',
 	        restrict: 'E',
@@ -65,10 +72,12 @@ angular.module('frontendApp')
 	                }
 	            };
 
-
 	            scope.enterEditMode = function (row) {
 	                row.state = state.edit;
 	                row.existingScoreOriginal = angular.copy(row.existingScore);
+	                $timeout(function () {
+	                    scope.$broadcast('editModeEntered');
+	                });
 	            };
 
 	            scope.enterReadOnlyMode = function (row) {

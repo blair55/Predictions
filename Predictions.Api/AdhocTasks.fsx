@@ -206,8 +206,3 @@ let getLastResultsForTeam fixtures team =
     |> Seq.map(fun fdr -> getResultForTeam fdr team)
     |> Seq.toList
     
-
-// update "Manchester United" to Man Utd
-
-let updateToManUtd = "update fixtures set away = 'Man Utd' where away = 'Manchester United'"
-     //update fixtures set away = 'Man Utd' where away = 'Manchester United'"

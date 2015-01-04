@@ -1,22 +1,14 @@
-/* Space out content a bit */
-/*body {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-*/
 body { padding-bottom: 70px; background-color:#fefefe;}
-/* Everything but the jumbotron gets side spacing for mobile first views */
-
-.team-label {width:50%;text-align: left;}
 
 .diff-up{color:#3c763d;}
-.diff-none{color:#808080;margin-left:-2px;}
+.diff-none{color:#969696;margin-left:-2px;}
 .diff-down{color:#a94442;margin-left:-2px;}
 
-.focused {}
+.team-label {width:50%;text-align:left;position:relative;}
+
 .focused .form-guide li {opacity:1;}
 
-.form-guide{margin:0;padding:0;display:inline;float:right;}
+.form-guide{margin:0;padding:0;display:block;position:absolute;top:9px;right:11px;}
 
 .form-guide li{
     opacity:0.3;
