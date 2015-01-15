@@ -21,20 +21,26 @@ open Predictions.Api.Data
 //        executeNonQuery updateQuery
 //    readPlayers() |> List.iter(fun p -> flipPlayersName p)
 
-let dunphyId = "ebd3cd36-db54-42b2-a354-7d5743b21082"
+(*
+Aston Villa v Sunderland  1 v 1
+Hull v Leicester          2 v 1
+Man City v Burnley        4 v 0
+QPR v Crystal Palace      2 v 1
+Stoke v West Brom         3 v 1
+West Ham v Arsenal        2 v 2
+Newcastle v Everton       0 v 2
+*)
+//let dunphyId = "ebd3cd36-db54-42b2-a354-7d5743b21082"
 let biggsId = "5ac435de-2c70-4a49-ab41-a02a0657b0d0"
 
 let biggsPredictions =
-    [(biggsId,"6c459519-45bd-4be3-8a86-a853edc14633","3-0")
-     (biggsId,"9c6fa2fe-3368-41aa-ac5b-b6d1508f8d52","0-4")
-     (biggsId,"d1af616e-4b79-49c1-a6eb-823de693373c","2-2")
-     (biggsId,"880b4c49-c8f6-4b6e-a007-223be912cbf5","1-0")
-     (biggsId,"6dfbc77f-2405-4a0b-a959-19eeb61bbb11","2-0")
-     (biggsId,"7744dc41-92e6-43d3-a2f9-b1284425eda7","1-2")
-     (biggsId,"3d8ef3d5-e8cb-440d-9ac1-bc388ec09179","2-1")
-     (biggsId,"f0bac85b-339d-4fbd-a8c2-1a026157edf6","1-1")
-     (biggsId,"c52c58be-e7d4-4a1f-9a80-8ef22122dcf7","1-3")
-     (biggsId,"a69bb1d0-d64d-4999-8f43-3bec207a32bc","2-1")]
+    [(biggsId,"6e9ab8e2-46cb-474b-a075-d03b551b5e26","1-1")
+     (biggsId,"f3c5081b-8df8-4ee8-bb12-7d7dff613c99","2-1")
+     (biggsId,"59e3c6b6-afdc-439d-9d3f-f8b4f1096c6d","4-0")
+     (biggsId,"88671d68-6996-4be3-af73-e6acb80daa4f","2-1")
+     (biggsId,"8e8238bc-7dac-42e1-962a-a4e26b2d3312","3-1")
+     (biggsId,"e18fcdeb-b7b6-487f-9cb9-e9a860a18599","2-2")
+     (biggsId,"1a078286-b1e2-45db-931e-d4814c5d6115","0-2")]
 
 let getScoreFromString (s:string) =
     let i (sd:string) = Convert.ToInt32(sd)
@@ -47,12 +53,11 @@ let printFixtureAndScore (c:SavePredictionCommand) =
     let fixture = fixts |> List.find(fun f -> FxId f.id = c.fixtureId)
     printfn "|%20s|%-20s|%i - %i|" fixture.home fixture.away (fst c.score) (snd c.score)
 
-let saveBiggsPreds() =
-    biggsPredictions
-    |> List.map(fun (plid, fxid, scoreString) -> { SavePredictionCommand.id=newPrId(); fixtureId=fxid|>sToGuid|>FxId; playerId=plid|>sToGuid|>PlId; score=scoreString|>getScoreFromString })
-    //|> List.iter(fun c -> printfn "%A" c)
-    //|> List.iter(printFixtureAndScore)
-    |> List.iter(savePrediction)
+let tupleToSavePreditionCmd (plid, fxid, scoreString) =
+    { SavePredictionCommand.id=newPrId(); fixtureId=fxid|>sToGuid|>FxId; playerId=plid|>sToGuid|>PlId; score=scoreString|>getScoreFromString }
+
+let printPreds prds = prds |> List.map(tupleToSavePreditionCmd) |> List.iter(printFixtureAndScore)
+let savePreds prds = prds |> List.map(tupleToSavePreditionCmd) |> List.iter(savePrediction)
 
 
 // update gw 17 games to gw 16
@@ -126,6 +131,28 @@ let getCmd (h, a, t) =
 
 let getCmds f = f |> List.map getCmd
 
+// gw21 extra fixtures
+
+let fxs21 =
+    [("West Ham", "Hull",      "2015-01-18 13:30:00")
+     ("Man City", "Arsenal",   "2015-01-18 16:00:00")
+     ("Everton",  "West Brom", "2015-01-19 20:00:00")]
+
+let gwid21 = sToGuid "b65012d6-2726-4c26-98de-e042be508da0" |> GwId
+
+let getCmd21 (h, a, t:string) =
+    {
+        SaveFixtureCommand.id=newFxId()
+        SaveFixtureCommand.home = h
+        SaveFixtureCommand.away = a
+        SaveFixtureCommand.ko = Convert.ToDateTime(t)
+        SaveFixtureCommand.gameWeekId = gwid21
+    }
+
+let savecmds21 thecmds = 
+    thecmds |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
+
+
 
 /// accuracy index
 
@@ -150,21 +177,29 @@ let accInd prds rlts =
     |> List.average
 
 let ssn = buildSeason currentSeason
-let gws = ssn.gameWeeks |> List.filter(fun gw -> (getGameWeekNo gw.number) = 9)
+let gws = ssn.gameWeeks // |> List.filter(fun gw -> (getGameWeekNo gw.number) = 9)
 let pls = getPlayers()
 
-let getAccuracyIndexForPlayer fdrs (player:Player)=
+let stddev (input : float list) =
+    let sampleSize = float input.Length
+    let mean = input |> List.average
+    let differenceOfSquares =
+        input |> List.fold(fun sum item -> sum + Math.Pow(item - mean, 2.0)) 0.0
+    let variance = differenceOfSquares / sampleSize
+    Math.Sqrt(variance)
+
+let round2 (d:float) = Math.Round(d, 3)
+
+let getDiffListForPlayer fdrs (player:Player)=
     let inline whereBothAreSome ((o1:'a option), (o2:'b option)) = o1.IsSome && o2.IsSome
     let inline toDoubleTup ((po:Prediction option), (ro:Result option)) = po.Value.score, ro.Value.score
-    let inline tod (d:int) = Convert.ToDecimal(d)
-    let inline round2 (d:decimal) = Math.Round(d, 2)
+    let inline tof (d:int) = Convert.ToDouble(d)
     fdrs
     |> List.map(fun (fd, r) -> (tryFindPlayerPrediction fd.predictions player, r))
     |> List.filter(whereBothAreSome)
     |> List.map(toDoubleTup)
     |> List.collect(fun ((ph, pa), (rh, ra)) -> [ (ph, rh); (pa, ra) ])
-    |> List.map(fun ((p:int), (r:int)) -> (p - r) |> abs |> tod)
-    |> List.average |> round2
+    |> List.map(fun ((p:int), (r:int)) -> (p - r) |> abs |> tof)
 
 let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
     let fdrs = gws
@@ -172,8 +207,9 @@ let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
                |> List.choose(onlyClosedFixtures)
                |> List.map(fixtureToFixtureDataWithResult)
     players
-    |> List.map(fun p -> p.name, getAccuracyIndexForPlayer fdrs p)
-    |> List.sortBy(fun (_, i) -> i)
+    |> List.map(fun p -> p.name, getDiffListForPlayer fdrs p)
+    |> List.map(fun (n, dl) -> (n, (dl |> List.average |> round2), dl |> stddev |> round2, dl.Length/2))
+    |> List.sortBy(fun (_, _, i, _) -> i)
     |> List.iter(fun x -> printfn "%A" x)
 
 
