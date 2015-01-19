@@ -20,7 +20,7 @@
             <tr>
                 <th>Player</th>
                 <th class="">Prediction</th>
-                <th class="numeric-cell-heading">Pts.</th>
+                <th ng-if="model.resultSubmitted" class="numeric-cell-heading">Pts.</th>
             </tr>
         </thead>
         <tbody>
@@ -32,7 +32,7 @@
                     <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
                     <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
                 </td>
-                <td class="numeric-cell">{{row.points}}</td>
+                <td ng-if="model.resultSubmitted" class="numeric-cell">{{row.points}}</td>
             </tr>
         </tbody>
     </table>

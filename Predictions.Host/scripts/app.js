@@ -33,11 +33,11 @@ angular
             templateUrl: 'views/leaguetable.html',
             controller: 'LeaguetableCtrl'
         })
-        .when('/player/:playerName', {
+        .when('/player/:playerId', {
             templateUrl: 'views/player.html',
             controller: 'PlayerCtrl'
         })
-        .when('/playergameweek/:playerName/:gameWeekNo', {
+        .when('/playergameweek/:playerId/:gameWeekNo', {
             templateUrl: 'views/playergameweek.html',
             controller: 'PlayergameweekCtrl'
         })

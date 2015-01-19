@@ -34,9 +34,9 @@ module Domain =
     let getSnYr (SnYr year) = year
 
     let currentSeason = SnYr "2014/15"
+    let monthFormat = "MMMM yyyy"
 
     type Score = int * int
-
     type Player = { id:PlId; name:string; role:Role; authToken:string }
     type Prediction = { id:PrId; score:Score; player:Player }
     type Result = { id:RsId; score:Score }
@@ -46,11 +46,8 @@ module Domain =
         | ClosedFixture of (FixtureData * Result option)
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
-    
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
-    //type ClosedFixtureStatus = AwaitingResult | ResultAdded
-    //type FixtureStatus = Open | ClosedFixtureStatus
 
     type AppError =
         | NotLoggedIn of string
@@ -104,8 +101,6 @@ module Domain =
         |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
         |> List.tryFind(fun (_, p) -> p.id = prid)
 
-    let monthFormat = "MMMM yyyy"
-
     let getMonthForGameWeek (gw:GameWeek) =
         gw.fixtures
         |> List.map(fixtureToFixtureData)
@@ -122,6 +117,14 @@ module Domain =
 
     let getFixturesInPlay gws =
         gws |> List.map(fun gw -> gw, ([gw] |> getFixturesForGameWeeks |> List.filter(isFixtureClosedAndHaveNoResult)))
+        
+    let getFirstKoForGw (gw:GameWeek) =
+        gw.fixtures
+        |> List.map(fixtureToFixtureData)
+        |> List.minBy(fun f -> f.kickoff) |> fun f -> f.kickoff
+
+    let doesGameWeekHaveAnyResults (gw:GameWeek) =
+        getFixturesForGameWeeks [gw] |> List.exists(isFixtureClosedAndHaveResult)
 
     // base calculations
 

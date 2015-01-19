@@ -135,13 +135,19 @@ module Services =
         player |> (switch getLeaguePosition)
 
     let getGameWeeksPointsForPlayer playerId =
-        let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
-            match r with
-            | Some (pos, _, cs, co, pts) -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=pos; correctScores=cs; correctOutcomes=co; points=pts}
-            | None -> {PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number); position=0; correctScores=0; correctOutcomes=0; points=0}
         let players = getPlayers()
         let gameWeeks = gameWeeks()
         let player = findPlayerById players (playerId|>PlId)
+        let buildRow (gw:GameWeek) pos cs co pts =
+            {
+                PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number);
+                hasResults=(doesGameWeekHaveAnyResults gw); firstKo=(getFirstKoForGw gw);
+                position=pos; correctScores=cs; correctOutcomes=co; points=pts
+            }
+        let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
+            match r with
+            | Some (pos, _, cs, co, pts) -> buildRow gw pos cs co pts
+            | None -> buildRow gw 0 0 0 0
         let rows = (getPlayerPointsForGameWeeks players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
         let fixtures = gameWeeks |> getFixturesForGameWeeks
         let pos = getLeaguePositionForFixturesForPlayer fixtures players player
@@ -183,10 +189,6 @@ module Services =
         let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
         { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
 
-    let compoundList collection =
-        collection
-        |> List.scan (fun x y -> x @ [y]) []
-        |> List.tail
 
     let getLeaguePositionGraphDataForPlayer playerId =
         let players = getPlayers()
@@ -206,8 +208,8 @@ module Services =
             Invalid "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
-             >> bind (switch (fun fd -> GetOutcomeCounts fd.predictions (0, 0, 0)))
-             >> bind (switch (fun (hw, d, aw) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=["home win"; "draw"; "away win"] })))
+             >> bind (switch (fun fd -> fd, (GetOutcomeCounts fd.predictions (0, 0, 0))))
+             >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()

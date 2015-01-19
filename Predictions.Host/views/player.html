@@ -22,11 +22,18 @@
             <tr ng-repeat="row in model.rows">
                 <td>
                     <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
+                    <span class="text-muted small">&middot; {{ row.firstKo | date:'MMM' | uppercase }}</span>
                 </td>
-                <td class="numeric-cell">{{row.position}}</td>
-                <td class="numeric-cell">{{row.correctScores}}</td>
-                <td class="numeric-cell">{{row.correctOutcomes}}</td>
-                <td class="numeric-cell">{{row.points}}</td>
+                
+                <td ng-if="row.hasResults" class=" numeric-cell">{{row.position}}</td>
+                <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctScores}}</td>
+                <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctOutcomes}}</td>
+                <td ng-if="row.hasResults" class=" numeric-cell">{{row.points}}</td>
+
+                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
             </tr>
         </tbody>
     </table>

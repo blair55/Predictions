@@ -48,3 +48,9 @@ module Common =
         
     let sToGuid s = Guid.Parse(s)
     let trySToGuid s = Guid.TryParse(s)
+
+    
+    let compoundList collection =
+        collection
+        |> List.scan (fun x y -> x @ [y]) []
+        |> List.tail
