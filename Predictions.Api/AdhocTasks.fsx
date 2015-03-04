@@ -22,25 +22,18 @@ open Predictions.Api.Data
 //    readPlayers() |> List.iter(fun p -> flipPlayersName p)
 
 (*
-Aston Villa v Sunderland  1 v 1
-Hull v Leicester          2 v 1
-Man City v Burnley        4 v 0
-QPR v Crystal Palace      2 v 1
-Stoke v West Brom         3 v 1
-West Ham v Arsenal        2 v 2
-Newcastle v Everton       0 v 2
+Burnley 2-1
+Man u 2-0
+Newcastle 2-0
+Stoke 2-0
+Southampton 2-0
 *)
 //let dunphyId = "ebd3cd36-db54-42b2-a354-7d5743b21082"
-let biggsId = "5ac435de-2c70-4a49-ab41-a02a0657b0d0"
+//let biggsId = "5ac435de-2c70-4a49-ab41-a02a0657b0d0"
+let antId = "ebe847df-994f-4f8b-b61f-c82b8afa94ef"
 
-let biggsPredictions =
-    [(biggsId,"6e9ab8e2-46cb-474b-a075-d03b551b5e26","1-1")
-     (biggsId,"f3c5081b-8df8-4ee8-bb12-7d7dff613c99","2-1")
-     (biggsId,"59e3c6b6-afdc-439d-9d3f-f8b4f1096c6d","4-0")
-     (biggsId,"88671d68-6996-4be3-af73-e6acb80daa4f","2-1")
-     (biggsId,"8e8238bc-7dac-42e1-962a-a4e26b2d3312","3-1")
-     (biggsId,"e18fcdeb-b7b6-487f-9cb9-e9a860a18599","2-2")
-     (biggsId,"1a078286-b1e2-45db-931e-d4814c5d6115","0-2")]
+let antPredictions =
+    [(antId,"eaf8cb61-7b35-4aef-bb20-76ab74e5dda9","2-0")]
 
 let getScoreFromString (s:string) =
     let i (sd:string) = Convert.ToInt32(sd)
@@ -215,6 +208,7 @@ let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
 
 // update ko to 15:00
 
+//let updateto1500 = "update fixtures set kickoff = '2015-01-01 15:00:00' where kickoff = '2015-01-01 13:00:00'"
 let updateto1500 = "update fixtures set kickoff = '2015-01-01 15:00:00' where kickoff = '2015-01-01 13:00:00'"
 
 // form guide
@@ -241,4 +235,14 @@ let getLastResultsForTeam fixtures team =
     |> Seq.truncate 6
     |> Seq.map(fun fdr -> getResultForTeam fdr team)
     |> Seq.toList
-    
+
+let fixturesToUpdate = [
+    ( "19:45","4558501f-84e9-415c-b565-6f72d0e885a9" )
+    ( "19:45","0a76779e-1670-407e-ad69-c171de35c490" )
+    ( "19:45","9d17bff7-b256-4d5e-b0c8-d4bc06412343" )
+    ( "19:45","64a3717b-04cd-4e23-86dd-a34088943b2f" )
+    ( "20:00","65f13cf8-4190-4627-8530-9f7aa55dddc6" )
+    ( "20:00","403e9ca2-035b-43b0-b3cb-774d7b32607c" )]
+
+let kofix (time, fxid) = sprintf "update fixtures set kickoff = '2015-02-11 %s:00' where id = '%s'" time fxid
+
