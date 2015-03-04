@@ -5,12 +5,28 @@ using System.Web;
 using System.Web.Mvc;
 using System.Threading.Tasks;
 using Microsoft.Owin.Security;
-using Predictions.MvcOwin.Models;
+//using Predictions.MvcOwin.Models;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.AspNet.Identity;
 
 namespace Predictions.MvcOwin.Controllers
 {
     public class HomeController : Controller
     {
+        private PlSignInManager _signInManager;
+
+        public PlSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? HttpContext.GetOwinContext().Get<PlSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
+        }
+
         public ActionResult Index()
         {
             return View();
@@ -59,10 +75,16 @@ namespace Predictions.MvcOwin.Controllers
                 return RedirectToAction("Login");
             }
 
-            return View("~/Views/Account/ExternalLoginConfirmation.cshtml", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
-            //return new RedirectResult(returnUrl);
+            var user = new PlUser { Id = loginInfo.ExternalIdentity.GetUserId(), UserName = loginInfo.DefaultUserName };
+            //var r = SignInManager.CreateUserIdentityAsync(user);
+            await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+            //return View("~/Views/Account/ExternalLoginConfirmation.cshtml", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
+            return new RedirectResult(returnUrl);
         }
     }
+
+
 
     public class ChallengeResult : HttpUnauthorizedResult
     {

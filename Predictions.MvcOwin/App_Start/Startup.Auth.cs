@@ -5,7 +5,7 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Owin;
-using Predictions.MvcOwin.Models;
+//using Predictions.MvcOwin.Models;
 
 namespace Predictions.MvcOwin
 {
@@ -16,8 +16,8 @@ namespace Predictions.MvcOwin
         {
             // Configure the db context, user manager and signin manager to use a single instance per request
             //app.CreatePerOwinContext(ApplicationDbContext.Create);
-            //app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
-            //app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
+            app.CreatePerOwinContext<PlUserManager>(PlUserManager.Create);
+            app.CreatePerOwinContext<PlSignInManager>(PlSignInManager.Create);
 
             // Enable the application to use a cookie to store information for the signed in user
             // and to use a cookie to temporarily store information about a user logging in with a third party login provider
@@ -54,9 +54,9 @@ namespace Predictions.MvcOwin
                consumerKey: "dQzp1ZWRP7vs5kVr2oCzKOfg1",
                consumerSecret: "CERf0CZnnTXxnwgF9VJ6YOMmNsAgUEvClSUDPu2qdaS0VkmuAk");
 
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
+            app.UseFacebookAuthentication(
+               appId: "701632913289116",
+               appSecret: "67e25b79fa689840e26520f20f620fa8");
 
             app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions
             {
