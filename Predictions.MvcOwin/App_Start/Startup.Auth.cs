@@ -16,8 +16,11 @@ namespace Predictions.MvcOwin
         {
             // Configure the db context, user manager and signin manager to use a single instance per request
             //app.CreatePerOwinContext(ApplicationDbContext.Create);
-            app.CreatePerOwinContext<PlUserManager>(PlUserManager.Create);
-            app.CreatePerOwinContext<PlSignInManager>(PlSignInManager.Create);
+            //app.CreatePerOwinContext<PlUserManager>(() => new PlUserManager(new PlUserStore()));
+            app.CreatePerOwinContext<PlSignInManager>((options, context) =>
+            {
+                return new PlSignInManager(new PlUserManager(new PlUserStore()), context.Authentication);
+            });
 
             // Enable the application to use a cookie to store information for the signed in user
             // and to use a cookie to temporarily store information about a user logging in with a third party login provider

@@ -113,11 +113,11 @@ namespace Predictions.MvcOwin
         public string Id { get; set; }
         public string UserName { get; set; }
 
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<PlUser> manager)
-        {
-            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
-            return await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
-        }
+        //public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<PlUser> manager)
+        //{
+        //    // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
+        //    return await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
+        //}
     }
 
     public class PlUserStore : IUserStore<PlUser>
@@ -137,14 +137,7 @@ namespace Predictions.MvcOwin
     public class PlUserManager : UserManager<PlUser>
     {
         public PlUserManager(IUserStore<PlUser> store) : base(store)
-        {
-        }
-
-        public static PlUserManager Create(IdentityFactoryOptions<PlUserManager> options, IOwinContext context)
-        {
-            var manager = new PlUserManager(new PlUserStore());
-            return manager;
-        }
+        {}
     }
 
     public class PlSignInManager : SignInManager<PlUser, string>
@@ -152,14 +145,14 @@ namespace Predictions.MvcOwin
         public PlSignInManager(PlUserManager userManager, IAuthenticationManager authenticationManager) : base(userManager, authenticationManager)
         {}
 
-        public override Task<ClaimsIdentity> CreateUserIdentityAsync(PlUser user)
-        {
-            return user.GenerateUserIdentityAsync((PlUserManager)UserManager);
-        }
+        //public override Task<ClaimsIdentity> CreateUserIdentityAsync(PlUser user)
+        //{
+        //    return user.GenerateUserIdentityAsync((PlUserManager)UserManager);
+        //}
 
-        public static PlSignInManager Create(IdentityFactoryOptions<PlSignInManager> options, IOwinContext context)
-        {
-            return new PlSignInManager(context.GetUserManager<PlUserManager>(), context.Authentication);
-        }
+        //public static PlSignInManager Create(IdentityFactoryOptions<PlSignInManager> options, IOwinContext context)
+        //{
+        //    return new PlSignInManager(context.GetUserManager<PlUserManager>(), context.Authentication);
+        //}
     }
 }

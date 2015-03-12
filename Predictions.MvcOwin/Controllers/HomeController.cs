@@ -76,15 +76,13 @@ namespace Predictions.MvcOwin.Controllers
             }
 
             var user = new PlUser { Id = loginInfo.ExternalIdentity.GetUserId(), UserName = loginInfo.DefaultUserName };
-            //var r = SignInManager.CreateUserIdentityAsync(user);
+            //var r = SignInManager.CreateUserIdentityAsync(user).Result;
             await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
             //return View("~/Views/Account/ExternalLoginConfirmation.cshtml", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
             return new RedirectResult(returnUrl);
         }
     }
-
-
 
     public class ChallengeResult : HttpUnauthorizedResult
     {
