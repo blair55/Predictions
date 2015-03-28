@@ -61,11 +61,11 @@ namespace Predictions.MvcOwin
                appId: "701632913289116",
                appSecret: "67e25b79fa689840e26520f20f620fa8");
 
-            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions
-            {
-                ClientId = "184413536018-r1o4piddeir2l43hkkrct5mcgjlnrper.apps.googleusercontent.com",
-                ClientSecret = "4uVr-m56GieU7pP0IiXgl_Nf"
-            });
+            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions
+            //{
+            //    ClientId = "",
+            //    ClientSecret = ""
+            //});
         }
     }
 }

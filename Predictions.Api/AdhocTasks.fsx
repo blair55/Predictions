@@ -106,30 +106,6 @@ let rank a =
     |> pr
 
 
-/// gameweek 17 data
-
-let fxs =
-    [("Chelsea", "West Ham", "12:45")
-     ("Burnley", "Liverpool", "15:00")
-     ("Crystal Palace", "Southampton", "15:00")
-     ("Everton", "Stoke", "15:00")
-     ("Leicester", "Tottenham", "15:00")
-     ("Man Utd", "Newcastle", "15:00")
-     ("Sunderland", "Hull", "15:00")
-     ("Swansea", "Aston Villa", "15:00")
-     ("West Brom", "Man City", "15:00")
-     ("Arsenal", "QPR", "17:30")]
-     
-let getCmd (h, a, t) =
-    {
-        SaveFixtureCommand.id=newFxId()
-        SaveFixtureCommand.home = h
-        SaveFixtureCommand.away = a
-        SaveFixtureCommand.ko = Convert.ToDateTime("2014-12-26 " + t + ":00")
-        SaveFixtureCommand.gameWeekId = Guid.Parse("a297c75f-bd4d-48ed-b82b-548ac53c087a") |> GwId
-    }
-
-let getCmds f = f |> List.map getCmd
 
 // gw21 extra fixtures
 
@@ -140,17 +116,36 @@ let fxs21 =
 
 let gwid21 = sToGuid "b65012d6-2726-4c26-98de-e042be508da0" |> GwId
 
-let getCmd21 (h, a, t:string) =
-    {
-        SaveFixtureCommand.id=newFxId()
-        SaveFixtureCommand.home = h
-        SaveFixtureCommand.away = a
-        SaveFixtureCommand.ko = Convert.ToDateTime(t)
-        SaveFixtureCommand.gameWeekId = gwid21
-    }
+// gw28 extra fixtures
 
-let savecmds21 thecmds = 
+let fxs28 =
+    [("Southampton","Burnley", "2015-03-21 15:00:00")
+     ("Stoke","Crystal Palace", "2015-03-21 15:00:00")
+     ("Tottenham","Leicester", "2015-03-21 15:00:00")
+     ("West Ham","Sunderland", "2015-03-21 17:30:00")
+     ("Liverpool","Man Utd", "2015-03-22 13:30:00")
+     ("Hull","Chelsea", "2015-03-22 16:00:00")
+     ("QPR","Everton", "2015-03-22 16:00:00")]
+     
+let gwid28 = sToGuid "2787a537-6c5e-4d96-9b5f-7e6e5afe56ff" |> GwId
+
+
+// save fixtures 
+
+let getSaveFixtureCommands gwid fixtures =
+    let getSaveFixtureCommand gwid (h, a, t:string) =
+        {
+            SaveFixtureCommand.id=newFxId()
+            SaveFixtureCommand.home = h
+            SaveFixtureCommand.away = a
+            SaveFixtureCommand.ko = Convert.ToDateTime(t)
+            SaveFixtureCommand.gameWeekId = gwid
+        }
+    fixtures |> List.map(fun f -> getSaveFixtureCommand gwid f)
+
+let savecmds thecmds = 
     thecmds |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
+
 
 
 
@@ -194,14 +189,22 @@ let getDiffListForPlayer fdrs (player:Player)=
     let inline whereBothAreSome ((o1:'a option), (o2:'b option)) = o1.IsSome && o2.IsSome
     let inline toDoubleTup ((po:Prediction option), (ro:Result option)) = po.Value.score, ro.Value.score
     let inline tof (d:int) = Convert.ToDouble(d)
+    let correctResultOnly (fixd, reslt) =
+        match getBracketForPredictionComparedToResult fixd reslt with
+        | CorrectScore -> true
+        | CorrectOutcome -> true
+        | Incorrect -> false
     fdrs
     |> List.map(fun (fd, r) -> (tryFindPlayerPrediction fd.predictions player, r))
     |> List.filter(whereBothAreSome)
+    |> List.filter(correctResultOnly)
     |> List.map(toDoubleTup)
     |> List.collect(fun ((ph, pa), (rh, ra)) -> [ (ph, rh); (pa, ra) ])
     |> List.map(fun ((p:int), (r:int)) -> (p - r) |> abs |> tof)
 
+
 let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
+    let inline writenice (n, _, sd, i) = printfn "%20s %.3f (%i)" n sd i
     let fdrs = gws
                |> getFixturesForGameWeeks
                |> List.choose(onlyClosedFixtures)
@@ -210,7 +213,8 @@ let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
     |> List.map(fun p -> p.name, getDiffListForPlayer fdrs p)
     |> List.map(fun (n, dl) -> (n, (dl |> List.average |> round2), dl |> stddev |> round2, dl.Length/2))
     |> List.sortBy(fun (_, _, i, _) -> i)
-    |> List.iter(fun x -> printfn "%A" x)
+    |> List.iter(writenice)
+    //|> List.iter(fun x -> printfn "%A" x)
 
 
 // update ko to 15:00

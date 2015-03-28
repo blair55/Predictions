@@ -9,6 +9,12 @@ namespace Predictions.MvcOwin
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+
+            var config = new System.Web.Http.HttpConfiguration();
+
+            Predictions.Api.Config.RegisterWebApi(config);
+
+            app.UseWebApi(config);
         }
     }
 }
