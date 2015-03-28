@@ -16,7 +16,8 @@
     "angular-bootstrap-datetimepicker": "https://github.com/blair55/angular-bootstrap-datetimepicker.git#~0.3.3",
     "ngtoast": "~1.2.0",
     "angular-chart.js": "~0.3.7",
-    "angularjs-ordinal-filter": "*"
+    "angularjs-ordinal-filter": "*",
+    "angular-loading-bar": "~0.7.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

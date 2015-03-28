@@ -23,7 +23,7 @@ type HomeController() =
     member this.GetRegista() =
         () |> Success |> resultToHttp
 
-    [<Route("whoami")>][<Authorize>]
+    [<Route("whoami")>]
     member this.GetWhoAmI() =
         base.Request |> (getLoggedInPlayerAuthToken
                      >> bind getPlayerFromAuthToken

@@ -90,6 +90,7 @@
     <Content Include="scripts\controllers\historybymonthwithmonth.js" />
     <Content Include="scripts\controllers\inplay.js" />
     <Content Include="scripts\controllers\leaguetable.js" />
+    <Content Include="scripts\controllers\login.js" />
     <Content Include="scripts\controllers\main.js" />
     <Content Include="scripts\controllers\nav.js" />
     <Content Include="scripts\controllers\openfixtures.js" />
@@ -101,6 +102,8 @@
     <Content Include="scripts\services\auth.js" />
     <Content Include="scripts\services\interceptor.js" />
     <Content Include="scripts\services\notify.js" />
+    <Content Include="scripts\services\oauthinterceptorservice.js" />
+    <Content Include="scripts\services\oauthservice.js" />
     <Content Include="styles\main.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
@@ -113,6 +116,7 @@
     <Content Include="views\inplay.html" />
     <Content Include="views\leaguetable.html" />
     <Content Include="views\directives\loading.html" />
+    <Content Include="views\login.html" />
     <Content Include="views\main.html" />
     <Content Include="views\nav.html" />
     <Content Include="views\openfixtures.html" />

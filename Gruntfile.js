@@ -18,7 +18,8 @@ module.exports = function (grunt) {
     // Configurable paths for the application
     var appConfig = {
         app: require('./bower.json').appPath,
-        dist: './Predictions.Host.AppHb'
+        //dist: './Predictions.Host.AppHb'
+        dist: './Predictions.Owin'
         //exportDist: 'src/Predictions.Host.AppHb/'
     };
 
