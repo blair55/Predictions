@@ -19,7 +19,11 @@ open Predictions.Api.WebUtils
 type HomeController() =
     inherit ApiController()
     
-    [<Route("whoami")>]
+    [<Route("regista")>][<AllowAnonymous>]
+    member this.GetRegista() =
+        () |> Success |> resultToHttp
+
+    [<Route("whoami")>][<Authorize>]
     member this.GetWhoAmI() =
         base.Request |> (getLoggedInPlayerAuthToken
                      >> bind getPlayerFromAuthToken
