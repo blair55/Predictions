@@ -8,10 +8,23 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('LoginCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+    .controller('LoginCtrl', [
+        '$scope', '$location', 'oauthService', function($scope, $location, oauthService) {
+
+            $scope.loginData = {
+                userName: "",
+                password: ""
+            };
+
+            $scope.message = "";
+
+            $scope.login = function() {
+                oauthService.login($scope.loginData).then(function(response) {
+                        $location.path('/');
+                    },
+                    function(err) {
+                        $scope.message = err.error_description;
+                    });
+            };
+        }
+    ]);

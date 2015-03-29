@@ -19,7 +19,7 @@ open Predictions.Api.WebUtils
 type HomeController() =
     inherit ApiController()
     
-    [<Route("regista")>][<AllowAnonymous>]
+    [<Route("regista")>][<Authorize>]
     member this.GetRegista() =
         () |> Success |> resultToHttp
 

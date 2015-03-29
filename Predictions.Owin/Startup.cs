@@ -17,11 +17,6 @@ namespace Predictions.Owin
     {
         public void Configuration(IAppBuilder app)
         {
-            var config = new HttpConfiguration();
-            Config.RegisterWebApi(config);
-            app.UseWebApi(config);
-            app.UseCors(CorsOptions.AllowAll);
-
             var oAuthServerOptions = new OAuthAuthorizationServerOptions
             {
                 AllowInsecureHttp = true,
@@ -32,6 +27,11 @@ namespace Predictions.Owin
 
             app.UseOAuthAuthorizationServer(oAuthServerOptions);
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+
+            var config = new HttpConfiguration();
+            Config.RegisterWebApi(config);
+            app.UseWebApi(config);
+            app.UseCors(CorsOptions.AllowAll);
         }
     }
 
@@ -44,7 +44,7 @@ namespace Predictions.Owin
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+            //context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
 
             //using (AuthRepository _repo = new AuthRepository())
             //{

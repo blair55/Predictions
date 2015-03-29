@@ -94,7 +94,6 @@ angular
         Chart.defaults.global.responsive = true;
         oauthService.fillAuthData();
     })
-    .config(function ($httpProvider, localStorageServiceProvider) {
-        $httpProvider.interceptors.push('oauthInterceptorService');
+    .config(function (localStorageServiceProvider) {
         localStorageServiceProvider.setPrefix('prdlge');
     });

@@ -1,0 +1,3 @@
+<div ng-if="model"> <h4>Add Results</h4> <table class="table table-striped"> <thead> <tr> <th> <th>   <tbody> <tr ng-repeat="row in model.rows"> <td> <a href="#/admin/addresults/{{row.gwno}}">GW#{{row.gwno}}</a>  <td> <ng-pluralize count="row.closedFixtureCount" when="{'0': 'no closed fixtures',
+                                         'one': 'one closed fixture',
+                                         'other': '{} closed fixtures'}"></ng-pluralize>    </table> </div> <loading model="model" no-rows-msg="no gameweeks with closed fixtures yet"></loading>

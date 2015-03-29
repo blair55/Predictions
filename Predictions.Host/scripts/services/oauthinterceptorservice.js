@@ -16,6 +16,7 @@ angular.module('frontendApp')
                 config.headers = config.headers || {};
 
                 var authData = localStorageService.get('authorizationData');
+
                 if (authData) {
                     config.headers.Authorization = 'Bearer ' + authData.token;
                 }
@@ -36,3 +37,8 @@ angular.module('frontendApp')
             }
         }
     ]);
+
+angular.module('frontendApp')
+  .config(['$httpProvider', function ($httpProvider) {
+      $httpProvider.interceptors.push('oauthInterceptorService');
+  }]);

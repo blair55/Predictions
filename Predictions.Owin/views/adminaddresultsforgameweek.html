@@ -1,0 +1,1 @@
+<loading model="model" no-rows-msg="no fixtures are ready to have results added"></loading> <div ng-if="model"> <h4>Add Results / GW#{{model.gameWeekNo}}</h4> <div ng-repeat-start="row in model.rows"></div> <submitscore row="row" post-url="/api/admin/result"></submitscore> <div ng-repeat-end></div> </div>
