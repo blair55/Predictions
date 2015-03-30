@@ -67,6 +67,7 @@ namespace Predictions.Owin
     public class PlUser : IUser
     {
         public string Id { get; set; }
+        public string Provider { get; set; }
         public string UserName { get; set; }
     }
 

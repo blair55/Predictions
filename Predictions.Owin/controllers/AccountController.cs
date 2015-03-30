@@ -54,7 +54,13 @@ namespace Predictions.Owin.controllers
                 return Redirect(BaseUri);
             }
 
-            var user = new PlUser { Id = loginInfo.ExternalIdentity.GetUserId(), UserName = loginInfo.DefaultUserName };
+            var user = new PlUser
+            {
+                Id = loginInfo.ExternalIdentity.GetUserId(),
+                Provider = loginInfo.Login.LoginProvider,
+                UserName = loginInfo.ExternalIdentity.GetUserName()
+            };
+
             await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
             return Redirect(BaseUri);
