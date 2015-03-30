@@ -8,7 +8,7 @@
  * Factory in the frontendApp.
  */
 angular.module('frontendApp')
-    .factory('interceptor', function($q, notify) {
+    .factory('interceptor', function ($q, $location, notify) {
         return {
             //'request': function(config) {
             //    return config;
@@ -30,11 +30,14 @@ angular.module('frontendApp')
             //  },
             'responseError': function(rejection) {
                 // do something on error
-                if (rejection.status !== 401) {
+
+                if (rejection.status === 401) {
+                    $location.path('/login');
+                }
+                else {
                     var msg = rejection.statusText + " - " + rejection.data;
                     notify.fail(msg);
                 }
-
                 // if (canRecover(rejection)) {
                 //   return responseOrNewPromise
                 // }

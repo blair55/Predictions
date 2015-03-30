@@ -8,7 +8,7 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-    .controller('NavCtrl', function($scope, $location, auth, oauthService) {
+    .controller('NavCtrl', function($scope, $location, auth) {
         $scope.navCollapsed = true;
         auth.withPlayer(function(player) {
             $scope.player = player;
@@ -19,9 +19,5 @@ angular.module('frontendApp')
             var path = $event.target.href.substring(i);
             $location.path(path);
             $event.preventDefault();
-        };
-        $scope.logOut = function() {
-            oauthService.logOut();
-            $location.path('/login');
         };
     });

@@ -90,9 +90,8 @@ angular
             redirectTo: '/'
         });
     })
-    .run(function (oauthService) {
+    .run(function () {
         Chart.defaults.global.responsive = true;
-        oauthService.fillAuthData();
     })
     .config(function (localStorageServiceProvider) {
         localStorageServiceProvider.setPrefix('prdlge');

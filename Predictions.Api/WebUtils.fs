@@ -90,3 +90,32 @@ module WebUtils =
         match result with
         | Success body -> getOkResponseWithBody body
         | Failure appError -> getErrorResponseFromAppError appError
+
+//public string LoginProvider { get; set; }
+//public HttpRequestMessage Request { get; set; }
+//
+//public ChallengeResult(string loginProvider, ApiController controller)
+//{
+//    LoginProvider = loginProvider;
+//    Request = controller.Request;
+//}
+//
+//public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+//{
+//    Request.GetOwinContext().Authentication.Challenge(LoginProvider);
+//
+//    HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+//    response.RequestMessage = Request;
+//    return Task.FromResult(response);
+//}
+//
+//    type ChallengeResult(loginProvider, controller:ApiController) =
+//
+//
+//        
+//        interface IHttpActionResult with
+//
+//            member this.ExecuteAsync cancellationToken =
+//                controller.Request.
+//                let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
+//                System.Threading.Tasks.Task.FromResult(response)

@@ -15,13 +15,10 @@ open Predictions.Api.PostModels
 open Predictions.Api.Services
 open Predictions.Api.WebUtils
 
+[<Authorize>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
-    
-    [<Route("regista")>][<Authorize>]
-    member this.GetRegista() =
-        () |> Success |> resultToHttp
 
     [<Route("whoami")>]
     member this.GetWhoAmI() =

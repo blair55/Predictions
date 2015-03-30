@@ -22,6 +22,4 @@ angular.module('frontendApp')
           $scope.openfixturecount = data;
           $scope.openfixturecountLoaded = true;
       });
-
-      $http.get('/api/regista');
   });
