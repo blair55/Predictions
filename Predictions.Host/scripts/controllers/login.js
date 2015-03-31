@@ -9,5 +9,5 @@
  */
 angular.module('frontendApp')
     .controller('LoginCtrl', [
-        '$scope', '$location', 'oauthService', function($scope, $location) {}
+        '$scope', '$location', function($scope, $location) {}
     ]);
