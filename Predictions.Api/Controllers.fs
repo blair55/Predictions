@@ -14,6 +14,8 @@ open Predictions.Api.ViewModels
 open Predictions.Api.PostModels
 open Predictions.Api.Services
 open Predictions.Api.WebUtils
+open Microsoft.Owin.Security
+open Microsoft.AspNet.Identity
 
 [<Authorize>]
 [<RoutePrefix("api")>]
