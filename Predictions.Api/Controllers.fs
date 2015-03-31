@@ -16,6 +16,33 @@ open Predictions.Api.Services
 open Predictions.Api.WebUtils
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
+open Microsoft.AspNet.Identity.Owin
+
+[<AllowAnonymous>]
+[<RoutePrefix("account")>]
+type AccountController() =
+    inherit ApiController()
+
+    member private this.SignInManager = this.Request.GetOwinContext().Get<PlSignInManager>()
+    member private this.AuthManager = this.Request.GetOwinContext().Authentication
+    member private this.BaseUri = new Uri(this.Request.RequestUri.AbsoluteUri.Replace(this.Request.RequestUri.PathAndQuery, String.Empty))
+
+    [<HttpPost>][<Route("login")>]
+    member this.LoginWithExternal(model:ExternalLoginPostModel) =
+        new ChallengeResult(model.provider, this.Request)
+
+    [<HttpGet>][<Route("logout")>]
+    member this.GetLogOut() =
+        this.AuthManager.SignOut()
+        this.Redirect(this.BaseUri)
+
+    [<HttpGet>][<Route("callback")>]
+    member this.GetCallback() =
+        let loginInfo = this.AuthManager.GetExternalLoginInfo()
+        if (box loginInfo <> null) then
+            let user = buildPlUser loginInfo
+            this.SignInManager.SignIn(user, false, true)
+        this.Redirect(this.BaseUri)
 
 [<Authorize>]
 [<RoutePrefix("api")>]

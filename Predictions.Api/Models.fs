@@ -101,3 +101,6 @@ module PostModels =
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PredictionPostModel = { fixtureId:string; score:ScoreViewModel }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type ExternalLoginPostModel = { provider:string }

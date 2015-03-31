@@ -8,12 +8,15 @@ open System.Web.Http
 open System.Web.Routing
 open System.Web.Http.Cors
 open System.Net.Http.Headers
+open System.Threading
+open System.Threading.Tasks
 open Newtonsoft.Json
 open Predictions.Api.Domain
 open Predictions.Api.Data
 open Predictions.Api.Common
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
+open Microsoft.AspNet.Identity.Owin
 
 [<AutoOpen>]
 module WebUtils =
@@ -96,3 +99,17 @@ module WebUtils =
         match result with
         | Success body -> getOkResponseWithBody body
         | Failure appError -> getErrorResponseFromAppError appError
+
+    type ChallengeResult(loginProvider:string, request:HttpRequestMessage) =
+        interface IHttpActionResult with
+            member this.ExecuteAsync(cancellationToken) =
+                let authProperties = new AuthenticationProperties()
+                authProperties.RedirectUri <- "/account/callback"
+                request.GetOwinContext().Authentication.Challenge(authProperties, loginProvider)
+                let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
+                response.RequestMessage <- request
+                Task.FromResult(response)
+
+    let buildPlUser (loginInfo:ExternalLoginInfo) =
+        new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
+        
