@@ -30,3 +30,4 @@ type Config() =
         config.Formatters.JsonFormatter.SerializerSettings.ContractResolver
             <- Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
 
+    //static member BuildApp()

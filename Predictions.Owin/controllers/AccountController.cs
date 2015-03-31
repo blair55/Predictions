@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.Identity;
@@ -62,7 +64,6 @@ namespace Predictions.Owin.controllers
             };
 
             await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
             return Redirect(BaseUri);
         }
     }
