@@ -44,7 +44,8 @@ type AccountController() =
             this.SignInManager.SignIn(user, false, true)
         this.Redirect(this.BaseUri)
 
-[<Authorize>]
+//[<Authorize>]
+[<AllowAnonymous>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
