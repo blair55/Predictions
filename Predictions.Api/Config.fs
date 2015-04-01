@@ -5,8 +5,6 @@ open Microsoft.Owin
 open Microsoft.Owin.Cors
 open Microsoft.Owin.Security
 open Microsoft.Owin.Security.Cookies
-open Microsoft.AspNet.Identity
-open Microsoft.AspNet.Identity.Owin
 open System.Web.Http.Owin
 open System
 open System.Configuration
@@ -17,6 +15,8 @@ open System.Web
 open System.Web.Http
 open System.Web.Routing
 open System.Web.Http.Filters
+open Microsoft.AspNet.Identity
+open Microsoft.AspNet.Identity.Owin
 
 type ErrorFilter() =
     inherit ExceptionFilterAttribute()
@@ -37,15 +37,12 @@ type Config() =
             <- Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
 
     static member BuildApp(app:IAppBuilder) =
-    
-        let userManager() = new PlUserManager(new PlUserStore())
-        app.CreatePerOwinContext<PlSignInManager>(
-            fun _ (c:IOwinContext) -> new PlSignInManager(userManager(), c.Authentication)) |> ignore
         
-        app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie)
+        app.UseCors(CorsOptions.AllowAll) |> ignore
+        app.SetDefaultSignInAsAuthenticationType(DefaultAuthenticationTypes.ExternalCookie)
 
         let cookieOptions = new CookieAuthenticationOptions()
-        cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ApplicationCookie
+        cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ExternalCookie
         app.UseCookieAuthentication(cookieOptions) |> ignore
 
         let twitterOptions = new Twitter.TwitterAuthenticationOptions()
@@ -57,8 +54,6 @@ type Config() =
         facebookOptions.AppId <- "701632913289116"
         facebookOptions.AppSecret <- ConfigurationManager.AppSettings.["FacebookAppSecret"]
         app.UseFacebookAuthentication(facebookOptions) |> ignore
-
-        app.UseCors(CorsOptions.AllowAll) |> ignore
 
         let config = new HttpConfiguration()
         Config.RegisterWebApi(config)

@@ -54,33 +54,3 @@ module Common =
         collection
         |> List.scan (fun x y -> x @ [y]) []
         |> List.tail
-
-
-open Microsoft.AspNet.Identity
-open Microsoft.AspNet.Identity.Owin
-open System.Threading.Tasks
-
-    type PlUser(id, provider, username) =
-        let mutable _username = username
-        interface IUser with
-            member this.Id with get() = id
-            member this.UserName
-                with get() = _username
-                and set(value) = _username <- value
-        member this.Provider with get() = provider
-
-    type PlUserStore() =
-        interface IUserStore<PlUser> with
-            member this.FindByNameAsync(name) = failwith ""
-            member this.FindByIdAsync(name) = failwith ""
-            member this.UpdateAsync(user) = failwith ""
-            member this.DeleteAsync(user) = failwith ""
-            member this.CreateAsync(user) = failwith ""
-            member this.Dispose() = ()
-
-    type PlUserManager(store) =
-        inherit UserManager<PlUser>(store)
-
-    type PlSignInManager(userManager, authenticationManager) =
-        inherit SignInManager<PlUser, string>(userManager, authenticationManager)
-            

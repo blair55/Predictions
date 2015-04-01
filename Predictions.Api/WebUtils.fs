@@ -59,10 +59,6 @@ module WebUtils =
     let getLoggedInPlayerAuthToken r =
         getCookieValue r cookieName
         
-//    let getLoggedInPlayerAuthToken (r:HttpRequestMessage) =
-//        let id = r.GetOwinContext().Authentication.GetExternalIdentity("ApplicationCookie")
-//        if id = null then NotLoggedIn "No cookie found" |> Failure else Success (id.GetUserId())
-
     let getOkResponseWithBody (body:'T) =
         let response = new HttpResponseMessage(HttpStatusCode.OK)
         response.Content <- new ObjectContent<'T>(body, new Formatting.JsonMediaTypeFormatter())
@@ -106,10 +102,15 @@ module WebUtils =
                 let authProperties = new AuthenticationProperties()
                 authProperties.RedirectUri <- "/account/callback"
                 request.GetOwinContext().Authentication.Challenge(authProperties, loginProvider)
-                let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
-                response.RequestMessage <- request
+                let response = request.CreateResponse(HttpStatusCode.Unauthorized)
                 Task.FromResult(response)
 
     let buildPlUser (loginInfo:ExternalLoginInfo) =
-        new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
-        
+        (loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
+
+    let getLoggedInPlayer r = r |> (getLoggedInPlayerAuthToken >> bind getPlayerFromAuthToken)
+
+//    let getLoggedInPlayer (r:HttpRequestMessage) =
+//        let logininfo = r.GetOwinContext().Authentication.GetExternalLoginInfo()
+//        let user = { Player.id=newPlId(); name=logininfo.Login.LoginProvider; authToken=""; role=Admin }
+//        Success user

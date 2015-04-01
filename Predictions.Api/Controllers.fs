@@ -16,14 +16,12 @@ open Predictions.Api.Services
 open Predictions.Api.WebUtils
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
-open Microsoft.AspNet.Identity.Owin
 
 [<AllowAnonymous>]
 [<RoutePrefix("account")>]
 type AccountController() =
     inherit ApiController()
 
-    member private this.SignInManager = this.Request.GetOwinContext().Get<PlSignInManager>()
     member private this.AuthManager = this.Request.GetOwinContext().Authentication
     member private this.BaseUri = new Uri(this.Request.RequestUri.AbsoluteUri.Replace(this.Request.RequestUri.PathAndQuery, String.Empty))
 
@@ -38,10 +36,10 @@ type AccountController() =
 
     [<HttpGet>][<Route("callback")>]
     member this.GetCallback() =
-        let loginInfo = this.AuthManager.GetExternalLoginInfo()
-        if (box loginInfo <> null) then
-            let user = buildPlUser loginInfo
-            this.SignInManager.SignIn(user, false, true)
+        let claims = this.AuthManager.GetExternalIdentity(DefaultAuthenticationTypes.ExternalCookie)
+        if (box claims <> null) then
+            this.AuthManager.SignIn(claims)
+            //register user
         this.Redirect(this.BaseUri)
 
 [<Authorize>]
@@ -51,8 +49,7 @@ type HomeController() =
 
     [<Route("whoami")>]
     member this.GetWhoAmI() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind (switch getPlayerViewModel)
                      >> resultToHttp)
 
@@ -82,15 +79,13 @@ type HomeController() =
         
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind (switch getOpenFixturesForPlayer)
                      >> resultToHttp)
 
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind (trySavePrediction prediction)
                      >> resultToHttp)
 
@@ -109,8 +104,7 @@ type HomeController() =
     [<Route("history/gameweek/{gwno:int}")>]
     member this.GetGameWeekPoints gwno =
         let getGwPointsView = (GwNo gwno) |> getGameWeekPointsView
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind (switch getGwPointsView)
                      >> resultToHttp)
 
@@ -128,8 +122,7 @@ type HomeController() =
 
     [<Route("getleaguepositionforplayer")>]
     member this.GetLeaguePositionForPlayer() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind getLeaguePositionForPlayer
                      >> resultToHttp)
                      
@@ -139,8 +132,7 @@ type HomeController() =
 
     [<Route("getopenfixtureswithnopredictionsforplayercount")>]
     member this.GetOpenFixturesWithNoPredictionsForPlayerCount() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
+        base.Request |> (getLoggedInPlayer
                      >> bind (switch getOpenFixturesWithNoPredictionsForPlayerCount)
                      >> resultToHttp)
 
