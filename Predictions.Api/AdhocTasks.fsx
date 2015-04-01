@@ -215,6 +215,9 @@ let getAccuracyIndexForPlayers (gws:GameWeek list) (players:Player list) =
 //let updateto1500 = "update fixtures set kickoff = '2015-01-01 15:00:00' where kickoff = '2015-01-01 13:00:00'"
 let updateto1500 = "update fixtures set kickoff = '2015-01-01 15:00:00' where kickoff = '2015-01-01 13:00:00'"
 
+// correct daylight saving fixtures
+let correctdls = "update fixtures set kickoff = kickoff + '1 hour' where kickoff > '2015-04-01 00:00:00'"
+
 // form guide
 
 type TeamOutcome = Win | Lose | Draw
