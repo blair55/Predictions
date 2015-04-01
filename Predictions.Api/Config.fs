@@ -38,27 +38,27 @@ type Config() =
 
     static member BuildApp(app:IAppBuilder) =
     
-//        let userManager() = new PlUserManager(new PlUserStore())
-//        app.CreatePerOwinContext<PlSignInManager>(
-//            fun _ (c:IOwinContext) -> new PlSignInManager(userManager(), c.Authentication)) |> ignore
-//        
-//        app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie)
-//
-//        let cookieOptions = new CookieAuthenticationOptions()
-//        cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ApplicationCookie
-//        app.UseCookieAuthentication(cookieOptions) |> ignore
-//
-//        let twitterOptions = new Twitter.TwitterAuthenticationOptions()
-//        twitterOptions.ConsumerKey <- "Cs5EW6KIh7gLlmmMfEPWj13uV"
-//        twitterOptions.ConsumerSecret <- ConfigurationManager.AppSettings.["TwitterConsumerSecret"]
-//        app.UseTwitterAuthentication(twitterOptions) |> ignore
-//
-//        let facebookOptions = new Facebook.FacebookAuthenticationOptions()
-//        facebookOptions.AppId <- "701632913289116"
-//        facebookOptions.AppSecret <- ConfigurationManager.AppSettings.["FacebookAppSecret"]
-//        app.UseFacebookAuthentication(facebookOptions) |> ignore
-//
-//        app.UseCors(CorsOptions.AllowAll) |> ignore
+        let userManager() = new PlUserManager(new PlUserStore())
+        app.CreatePerOwinContext<PlSignInManager>(
+            fun _ (c:IOwinContext) -> new PlSignInManager(userManager(), c.Authentication)) |> ignore
+        
+        app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie)
+
+        let cookieOptions = new CookieAuthenticationOptions()
+        cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ApplicationCookie
+        app.UseCookieAuthentication(cookieOptions) |> ignore
+
+        let twitterOptions = new Twitter.TwitterAuthenticationOptions()
+        twitterOptions.ConsumerKey <- "Cs5EW6KIh7gLlmmMfEPWj13uV"
+        twitterOptions.ConsumerSecret <- ConfigurationManager.AppSettings.["TwitterConsumerSecret"]
+        app.UseTwitterAuthentication(twitterOptions) |> ignore
+
+        let facebookOptions = new Facebook.FacebookAuthenticationOptions()
+        facebookOptions.AppId <- "701632913289116"
+        facebookOptions.AppSecret <- ConfigurationManager.AppSettings.["FacebookAppSecret"]
+        app.UseFacebookAuthentication(facebookOptions) |> ignore
+
+        app.UseCors(CorsOptions.AllowAll) |> ignore
 
         let config = new HttpConfiguration()
         Config.RegisterWebApi(config)

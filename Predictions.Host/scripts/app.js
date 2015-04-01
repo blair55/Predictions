@@ -82,10 +82,10 @@ angular
           templateUrl: 'views/inplay.html',
           controller: 'InplayCtrl'
         })
-        //.when('/login', {
-        //  templateUrl: 'views/login.html',
-        //  controller: 'LoginCtrl'
-        //})
+        .when('/login', {
+          templateUrl: 'views/login.html',
+          controller: 'LoginCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

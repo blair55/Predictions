@@ -44,8 +44,7 @@ type AccountController() =
             this.SignInManager.SignIn(user, false, true)
         this.Redirect(this.BaseUri)
 
-//[<Authorize>]
-[<AllowAnonymous>]
+[<Authorize>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
@@ -148,8 +147,8 @@ type HomeController() =
     [<Route("inplay")>]
     member this.GetInPlay() =
         () |> (switch getInPlay >> resultToHttp)
-                     
 
+[<Authorize>]
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
