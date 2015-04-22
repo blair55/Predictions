@@ -4,6 +4,9 @@
 # Hide web config as it contains external login details
 Predictions.Host/[Ww]eb.config
 
+# Vagrant local artifacts
+.vagrant/*
+
 # User-specific files
 *.suo
 *.user
