@@ -11,8 +11,16 @@ open System.Net.Http.Headers
 open Newtonsoft.Json
 open Predictions.Api.Domain
 open Predictions.Api.FormGuide
-open Predictions.Api.Data
+//open Predictions.Api.Data
 open Predictions.Api.Common
+
+[<AutoOpen>]
+module DummyData =
+    let getPlayers() : Player list =
+        []
+
+    let buildSeason _ =
+        { id=newSnId(); year=SnYr ""; gameWeeks=[] }
 
 [<AutoOpen>]
 module Services =
@@ -100,7 +108,8 @@ module Services =
     let getLeagueTableView() =
         let players = getPlayers()
         let gwsWithResults = gameWeeksWithResults()
-        let gwsWithResultsWithoutMax = gwsWithResults |> List.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> List.tail
+        let getSafeTail collection = if collection |> List.exists(fun _ -> true) then collection |> List.tail else collection
+        let gwsWithResultsWithoutMax = gwsWithResults |> List.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> getSafeTail
         let recentFixtures = getFixturesForGameWeeks gwsWithResults
         let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
         let recentLge = getLeagueTable players recentFixtures
@@ -123,10 +132,13 @@ module Services =
         let pvm = getPlayerViewModel player
         { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; player=pvm }
         
-    let getPlayerFromAuthToken authToken =
-        let pls = getPlayers()
-        let player = pls |> List.tryFind(fun plr -> plr.authToken = authToken)
-        NotLoggedIn (sprintf "no player found with auth token %s" authToken) |> optionToResult player 
+//    let getPlayerFromAuthToken authToken =
+//        let pls = getPlayers()
+//        let player = pls |> List.tryFind(fun plr -> plr.authToken = authToken)
+//        NotLoggedIn (sprintf "no player found with auth token %s" authToken) |> optionToResult player
+
+    let getPlayerFromAuthToken _ =
+        Success { Player.id=(PlId ""); name=""; authToken=""; role=User }
 
     let getLeaguePositionForPlayer player =
         let players = getPlayers()
@@ -231,7 +243,10 @@ module Services =
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
-    let getLastGameWeekAndWinner() = getPastGameWeeksWithWinner().rows |> Seq.last
+    let getLastGameWeekAndWinner() = 
+//        getPastGameWeeksWithWinner().rows |> Seq.last
+        let (p:PlayerViewModel) = {PlayerViewModel.name=""; id=""; isAdmin=false }
+        { PastGameWeekRowViewModel.gameWeekNo=2; winner=p; points=2 }
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =
         getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) (getPlayers()) player
@@ -248,6 +263,20 @@ module Services =
 
 
     // persistence
+
+    
+    type SaveSeasonCommand = { id:SnId; year:SnYr; }
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
+    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
+    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
+    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
+    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
+
+    let savePlayer (cmd:SavePlayerCommand) = ()
+    let saveSeason (cmd:SaveSeasonCommand) = ()
+    let saveResult (cmd:SaveResultCommand) = ()
+    let savePrediction (cmd:SavePredictionCommand) = ()
+    let saveGameWeek (cmd:SaveGameWeekCommand) = ()
 
     let trySaveResultPostModel (rpm:ResultPostModel) =
         let gws = gameWeeks()

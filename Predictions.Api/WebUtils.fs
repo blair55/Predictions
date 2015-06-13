@@ -12,7 +12,7 @@ open System.Threading
 open System.Threading.Tasks
 open Newtonsoft.Json
 open Predictions.Api.Domain
-open Predictions.Api.Data
+//open Predictions.Api.Data
 open Predictions.Api.Common
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
@@ -23,11 +23,13 @@ module WebUtils =
     
     let cookieName = "auth-token"
 
-    let getCookieValue (request:HttpRequestMessage) key =
-        let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
-        match cookie with
-        | Some c -> Success c.[key].Value
-        | None -> NotLoggedIn "No cookie found" |> Failure
+//    let getCookieValue (request:HttpRequestMessage) key =
+//        let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
+//        match cookie with
+//        | Some c -> Success c.[key].Value
+//        | None -> NotLoggedIn "No cookie found" |> Failure
+
+    let getCookieValue _ _ = Success ""
 
     let createCookie name (value:string) expiry =
         let cookie = new CookieHeaderValue(name, value)
@@ -112,4 +114,5 @@ module WebUtils =
 
     let buildPlUser (loginInfo:ExternalLoginInfo) =
         new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
+
         

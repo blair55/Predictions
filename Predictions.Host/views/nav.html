@@ -15,6 +15,12 @@
         <ul class="nav navbar-nav side-nav">
 
             <li>
+                <a ng-click="navTo($event)" href="#leagues">
+                    <span class="glyphicon glyphicon-th"></span>
+                    Leagues
+                </a>
+            </li>
+            <li>
                 <a ng-click="navTo($event)" href="#leaguetable">
                     <span class="glyphicon glyphicon-th"></span>
                     League Table
@@ -61,8 +67,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a ng-click="navTo($event)" href="#player/{{player.id}}">Profile</a></li>
-                    <li><a href="/api/logout">Log Out</a></li>
-                    <!--<li><a href="/account/logout">Log Out 2</a></li>-->
+                    <li><a href="/account/logout">Log Out</a></li>
                 </ul>
             </li>
 

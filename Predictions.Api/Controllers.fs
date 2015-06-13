@@ -44,25 +44,35 @@ type AccountController() =
             this.SignInManager.SignIn(user, false, true)
         this.Redirect(this.BaseUri)
 
-//[<Authorize>]
-[<AllowAnonymous>]
+open System.Security.Principal
+
+
+[<Authorize>]
+//[<AllowAnonymous>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
 
+//    [<Route("whoami")>]
+//    member this.GetWhoAmI() =
+//        base.Request |> (getLoggedInPlayerAuthToken
+//                     >> bind getPlayerFromAuthToken
+//                     >> bind (switch getPlayerViewModel)
+//                     >> resultToHttp)
+    member private this.AuthManager = this.Request.GetOwinContext().Authentication
+
     [<Route("whoami")>]
     member this.GetWhoAmI() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
-                     >> bind (switch getPlayerViewModel)
-                     >> resultToHttp)
+        let getUser (id:IIdentity) =
+            { PlayerViewModel.id=""; name=id.Name; isAdmin=false }
+        this.AuthManager.User.Identity |> (switch getUser >> resultToHttp)
 
-    [<Route("auth/{authToken}")>]
-    member this.GetAuthenticate (authToken:string) =
-        let login = logPlayerIn base.Request
-        authToken |> (getPlayerFromAuthToken
-                  >> bind (switch login)
-                  >> httpResponseFromResult)
+//    [<Route("auth/{authToken}")>]
+//    member this.GetAuthenticate (authToken:string) =
+//        let login = logPlayerIn base.Request
+//        authToken |> (getPlayerFromAuthToken
+//                  >> bind (switch login)
+//                  >> httpResponseFromResult)
         
     [<Route("logout")>]
     member this.GetLogOut() =
@@ -71,13 +81,13 @@ type HomeController() =
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
         () |> (switch getLeagueTableView >> resultToHttp)
-        
+
     [<Route("player/{playerId:Guid}")>]
-    member this.GetPlayer (playerId:Guid) =
+    member this.GetPlayer (playerId) =
         playerId |> (switch getGameWeeksPointsForPlayer >> resultToHttp)
 
     [<Route("playergameweek/{playerId:Guid}/{gameWeekNo:int}")>]
-    member this.GetPlayerGameWeek (playerId:Guid) (gameWeekNo:int) =
+    member this.GetPlayerGameWeek (playerId) (gameWeekNo:int) =
         let getPoints = getPlayerGameWeek playerId
         gameWeekNo |> (switch getPoints >> resultToHttp)
         
@@ -120,7 +130,7 @@ type HomeController() =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
     
     [<Route("leaguepositiongraphforplayer/{plId:Guid}")>]
-    member this.GetLeaguePositionGraph (plId:Guid) =
+    member this.GetLeaguePositionGraph (plId) =
         PlId plId |> ((switch getLeaguePositionGraphDataForPlayer) >> resultToHttp)
     
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]

@@ -6,7 +6,7 @@ module Domain =
 
     type FxId = FxId of Guid
     type GwId = GwId of Guid
-    type PlId = PlId of Guid
+    type PlId = PlId of string //Guid
     type PrId = PrId of Guid
     type RsId = RsId of Guid
     type SnId = SnId of Guid
@@ -22,7 +22,7 @@ module Domain =
     let newGwId() = nguid()|>GwId
     let newRsId() = nguid()|>RsId
     let newSnId() = nguid()|>SnId
-    let newPlId() = nguid()|>PlId
+    //let newPlId() = nguid()|>PlId
     
     let getPlayerId (PlId id) = id
     let getGameWeekNo (GwNo n) = n
@@ -244,8 +244,10 @@ module Domain =
     let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players player =
         fixtures
         |> getLeagueTable players
-        |> List.find(fun (_, plr, _, _, _) -> plr = player)
-        |> (fun (pos, _, _, _, _) -> pos)
+        |> List.tryFind(fun (_, plr, _, _, _) -> plr = player)
+        |> (function
+            | Some (pos, _, _, _, _) -> pos
+            | None -> -1)
 
     let rec GetOutcomeCounts (p:Prediction list) (hw, d, aw) =
         match p with
@@ -316,7 +318,7 @@ module FormGuide =
     type FormGuideOutcome = Win | Lose | Draw
 
     let private isTeamInFixture (fd:FixtureData) team = fd.home = team || fd.away = team
-    let private getResultForTeam (fd:FixtureData, result:Result) team =
+    let private getResultForTeam team (fd:FixtureData, result:Result) =
         let isHomeTeam = fd.home = team
         let outcome = getResultOutcome result.score
         match outcome with
@@ -334,7 +336,7 @@ module FormGuide =
         |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
         |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
         |> Seq.truncate 6
-        |> Seq.map(fun fdr -> getResultForTeam fdr team)
+        |> Seq.map(getResultForTeam team)
         |> Seq.toList
         |> List.rev
     

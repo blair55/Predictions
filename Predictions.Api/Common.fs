@@ -68,6 +68,8 @@ open System.Threading.Tasks
                 with get() = _username
                 and set(value) = _username <- value
         member this.Provider with get() = provider
+        member this.Id with get() = id
+        member this.UserName with get() = _username
 
     type PlUserStore() =
         interface IUserStore<PlUser> with
