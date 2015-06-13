@@ -21,8 +21,8 @@ angular
         'ui.bootstrap.datetimepicker',
         'ngToast',
         'chart.js',
-        'ordinal'
-   //,     'angular-loading-bar'
+        'ordinal',
+        'angular-loading-bar'
     ])
     .config(function ($routeProvider) {
       $routeProvider
@@ -85,6 +85,10 @@ angular
         .when('/login', {
           templateUrl: 'views/login.html',
           controller: 'LoginCtrl'
+        })
+        .when('/leagues', {
+          templateUrl: 'views/leagues.html',
+          controller: 'LeaguesCtrl'
         })
         .otherwise({
             redirectTo: '/'
