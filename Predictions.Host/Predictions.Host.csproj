@@ -77,6 +77,7 @@
     <Content Include="scripts\controllers\adminaddgameweek.js" />
     <Content Include="scripts\controllers\adminaddresults.js" />
     <Content Include="scripts\controllers\adminaddresultsforgameweek.js" />
+    <Content Include="scripts\controllers\createleague.js" />
     <Content Include="scripts\controllers\fixture.js" />
     <Content Include="scripts\controllers\historybygameweek.js" />
     <Content Include="scripts\controllers\historybygameweekwithgameweek.js" />
@@ -101,6 +102,7 @@
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />
     <Content Include="views\adminaddresultsforgameweek.html" />
+    <Content Include="views\createleague.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\historybygameweek.html" />
     <Content Include="views\historybygameweekwithgameweek.html" />

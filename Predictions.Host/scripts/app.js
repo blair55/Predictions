@@ -90,6 +90,10 @@ angular
           templateUrl: 'views/leagues.html',
           controller: 'LeaguesCtrl'
         })
+        .when('/createleague', {
+          templateUrl: 'views/createleague.html',
+          controller: 'CreateleagueCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

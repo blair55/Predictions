@@ -22,6 +22,11 @@ module DummyData =
     let buildSeason _ =
         { id=newSnId(); year=SnYr ""; gameWeeks=[] }
 
+    let mutable leagues:List<League> = []
+
+    let saveLeague league =
+        leagues <- league::leagues
+
 [<AutoOpen>]
 module Services =
     
@@ -104,6 +109,15 @@ module Services =
            >> bind (switch getFixtureViewDetails))
 
     let leagueTableRowToViewModel (diffPos, pos, pl, cs, co, pts) = { LeagueTableRowViewModel.diffPos=diffPos; position=pos; player=getPlayerViewModel pl; correctScores=cs; correctOutcomes=co; points=pts }
+
+    let leagueToViewModel (league:League) =
+        { LeaguesRowViewModel.id=str (getLgId league.id); name=league.name; position=0; diffPos=0 }
+
+    let getLeaguesView player =
+        let rows = leagues
+                   |> List.filter(fun l -> l.players |> List.exists(fun p -> p = player))
+                   |> List.map(leagueToViewModel)
+        { LeaguesViewModel.rows = rows }
 
     let getLeagueTableView() =
         let players = getPlayers()
@@ -323,3 +337,10 @@ module Services =
                >> bind createScore
                >> bind (switch createPrediction)
                >> bind (switch updatePrediction))
+
+    let trySaveLeague host player (createLeague:CreateLeaguePostModel) =
+        let league = { League.id=newLgId(); name=createLeague.name; players=[player] }
+        let id = getLgId league.id |> str
+        saveLeague league
+        let inviteLink = sprintf "%s/#/joinleague/%s" host id
+        { name=createLeague.name; inviteLink=inviteLink }

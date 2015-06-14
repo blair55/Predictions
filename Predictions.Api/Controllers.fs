@@ -44,11 +44,7 @@ type AccountController() =
             this.SignInManager.SignIn(user, false, true)
         this.Redirect(this.BaseUri)
 
-open System.Security.Principal
-
-
 [<Authorize>]
-//[<AllowAnonymous>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
@@ -59,13 +55,21 @@ type HomeController() =
 //                     >> bind getPlayerFromAuthToken
 //                     >> bind (switch getPlayerViewModel)
 //                     >> resultToHttp)
+
     member private this.AuthManager = this.Request.GetOwinContext().Authentication
+
+    member this.GetPlayerViewModel() =
+        let name = this.AuthManager.User.Identity.GetUserName()
+        let id = this.AuthManager.User.Claims
+                 |> Seq.find(fun c -> c.Type = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+                 |> (fun c -> c.Value)
+        { PlayerViewModel.id=id; name=name; isAdmin=false }
+
+    member this.Host() = this.Request.RequestUri.GetLeftPart(UriPartial.Authority)
 
     [<Route("whoami")>]
     member this.GetWhoAmI() =
-        let getUser (id:IIdentity) =
-            { PlayerViewModel.id=""; name=id.Name; isAdmin=false }
-        this.AuthManager.User.Identity |> (switch getUser >> resultToHttp)
+        () |> (switch this.GetPlayerViewModel >> resultToHttp)
 
 //    [<Route("auth/{authToken}")>]
 //    member this.GetAuthenticate (authToken:string) =
@@ -77,6 +81,17 @@ type HomeController() =
     [<Route("logout")>]
     member this.GetLogOut() =
         base.Request |> logPlayerOut
+        
+    [<Route("leagues")>]
+    member this.GetLeagues () =
+        let player = this.GetPlayerViewModel() |> getPlayerFromViewModel
+        player |> (switch getLeaguesView >> resultToHttp)
+
+    [<HttpPost>][<Route("createleague")>]
+    member this.AddLeague (createLeague:CreateLeaguePostModel) =
+        let player = this.GetPlayerViewModel() |> getPlayerFromViewModel
+        let saveLge = trySaveLeague (this.Host()) player
+        createLeague |> (switch saveLge >> resultToHttp)
 
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =

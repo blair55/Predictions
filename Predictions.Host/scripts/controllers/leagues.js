@@ -8,10 +8,8 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('LeaguesCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+    .controller('LeaguesCtrl', function($scope, $http) {
+        $http.get('/api/leagues').success(function(data) {
+            $scope.model = data;
+        });
+    });

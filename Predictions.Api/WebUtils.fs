@@ -115,4 +115,6 @@ module WebUtils =
     let buildPlUser (loginInfo:ExternalLoginInfo) =
         new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
 
+    let getPlayerFromViewModel (pvm:PlayerViewModel) =
+        { Player.id=(PlId pvm.id); name=pvm.name; authToken=""; role=User}
         

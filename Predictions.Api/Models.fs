@@ -87,6 +87,16 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type InPlayViewModel = { rows:InPlayRowViewModel list; }
 
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type LeagueSavedViewModel = { name:string; inviteLink:string }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type LeaguesRowViewModel = { id:string; name:string; position:int; diffPos:int }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type LeaguesViewModel = { rows:LeaguesRowViewModel list }
+
+
 [<AutoOpen>]
 module PostModels =
 
@@ -104,3 +114,7 @@ module PostModels =
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ExternalLoginPostModel = { provider:string }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type CreateLeaguePostModel = { name:string; }
+    

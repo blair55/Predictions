@@ -4,6 +4,7 @@ open System
 
 module Domain =
 
+    type LgId = LgId of Guid
     type FxId = FxId of Guid
     type GwId = GwId of Guid
     type PlId = PlId of string //Guid
@@ -17,6 +18,7 @@ module Domain =
     type Role = User | Admin
 
     let nguid() = Guid.NewGuid()
+    let newLgId() = nguid()|>LgId
     let newFxId() = nguid()|>FxId
     let newPrId() = nguid()|>PrId
     let newGwId() = nguid()|>GwId
@@ -26,6 +28,7 @@ module Domain =
     
     let getPlayerId (PlId id) = id
     let getGameWeekNo (GwNo n) = n
+    let getLgId (LgId id) = id
     let getFxId (FxId id) = id
     let getGwId (GwId id) = id
     let getPrId (PrId id) = id
@@ -48,6 +51,8 @@ module Domain =
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
+
+    type League = { id:LgId; name:string; players:Player list}
 
     type AppError =
         | NotLoggedIn of string
