@@ -1,0 +1,11 @@
+<h4>Invite to Join {{model.name}}</h4>
+<p>Share the link below to invite. Anyone with the link can join the league.</p>
+
+<form>
+    <div class="form-group">
+        <label for="invitelink">Invite Link</label>
+        <input type="text" class="form-control" id="invitelink" ng-model="model.inviteLink" readonly autofocus onclick="this.select();" />
+    </div>
+</form>
+
+<a ng-href="#league/{{model.id}}">Back to League</a>

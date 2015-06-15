@@ -58,6 +58,7 @@ module Domain =
         | NotLoggedIn of string
         | Forbidden of string
         | Invalid of string
+        | NotFound of string
         | InternalError of string
 
     let fixtureDataToFixture fd r =
@@ -315,6 +316,8 @@ module Domain =
         else if home = away then invalid "fixture home and away team cannot be the same"
         else Success({id=newFxId(); home=home; away=away; kickoff=kickoff; predictions=[]})
 
+    let getShareableLeagueId (league:League) =
+        (str <| getLgId league.id).Substring(0, 8)
 
 module FormGuide =
 

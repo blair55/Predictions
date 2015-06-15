@@ -94,6 +94,18 @@ angular
           templateUrl: 'views/createleague.html',
           controller: 'CreateleagueCtrl'
         })
+        .when('/league/:leagueId', {
+          templateUrl: 'views/league.html',
+          controller: 'LeagueCtrl'
+        })
+        .when('/leagueinvite/:leagueId', {
+          templateUrl: 'views/leagueinvite.html',
+          controller: 'LeagueinviteCtrl'
+        })
+        .when('/joinleague/:shareableLeagueId', {
+          templateUrl: 'views/leaguejoin.html',
+          controller: 'LeaguejoinCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

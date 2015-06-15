@@ -87,6 +87,7 @@ module WebUtils =
 
     let getErrorResponseFromAppError appError =
         match appError with
+        | NotFound msg -> errorResponse HttpStatusCode.NotFound msg
         | Invalid msg -> errorResponse HttpStatusCode.BadRequest msg
         | InternalError msg -> errorResponse HttpStatusCode.InternalServerError msg
         | Forbidden msg -> errorResponse HttpStatusCode.Forbidden msg

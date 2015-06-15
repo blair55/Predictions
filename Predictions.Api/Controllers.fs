@@ -93,6 +93,24 @@ type HomeController() =
         let saveLge = trySaveLeague (this.Host()) player
         createLeague |> (switch saveLge >> resultToHttp)
 
+    [<Route("league/{leagueId:Guid}")>]
+    member this.GetLeagueView (leagueId:Guid) =
+        leagueId |> (getLeagueView >> resultToHttp)
+        
+    [<Route("leagueinvite/{leagueId:Guid}")>]
+    member this.GetLeagueInviteView (leagueId:Guid) =
+        let getLge = getLeagueInviteView (this.Host())
+        leagueId |> (getLge >> resultToHttp)
+
+    [<Route("leaguejoin/{shareableLeagueId}")>]
+    member this.GetLeagueJoinView (shareableLeagueId) =
+        shareableLeagueId |> (getLeagueJoinView >> resultToHttp)
+
+    [<HttpPost>][<Route("leaguejoin/{leagueId:Guid}")>]
+    member this.JoinLeague (leagueId:Guid) =
+        let player = this.GetPlayerViewModel() |> getPlayerFromViewModel
+        leagueId |> ((joinLeague player) >> resultToHttp)
+
     [<Route("leaguetable")>]
     member this.GetLeagueTable () =
         () |> (switch getLeagueTableView >> resultToHttp)

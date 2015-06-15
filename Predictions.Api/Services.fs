@@ -110,13 +110,13 @@ module Services =
 
     let leagueTableRowToViewModel (diffPos, pos, pl, cs, co, pts) = { LeagueTableRowViewModel.diffPos=diffPos; position=pos; player=getPlayerViewModel pl; correctScores=cs; correctOutcomes=co; points=pts }
 
-    let leagueToViewModel (league:League) =
+    let leagueToRowViewModel (league:League) =
         { LeaguesRowViewModel.id=str (getLgId league.id); name=league.name; position=0; diffPos=0 }
 
     let getLeaguesView player =
         let rows = leagues
                    |> List.filter(fun l -> l.players |> List.exists(fun p -> p = player))
-                   |> List.map(leagueToViewModel)
+                   |> List.map(leagueToRowViewModel)
         { LeaguesViewModel.rows = rows }
 
     let getLeagueTableView() =
@@ -342,5 +342,39 @@ module Services =
         let league = { League.id=newLgId(); name=createLeague.name; players=[player] }
         let id = getLgId league.id |> str
         saveLeague league
-        let inviteLink = sprintf "%s/#/joinleague/%s" host id
-        { name=createLeague.name; inviteLink=inviteLink }
+        { LeagueViewModel.id=id; name=createLeague.name }
+
+
+    let findLeague whatToDoWithLeagueOnceFound leagueId =
+        match leagues |> List.tryFind(fun l -> l.id = leagueId) with
+        | Some league -> whatToDoWithLeagueOnceFound league |> Success
+        | None -> NotFound "League not found" |> Failure
+
+    let leagueIdToString leagueId = leagueId |> getLgId |> str
+
+    let leagueToViewModel (league:League) = 
+        // need to build league table here
+        { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name; }
+
+    let getLeagueView leagueId =
+        LgId leagueId |> findLeague leagueToViewModel
+
+    let getLeagueInviteView host leagueId =
+        let buildModel league =
+            let link = league |> getShareableLeagueId |> sprintf "%s/#/joinleague/%s" host
+            { LeagueInviteViewModel.id=league.id|>leagueIdToString; name=league.name; inviteLink=link }
+        LgId leagueId |> findLeague buildModel
+
+    let getLeagueJoinView shareableLeagueId =
+        match leagues |> List.tryFind(fun l -> l|>getShareableLeagueId = shareableLeagueId) with
+        | Some league -> leagueToViewModel league |> Success
+        | None -> NotFound "League not found" |> Failure
+
+    let joinLeague player leagueId =
+        let joinAndReturnLeague league =
+            leagues <- leagues |> List.filter(fun l -> l <> league)
+            let players = player :: league.players
+            let newLeague = { league with players=players }
+            saveLeague newLeague
+            newLeague |> leagueToViewModel
+        LgId leagueId |> findLeague joinAndReturnLeague
