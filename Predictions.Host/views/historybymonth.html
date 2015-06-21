@@ -1,26 +1,24 @@
-<div ng-if="model">
+<h4>{{model.league.name}} / Month History</h4>
 
-    <h4>Month History</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class=""></th>
+            <th>Winner</th>
+            <th class="numeric-cell-heading">Pts</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td>
+                <a href="#/history/month/{{row.month}}">{{row.month}}</a>
+            </td>
+            <td>
+                <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
+            </td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+</table>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class=""></th>
-                <th>Winner</th>
-                <th class="numeric-cell-heading">Pts</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in model.rows">
-                <td>
-                    <a href="#/history/month/{{row.month}}">{{row.month}}</a>
-                </td>
-                <td>
-                    <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
-                </td>
-                <td class="numeric-cell">{{row.points}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<loading model="model" no-rows-msg="no results"></loading>
+<a ng-href="#league/{{model.league.id}}">Back to League</a>

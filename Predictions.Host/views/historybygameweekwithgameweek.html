@@ -1,27 +1,27 @@
-<div ng-if="model">
-    <h4>Game Week #{{model.gameWeekNo}}</h4>
-    <p>In Month <a href="#/history/month/{{model.month}}">{{model.month}}</a> / <a href="#/playergameweek/{{model.player.id}}/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Predictions</a></p>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="numeric-cell-heading">Pos.</th>
-                <th>Player</th>
-                <th class="numeric-cell-heading" title="Correct Scores">CS</th>
-                <th class="numeric-cell-heading" title="Correct Results">CR</th>
-                <th class="numeric-cell-heading">Pts.</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in model.rows">
-                <td class="numeric-cell">{{row.position}}</td>
-                <td>
-                    <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
-                </td>
-                <td class="numeric-cell">{{row.correctScores}}</td>
-                <td class="numeric-cell">{{row.correctOutcomes}}</td>
-                <td class="numeric-cell">{{row.points}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<loading model="model" no-rows-msg="no results"></loading>
+<h4>{{model.league.name}} / Game Week #{{model.gameWeekNo}}</h4>
+<p>In Month <a href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a> 
+<!--<a href="#/playergameweek/{{model.player.id}}/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Predictions</a>--></p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="numeric-cell-heading">Pos.</th>
+            <th>Player</th>
+            <th class="numeric-cell-heading" title="Correct Scores">CS</th>
+            <th class="numeric-cell-heading" title="Correct Results">CR</th>
+            <th class="numeric-cell-heading">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td class="numeric-cell">{{row.position}}</td>
+            <td>
+                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+            </td>
+            <td class="numeric-cell">{{row.correctScores}}</td>
+            <td class="numeric-cell">{{row.correctOutcomes}}</td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<a ng-href="#league/{{model.league.id}}">Back to League</a>

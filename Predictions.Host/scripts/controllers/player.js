@@ -10,12 +10,12 @@
 angular.module('frontendApp')
   .controller('PlayerCtrl', function ($scope, $http, $routeParams) {
 
-      var url = '/api/player/' + $routeParams.playerId;
+      var url = '/api/player/' + $routeParams.playerId + "/" + $routeParams.leagueId;
       $http.get(url).success(function (data) {
           $scope.model = data;
       });
 
-      var graphUrl = '/api/leaguepositiongraphforplayer/' + $routeParams.playerId;
+      var graphUrl = '/api/leaguepositiongraphforplayer/' + $routeParams.playerId + "/" + $routeParams.leagueId;
       $http.get(graphUrl).success(function (data) {
           $scope.labels = data.labels;
           $scope.data = data.data;

@@ -128,7 +128,7 @@ module Domain =
         |> List.filter(fun (_, f) -> f.kickoff.ToString(monthFormat) = month)
         |> List.map(fun (gw, _) -> gw)
 
-    let findPlayerById (players:Player list) id = players |> List.find(fun p -> p.id = id)
+//    let findPlayerById (players:Player list) id = players |> List.find(fun p -> p.id = id)
 
     let getFixturesInPlay gws =
         gws |> List.map(fun gw -> gw, ([gw] |> getFixturesForGameWeeks |> List.filter(isFixtureClosedAndHaveNoResult)))
@@ -224,7 +224,7 @@ module Domain =
         |> List.map(fun (fd, r) -> (fd, r, tryFindPlayerPrediction fd.predictions player))
         |> List.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
         
-    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) (players:Player list) player =
+    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek list) player =
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
@@ -232,7 +232,7 @@ module Domain =
         |> List.map(fun fd -> fd, fd.predictions |> List.tryFind(fun p -> p.player = player))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
 
-    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (players:Player list) (player:Player) =
+    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek list) (player:Player) =
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)

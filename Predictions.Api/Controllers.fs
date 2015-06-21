@@ -107,67 +107,55 @@ type HomeController() =
 
 
 
-    [<Route("player/{playerId:Guid}")>]
-    member this.GetPlayer (playerId) =
-        playerId |> (getGameWeeksPointsForPlayerId >> resultToHttp)
+    [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
+    member this.GetPlayer (playerId:Guid, leagueId:Guid) =
+        (playerId, leagueId) |> (getGameWeeksPointsForPlayerIdAndLeagueId >> resultToHttp)
+        
+    [<Route("leaguepositiongraphforplayer/{playerId:Guid}/{leagueId:Guid}")>]
+    member this.GetLeaguePositionGraph (playerId:Guid, leagueId:Guid) =
+        (playerId, leagueId) |> (getLeaguePositionGraphDataForPlayerIdAndLeagueId >> resultToHttp)
 
     [<Route("playergameweek/{playerId:Guid}/{gameWeekNo:int}")>]
     member this.GetPlayerGameWeek (playerId) (gameWeekNo:int) =
-        let getPoints = getPlayerGameWeek playerId
-        gameWeekNo |> (switch getPoints >> resultToHttp)
-        
+        let getPoints = getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo
+        playerId |> (getPoints >> resultToHttp)
+
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
-                     >> bind (switch getOpenFixturesForPlayer)
-                     >> resultToHttp)
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> ((switch getOpenFixturesForPlayer) >> resultToHttp)
 
     [<HttpPost>][<Route("prediction")>]
     member this.AddPrediction (prediction) =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
-                     >> bind (trySavePrediction prediction)
-                     >> resultToHttp)
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> ((trySavePrediction prediction) >> resultToHttp)
 
-    [<Route("history/month")>]
-    member this.GetHistoryByMonth() =
-        () |> ((switch getPastMonthsWithWinner) >> resultToHttp)
+    [<Route("leaguehistory/{leagueId:Guid}/month")>]
+    member this.GetHistoryByMonth(leagueId:Guid) =
+        leagueId |> (getPastMonthsWithWinner >> resultToHttp)
 
-    [<Route("history/month/{month}")>]
-    member this.GetHistoryByMonth month =
-        month |> ((switch getMonthPointsView) >> resultToHttp)
+    [<Route("leaguehistory/{leagueId:Guid}/month/{month}")>]
+    member this.GetHistoryByMonth (leagueId:Guid, month) =
+        let getView = getMonthPointsView month
+        leagueId |> (getView >> resultToHttp)
 
-    [<Route("history/gameweek")>]
-    member this.GetPastGameWeeks() =
-        () |> (switch getPastGameWeeksWithWinner >> resultToHttp)
+    [<Route("leaguehistory/{leagueId:Guid}/gameweek")>]
+    member this.GetPastGameWeeks(leagueId:Guid) =
+        leagueId |> (getPastGameWeeksWithWinner >> resultToHttp)
 
-    [<Route("history/gameweek/{gwno:int}")>]
-    member this.GetGameWeekPoints gwno =
+    [<Route("leaguehistory/{leagueId:Guid}/gameweek/{gwno:int}")>]
+    member this.GetGameWeekPoints (leagueId:Guid, gwno) =
         let getGwPointsView = (GwNo gwno) |> getGameWeekPointsView
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
-                     >> bind (switch getGwPointsView)
-                     >> resultToHttp)
+        leagueId |> (getGwPointsView >> resultToHttp)
+
 
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
         FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
 
-    [<Route("leaguepositiongraphforplayer/{plId:Guid}")>]
-    member this.GetLeaguePositionGraph (plId) =
-        PlId plId |> ((switch getLeaguePositionGraphDataForPlayer) >> resultToHttp)
-
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =
         FxId fxId |> (getFixturePredictionGraphData >> resultToHttp)
-
-//    [<Route("getleaguepositionforplayer")>]
-//    member this.GetLeaguePositionForPlayer() =
-//        base.Request |> (getLoggedInPlayerAuthToken
-//                     >> bind getPlayerFromAuthToken
-//                     >> bind getLeaguePositionForPlayer
-//                     >> resultToHttp)
 
     [<Route("getlastgameweekandwinner")>]
     member this.GetLastGameWeekAndWinner() =
@@ -175,10 +163,8 @@ type HomeController() =
 
     [<Route("getopenfixtureswithnopredictionsforplayercount")>]
     member this.GetOpenFixturesWithNoPredictionsForPlayerCount() =
-        base.Request |> (getLoggedInPlayerAuthToken
-                     >> bind getPlayerFromAuthToken
-                     >> bind (switch getOpenFixturesWithNoPredictionsForPlayerCount)
-                     >> resultToHttp)
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> ((switch getOpenFixturesWithNoPredictionsForPlayerCount) >> resultToHttp)
 
     [<Route("inplay")>]
     member this.GetInPlay() =
@@ -191,27 +177,18 @@ type AdminController() =
 
     [<HttpPost>][<Route("gameweek")>]
     member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
-        let saveGameWeek() = trySaveGameWeekPostModel gameWeek
-        base.Request |> (makeSurePlayerIsAdmin
-                     >> bind saveGameWeek
-                     >> resultToHttp)
+        gameWeek |> (trySaveGameWeekPostModel >> resultToHttp)
 
     [<Route("getgameweekswithclosedfixtures")>]
     member this.GetGameWeeksWithClosedFixtures() =
-        base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch getGameWeeksWithClosedFixtures)
-                     >> resultToHttp)
+        () |> ((switch getGameWeeksWithClosedFixtures) >> resultToHttp)
 
     [<Route("getclosedfixturesforgameweek/{gwno:int}")>]
     member this.GetClosedFixturesForGameWeek gwno =
         let getFixtures() = gwno |> GwNo |> getClosedFixturesForGameWeek
-        base.Request |> (makeSurePlayerIsAdmin
-                     >> bind (switch getFixtures)
-                     >> resultToHttp)
+        () |> ((switch getFixtures) >> resultToHttp)
 
     [<HttpPost>][<Route("result")>]
     member this.AddResult (result:ResultPostModel) =
         let saveResult() = trySaveResultPostModel result
-        base.Request |> (makeSurePlayerIsAdmin
-                     >> bind saveResult
-                     >> resultToHttp)
+        () |> (saveResult >> resultToHttp)

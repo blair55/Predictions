@@ -8,8 +8,8 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('HistorybygameweekCtrl', function ($scope, $http) {
-      var url = '/api/history/gameweek';
+  .controller('HistorybygameweekCtrl', function ($scope, $http, $routeParams) {
+      var url = '/api/leaguehistory/' + $routeParams.leagueId + '/gameweek';
       $http.get(url).success(function (data) {
           $scope.model = data;
       });

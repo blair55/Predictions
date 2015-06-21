@@ -12,18 +12,7 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PlayerViewModel = { id:string; name:string; isAdmin:bool }
     
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueTableRowViewModel = { diffPos:int; position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }
-
-//    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-//    type LeagueTableViewModel = { rows:LeagueTableRowViewModel list }
-
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeeksViewModelRow = { gameWeekNo:int; hasResults:bool; firstKo:DateTime; position:int; correctScores:int; correctOutcomes:int; points:int; }
     
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeeksViewModel = { player:PlayerViewModel; position:int; rows:PlayerGameWeeksViewModelRow list }
-
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ScoreViewModel = { home:int; away:int; }
     
@@ -45,29 +34,43 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ClosedFixturesForGameWeekViewModel = { gameWeekNo:int; rows:OpenFixturesViewModelRow list }
 
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type MicroLeagueViewModel = { id:string; name:string; }
+
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PastGameWeekRowViewModel = { gameWeekNo:int; winner:PlayerViewModel; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PastGameWeeksViewModel = { rows:PastGameWeekRowViewModel list }
+    type PastGameWeeksViewModel = { league:MicroLeagueViewModel; rows:PastGameWeekRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type HistoryByMonthRowViewModel = { month:string; winner:PlayerViewModel; points:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type HistoryByMonthViewModel = { rows:HistoryByMonthRowViewModel list }
+    type HistoryByMonthViewModel = { league:MicroLeagueViewModel; rows:HistoryByMonthRowViewModel list }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type LeagueTableRowViewModel = { diffPos:int; position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type HistoryByMonthWithMonthViewModel = { month:string; rows:LeagueTableRowViewModel list; gameweeks:int list }
+    type HistoryByMonthWithMonthViewModel = { league:MicroLeagueViewModel; month:string; rows:LeagueTableRowViewModel list; gameweeks:int list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsViewModel = { gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string; player:PlayerViewModel }
+    type GameWeekPointsViewModel = { league:MicroLeagueViewModel; gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string; }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type PlayerGameWeeksViewModelRow = { gameWeekNo:int; hasResults:bool; firstKo:DateTime; position:int; correctScores:int; correctOutcomes:int; points:int; }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type PlayerGameWeeksViewModel = { player:PlayerViewModel; position:int; rows:PlayerGameWeeksViewModelRow list; league:MicroLeagueViewModel }
+
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; rows:FixturePointsRowViewModel list }
+    type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; (*rows:FixturePointsRowViewModel list*) }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeaguePositionGraphData = { data:int list list; labels:string list }

@@ -1,40 +1,36 @@
-<loading model="model" no-rows-msg="no results"></loading>
 
-<div ng-if="model">
-
-    <h4>{{model.player.name}}</h4>
-    <p>
-        League Position: {{ model.position | ordinal }}
-    </p>
-    <canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
-    <br />
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th></th>
-                <th class="numeric-cell-heading">Pos.</th>
-                <th class="numeric-cell-heading" title="Correct Scores">CS</th>
-                <th class="numeric-cell-heading" title="Correct Results">CR</th>
-                <th class="numeric-cell-heading">Pts.</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in model.rows">
-                <td>
-                    <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
-                    <span class="text-muted small">&middot; {{ row.firstKo | date:'MMM' | uppercase }}</span>
-                </td>
+<h4>{{model.player.name}} / {{model.league.name}}</h4>
+<p>
+    League Position: {{ model.position | ordinal }}
+</p>
+<canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
+<br />
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th class="numeric-cell-heading">Pos.</th>
+            <th class="numeric-cell-heading" title="Correct Scores">CS</th>
+            <th class="numeric-cell-heading" title="Correct Results">CR</th>
+            <th class="numeric-cell-heading">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td>
+                <a href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}} Predictions</a>
+                <span class="text-muted small">&middot; {{ row.firstKo | date:'MMM' | uppercase }}</span>
+            </td>
                 
-                <td ng-if="row.hasResults" class=" numeric-cell">{{row.position}}</td>
-                <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctScores}}</td>
-                <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctOutcomes}}</td>
-                <td ng-if="row.hasResults" class=" numeric-cell">{{row.points}}</td>
+            <td ng-if="row.hasResults" class=" numeric-cell">{{row.position}}</td>
+            <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctScores}}</td>
+            <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctOutcomes}}</td>
+            <td ng-if="row.hasResults" class=" numeric-cell">{{row.points}}</td>
 
-                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
-                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
-                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
-                <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+            <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+            <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+            <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+            <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
+        </tr>
+    </tbody>
+</table>

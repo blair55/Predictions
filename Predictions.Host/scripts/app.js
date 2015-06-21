@@ -30,11 +30,7 @@ angular
             templateUrl: 'views/main.html',
             controller: 'MainCtrl'
         })
-        .when('/leaguetable', {
-            templateUrl: 'views/leaguetable.html',
-            controller: 'LeaguetableCtrl'
-        })
-        .when('/player/:playerId', {
+        .when('/player/:playerId/:leagueId', {
             templateUrl: 'views/player.html',
             controller: 'PlayerCtrl'
         })
@@ -58,19 +54,19 @@ angular
             templateUrl: 'views/fixture.html',
             controller: 'FixtureCtrl'
         })
-        .when('/history/month', {
+        .when('/history/:leagueId/month', {
             templateUrl: 'views/historybymonth.html',
             controller: 'HistorybymonthCtrl'
         })
-        .when('/history/month/:month', {
+        .when('/history/:leagueId/month/:month', {
             templateUrl: 'views/historybymonthwithmonth.html',
             controller: 'HistorybymonthwithmonthCtrl'
         })
-        .when('/history/gameweek', {
+        .when('/history/:leagueId/gameweek', {
             templateUrl: 'views/historybygameweek.html',
             controller: 'HistorybygameweekCtrl'
         })
-        .when('/history/gameweek/:gameweekno', {
+        .when('/history/:leagueId/gameweek/:gameweekno', {
             templateUrl: 'views/historybygameweekwithgameweek.html',
             controller: 'HistorybygameweekwithgameweekCtrl'
         })

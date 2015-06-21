@@ -1,26 +1,24 @@
-<div ng-if="model">
-    <h4>Game Week History</h4>
+<h4>{{model.league.name}} / Game Week History</h4>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="slim-cell"></th>
-                <th>Winner</th>
-                <th class="numeric-cell-heading">Pts.</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in model.rows">
-                <td>
-                    <a href="#/history/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
-                </td>
-                <td>
-                    <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
-                </td>
-                <td class="numeric-cell">{{row.points}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="slim-cell"></th>
+            <th>Winner</th>
+            <th class="numeric-cell-heading">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td>
+                <a href="#/history/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
+            </td>
+            <td>
+                <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
+            </td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+</table>
 
-<loading model="model" no-rows-msg="no results"></loading>
+<a ng-href="#league/{{model.league.id}}">Back to League</a>

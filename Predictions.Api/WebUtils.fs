@@ -79,11 +79,11 @@ module WebUtils =
         match Admin with
         | Admin -> Success ()
         | _ -> Forbidden "player not admin" |> Failure 
-
-    let makeSurePlayerIsAdmin req =
-        req |> (getLoggedInPlayerAuthToken
-            >> bind getPlayerFromAuthToken
-            >> bind checkPlayerIsAdmin)
+//
+//    let makeSurePlayerIsAdmin req =
+//        req |> (getLoggedInPlayerAuthToken
+//            >> bind getPlayerFromAuthToken
+//            >> bind checkPlayerIsAdmin)
 
     let getErrorResponseFromAppError appError =
         match appError with

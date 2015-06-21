@@ -34,9 +34,6 @@ module DummyData =
     let registerPlayerInDb (cmd:RegisterPlayerCommand) = playersDictionary.Add(cmd.player.id, cmd.explid, cmd.exProvider, cmd.player.name)
     let updateUserNameInDb (cmd:UpdateUserNameCommand) = ()
 
-    let getPlayers() =
-        playersDictionary |> Seq.map(fun (plid, _, _, name) -> { Player.id=plid; name=name }) |> Seq.toList
-
     let getLeagueIdsThatPlayerIsIn (player:Player) =
         leaguePlayersBridgeTable
         |> Seq.filter(fun (_,plid) -> plid = player.id)
@@ -59,6 +56,11 @@ module DummyData =
         leaguePlayersBridgeTable
         |> Seq.filter(fun (lgid,_) -> lgid = leagueId)
         |> Seq.map(fun (_,plid) -> plid)
+
+    let getPlayer (plId:PlId) =
+        match tryFindPlayerByPlayerId (plId) with
+        | Some p -> p |> Success
+        | None -> NotFound "player not found" |> Failure
 
     let getLeague (lgId:LgId) =
         let found,name = leaguesDictionary.TryGetValue(lgId)
@@ -94,14 +96,14 @@ module Services =
     let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
     let gameWeeksWithResults() = gameWeeks() |> getGameWeeksWithAnyClosedFixturesWithResults
 
-    let getImmediateSiblings collection item =
-        match collection |> List.tryFindIndex(fun c -> c = item) with
-        | None -> (None, None)
-        | Some i -> let p = i - 1
-                    let n = i + 1
-                    let prev = if (p >= 0) then collection.[p] else None
-                    let next = if (n <= collection.Length) then collection.[p] else None
-                    (prev, next)
+//    let getImmediateSiblings collection item =
+//        match collection |> List.tryFindIndex(fun c -> c = item) with
+//        | None -> (None, None)
+//        | Some i -> let p = i - 1
+//                    let n = i + 1
+//                    let prev = if (p >= 0) then collection.[p] else None
+//                    let next = if (n <= collection.Length) then collection.[p] else None
+//                    (prev, next)
         
     let predictionOptionToScoreViewModel (pr:Prediction option) =
         match pr with
@@ -122,39 +124,37 @@ module Services =
         }
 
     let getOpenFixturesForPlayer (player:Player) =
-        let players = getPlayers()
         let gws = gameWeeks()
         let rows = gws
-                   |> List.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [gw] players player)
+                   |> List.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [gw] player)
                    |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd, p) -> toOpenFixtureViewModelRow (gw,fd,p) gws))
                    |> List.collect(fun ofvmr -> ofvmr)
                    |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
-    let getFixtureViewDetails (gw, (fd:FixtureData), r, players) =
+    let getFixtureViewDetails (gw, (fd:FixtureData), (r:Result option)) =
         let getPredictionScoreViewModel (prediction:Prediction option) =
             match prediction with
             | Some p -> toScoreViewModel p.score
-            | None -> { ScoreViewModel.home=0; away=0 }
+            | None -> noScoreViewModel
         let getResultScoreViewModel (result:Result option) =
             match result with
-            | Some r -> toScoreViewModel r.score
-            | None -> { ScoreViewModel.home=0; away=0 }
-        let rows = players
-                   |> List.map(fun plr -> plr, (fd.predictions |> List.tryFind(fun pr -> pr.player = plr)))
-                   |> List.map(fun (plr, pr) -> plr, pr, (getBracketForPredictionComparedToResult pr r) |> getPointsForBracket)
-                   |> List.map(fun (plr, pr, pts) -> { FixturePointsRowViewModel.player=(getPlayerViewModel plr); predictionSubmitted=pr.IsSome; prediction=(getPredictionScoreViewModel pr); points=pts })
-        { FixturePointsViewModel.fixture=(toFixtureViewModel fd gw); resultSubmitted=r.IsSome; result=r|>getResultScoreViewModel; rows=rows }
+            | Some rslt -> toScoreViewModel rslt.score
+            | None -> noScoreViewModel
+//        let rows = players
+//                   |> List.map(fun plr -> plr, (fd.predictions |> List.tryFind(fun pr -> pr.player = plr)))
+//                   |> List.map(fun (plr, pr) -> plr, pr, (getBracketForPredictionComparedToResult pr r) |> getPointsForBracket)
+//                   |> List.map(fun (plr, pr, pts) -> { FixturePointsRowViewModel.player=(getPlayerViewModel plr); predictionSubmitted=pr.IsSome; prediction=(getPredictionScoreViewModel pr); points=pts })
+        { FixturePointsViewModel.fixture=(toFixtureViewModel fd gw); resultSubmitted=r.IsSome; result=r|>getResultScoreViewModel; (*rows=rows*) }
 
     let getPlayerPointsForFixture (fxid:FxId) =
-        let players = getPlayers()
         let findFixtureAndGameWeek() =
             match tryFindFixtureWithGameWeek (gameWeeks()) fxid with
             | Some f -> Success f
-            | None -> InternalError "could not find fixture" |> Failure
+            | None -> NotFound "could not find fixture" |> Failure
         let viewFixture (gw, f, _) =
             match tryViewFixture f with
-            | Success (fd, r) -> Success(gw, fd, r, players)
+            | Success (fd, r) -> Success(gw, fd, r)
             | Failure msg -> Failure msg
         () |> (findFixtureAndGameWeek
            >> bind viewFixture
@@ -168,26 +168,6 @@ module Services =
         correctOutcomes=ltr.correctOutcomes
         points=ltr.points }
 
-//    let getLeagueTableView (league:League) =
-////        let players = getPlayers()    
-//        let players = league.players
-//        let gwsWithResults = gameWeeksWithResults()
-//        let getSafeTail collection = if collection |> List.exists(fun _ -> true) then collection |> List.tail else collection
-//        let gwsWithResultsWithoutMax = gwsWithResults |> List.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> getSafeTail
-//        let recentFixtures = getFixturesForGameWeeks gwsWithResults
-//        let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
-//        let recentLge = getLeagueTable players recentFixtures
-//        let priorLge = getLeagueTable players priorFixtures
-//        let findPlayerPriorPos player currentPos =
-//            let playerPriorLgeRow = priorLge |> List.tryFind(fun (_, pl, _, _, _) -> pl = player)
-//            match playerPriorLgeRow with | Some (pos, _, _, _, _) -> pos | None -> currentPos
-//        let toDiffLgeRow (pos, pl, cs, co, pts) =
-//            let priorPos = findPlayerPriorPos pl pos
-//            let diffPos = priorPos - pos
-//            (diffPos, pos, pl, cs, co, pts)
-//        let rows = recentLge |> List.map(toDiffLgeRow) |> List.map(leagueTableRowToViewModel)
-//        { LeagueTableViewModel.rows=rows }
-
     let leagueTableTupleToRowViewModel (pos, pl, cs, co, pts) =
         let ltr = {
             LeagueTableRow.diffPosition = 0
@@ -198,21 +178,14 @@ module Services =
             points = pts }
         leagueTableRowToViewModel ltr
 
-    let getGameWeekPointsView gwno player =
-        let players = getPlayers()
-        let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
-        let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
-        let rows = (getLeagueTable players fixtures) |> List.map(leagueTableTupleToRowViewModel)
-        let pvm = getPlayerViewModel player
-        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; player=pvm }
-        
-
-    let getPlayerFromAuthToken _ =
-        Success { Player.id=newPlId(); name=""|>PlayerName; }
-
     let getLeaguePositionForPlayer players player =
         let fixtures = gameWeeksWithResults() |> getFixturesForGameWeeks
         getLeaguePositionForFixturesForPlayer fixtures players player
+
+    let leagueIdToString leagueId = leagueId |> getLgId |> str
+
+    let getMircoLeagueViewModel (league:League) =
+        { MicroLeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName }
 
     let leagueToRowViewModel (league:League) player =
         let leagueTableRowForPlayer = getLeagueTableRows league (gameWeeksWithResults()) |> Seq.find(fun row -> row.player = player)
@@ -224,84 +197,64 @@ module Services =
             |> Seq.map getLeagueUnsafe
             |> Seq.map(fun l -> leagueToRowViewModel l player)
             |> Seq.toList
-        { LeaguesViewModel.rows = rows }
+        { LeaguesViewModel.rows=rows }
 
-    let getGameWeeksPointsForPlayer player =
-        let players = getPlayers()
-        let gameWeeks = gameWeeks()
-        let buildRow (gw:GameWeek) pos cs co pts =
-            {
-                PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number);
-                hasResults=(doesGameWeekHaveAnyResults gw); firstKo=(getFirstKoForGw gw);
-                position=pos; correctScores=cs; correctOutcomes=co; points=pts
-            }
-        let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
-            match r with
-            | Some (pos, _, cs, co, pts) -> buildRow gw pos cs co pts
-            | None -> buildRow gw 0 0 0 0
-        let rows = (getPlayerPointsForGameWeeks players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
-        let fixtures = gameWeeks |> getFixturesForGameWeeks
-        let pos = getLeaguePositionForFixturesForPlayer fixtures players player
-        { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); position=pos; rows=rows }
-        
-    let getGameWeeksPointsForPlayerId playerId =
-        let result = tryFindPlayerByPlayerId (PlId playerId)
-        match result with
-        | Some p -> getGameWeeksPointsForPlayer p |> Success
-        | None -> NotFound "player not found" |> Failure
+    let getGameWeeksPointsForPlayerIdAndLeagueId (playerId, leagueId) =
+        let getResult (player:Player, league:League) =
+            let gameWeeks = gameWeeks()
+            let buildRow (gw:GameWeek) pos cs co pts = {
+                    PlayerGameWeeksViewModelRow.gameWeekNo=(getGameWeekNo gw.number);
+                    hasResults=(doesGameWeekHaveAnyResults gw); firstKo=(getFirstKoForGw gw);
+                    position=pos; correctScores=cs; correctOutcomes=co; points=pts }
+            let getPlayerGameWeeksViewModelRow ((gw:GameWeek), r) =
+                match r with
+                | Some (pos, _, cs, co, pts) -> buildRow gw pos cs co pts
+                | None -> buildRow gw 0 0 0 0
+            let rows = (getPlayerPointsForGameWeeks league.players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
+            let fixtures = gameWeeks |> getFixturesForGameWeeks
+            let pos = getLeaguePositionForFixturesForPlayer fixtures league.players player
+            { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); position=pos; rows=rows; league=league|>getMircoLeagueViewModel }
+        let getLeagueAndCarryPlayer player =
+            LgId leagueId |> (getLeague >> bind (switch (fun lge -> (player, lge))))
+        PlId playerId |> (getPlayer
+                      >> bind getLeagueAndCarryPlayer
+                      >> bind (switch getResult))
 
-    let getPastGameWeeksWithWinner() =
-        let players = getPlayers()
-        let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) players)
-                   |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts })
-        { PastGameWeeksViewModel.rows = rows }
+    let getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo playerId =
+        let getResult player =
+            let gw = gameWeeks() |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
+            let rowToViewModel (fd, (r:Result option), (p:Prediction option), pts) =
+                let getVmPred (pred:Prediction option) =
+                    match pred with
+                    | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
+                    | None -> noScoreViewModel
+                let getVmResult (result:Result option) =
+                    match result with
+                    | Some r -> { ScoreViewModel.home=fst r.score;away=snd r.score }
+                    | None -> noScoreViewModel
+                { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts }
+            let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
+            { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
+        PlId playerId |> (getPlayer >> bind (switch getResult))
 
-    let getPastMonthsWithWinner() =
-        let players = getPlayers()
-        let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) players)
-                   |> List.map(fun (m, plr, pts) -> { HistoryByMonthRowViewModel.month=m; winner=(getPlayerViewModel plr); points=pts })
-        { HistoryByMonthViewModel.rows = rows }
-    
-    let getMonthPointsView month =
-        let players = getPlayers()
-        let gws = month |> getGameWeeksForMonth (gameWeeksWithResults())
-        let fixtures = gws |> getFixturesForGameWeeks
-        let rows = (getLeagueTable players fixtures) |> List.map(leagueTableTupleToRowViewModel)
-        { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo) }
-    
-    let getPlayerGameWeek playerId gameWeekNo =
-        let players = getPlayers()
-        let player = findPlayerById players (playerId|>PlId)
-        let gw = gameWeeks() |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
-        let rowToViewModel (fd, (r:Result option), (p:Prediction option), pts) =
-            let getVmPred (pred:Prediction option) =
-                match pred with
-                | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
-                | None -> noScoreViewModel
-            let getVmResult (result:Result option) =
-                match result with
-                | Some r -> { ScoreViewModel.home=fst r.score;away=snd r.score }
-                | None -> noScoreViewModel
-            { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts }
-        let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
-        { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
-
-    let getLeaguePositionGraphDataForPlayer playerId =
-        let players = getPlayers()
-        let gws = gameWeeksWithResults()
-        let fixtures = gws |> compoundList |> List.map(getFixturesForGameWeeks)
-        let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
-        let data = players
-                   |> List.filter(fun p -> p.id = playerId)
-                   |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs players plr)))
-                   |> List.map(fun (_, posList) -> posList)
-        { LeaguePositionGraphData.data=data; labels=labels }
+    let getLeaguePositionGraphDataForPlayerIdAndLeagueId (playerId, leagueId) =
+        let getResult (league:League) =
+            let plid = PlId playerId
+            let gws = gameWeeksWithResults()
+            let fixtures = gws |> compoundList |> List.map(getFixturesForGameWeeks)
+            let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+            let data = league.players
+                       |> List.filter(fun p -> p.id = plid)
+                       |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs league.players plr)))
+                       |> List.map(fun (_, posList) -> posList)
+            { LeaguePositionGraphData.data=data; labels=labels }
+        LgId leagueId |> (getLeague >> bind (switch getResult))
 
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
             let fixture = tryFindFixture gws fxid
-            Invalid "fixture does not exist" |> optionToResult fixture
+            NotFound "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> fd, (GetOutcomeCounts fd.predictions (0, 0, 0))))
@@ -333,7 +286,7 @@ module Services =
         { PastGameWeekRowViewModel.gameWeekNo=2; winner=p; points=2 }
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =
-        getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) (getPlayers()) player
+        getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) player
         |> List.length
 
     let getInPlay() =
@@ -345,9 +298,6 @@ module Services =
                    |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
         { InPlayViewModel.rows = rows }
 
-
-
-    let leagueIdToString leagueId = leagueId |> getLgId |> str
 
     let leagueToViewModel (league:League) = 
         let leagueTable = getLeagueTableRows league (gameWeeksWithResults())
@@ -373,6 +323,36 @@ module Services =
         lgid |> (getLeague
                  >> bind (switch joinLge)
                  >> bind (switch returnLeague))
+
+    let getPastMonthsWithWinner leagueId =
+        let getHistoryByMonthViewModel (league:League) =
+            let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
+                       |> List.map(fun (m, plr, pts) -> { HistoryByMonthRowViewModel.month=m; winner=(getPlayerViewModel plr); points=pts })
+            { HistoryByMonthViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
+        LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthViewModel))
+
+    let getMonthPointsView month leagueId =
+        let getHistoryByMonthWithMonthViewModel league =
+            let gws = month |> getGameWeeksForMonth (gameWeeksWithResults())
+            let fixtures = gws |> getFixturesForGameWeeks
+            let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
+            { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo); league=league|>getMircoLeagueViewModel }
+        LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthWithMonthViewModel))
+    
+    let getPastGameWeeksWithWinner leagueId =
+        let getPastGameWeeksViewModel (league:League) =
+            let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
+                       |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts })
+            { PastGameWeeksViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
+        LgId leagueId |> (getLeague >> bind (switch getPastGameWeeksViewModel))
+
+    let getGameWeekPointsView gwno leagueId =
+        let getGameWeekPointsViewModel (league:League) =
+            let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
+            let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
+            let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
+            { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; league=league|>getMircoLeagueViewModel }
+        LgId leagueId |> (getLeague >> bind (switch getGameWeekPointsViewModel))
 
     // persistence
     
@@ -421,7 +401,6 @@ module Services =
                       >> bind (switch saveGameWeek))
 
     let trySavePrediction (ppm:PredictionPostModel) (player:Player) =
-        let players = getPlayers()
         let gws = gameWeeks()
         let fxId = FxId (sToGuid ppm.fixtureId)
         let makeSureFixtureExists p = match (tryFindFixture gws fxId) with | Some f -> Success (p, f) | None -> Invalid "fixture does not exist" |> Failure
@@ -457,5 +436,5 @@ module Services =
         let result = tryFindPlayerByPlayerId plId
         match result with
         | Some p -> p
-        | None -> failwith "cannot find player details"
+        | None -> failwith "no player found"
 
