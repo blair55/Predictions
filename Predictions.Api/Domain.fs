@@ -53,6 +53,7 @@ module Domain =
     type Prediction = { id:PrId; score:Score; player:Player }
     type Result = { id:RsId; score:Score }
     type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
+//    type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; }
     type Fixture =
         | OpenFixture of FixtureData
         | ClosedFixture of (FixtureData * Result option)
@@ -108,13 +109,13 @@ module Domain =
         |> List.map(fun (gw, f) -> gw, f, fixtureToFixtureData f)
         |> List.tryFind(fun (gw, f, fd) -> fd.id = fxid)
 
-    let tryFindPredictionWithFixture (gws:GameWeek list) prid =
-        gws
-        |> List.collect(fun gw -> gw.fixtures)
-        |> List.map(fixtureToFixtureData)
-        |> List.map(fun fd -> fd, fd.predictions)
-        |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
-        |> List.tryFind(fun (_, p) -> p.id = prid)
+//    let tryFindPredictionWithFixture (gws:GameWeek list) prid =
+//        gws
+//        |> List.collect(fun gw -> gw.fixtures)
+//        |> List.map(fixtureToFixtureData)
+//        |> List.map(fun fd -> fd, fd.predictions)
+//        |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
+//        |> List.tryFind(fun (_, p) -> p.id = prid)
 
     let getMonthForGameWeek (gw:GameWeek) =
         gw.fixtures
@@ -127,8 +128,6 @@ module Domain =
         |> List.map(fun gw -> gw, (gw.fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff)))
         |> List.filter(fun (_, f) -> f.kickoff.ToString(monthFormat) = month)
         |> List.map(fun (gw, _) -> gw)
-
-//    let findPlayerById (players:Player list) id = players |> List.find(fun p -> p.id = id)
 
     let getFixturesInPlay gws =
         gws |> List.map(fun gw -> gw, ([gw] |> getFixturesForGameWeeks |> List.filter(isFixtureClosedAndHaveNoResult)))
@@ -279,8 +278,7 @@ module Domain =
         |> List.map(fixtureToFixtureDataWithResult)
 
     let getGameWeeksWithClosedFixtures (gws:GameWeek list) =
-        gws
-        |> List.filter(fun gw -> [gw] |> getClosedFixturesForGameWeeks |> List.isEmpty = false)
+        gws |> List.filter(fun gw -> [gw] |> getClosedFixturesForGameWeeks |> List.isEmpty = false)
 
 
     // Rules 
