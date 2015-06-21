@@ -34,7 +34,7 @@ module Common =
             let r = x()
             Success r
         with
-            | :? (System.Exception) as ex -> Failure ex.Message
+            | ex -> Failure ex.Message
 
     let fstOption a =
         match a with

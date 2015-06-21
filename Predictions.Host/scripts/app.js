@@ -115,4 +115,7 @@ angular
     })
     .config(function (localStorageServiceProvider) {
         localStorageServiceProvider.setPrefix('prdlge');
-    });
+    })
+	.config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
+		cfpLoadingBarProvider.includeSpinner = false;
+  }]);

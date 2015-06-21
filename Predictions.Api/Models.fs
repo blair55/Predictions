@@ -14,9 +14,9 @@ module ViewModels =
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueTableRowViewModel = { diffPos:int; position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }
-    
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueTableViewModel = { rows:LeagueTableRowViewModel list }
+
+//    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+//    type LeagueTableViewModel = { rows:LeagueTableRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PlayerGameWeeksViewModelRow = { gameWeekNo:int; hasResults:bool; firstKo:DateTime; position:int; correctScores:int; correctOutcomes:int; points:int; }
@@ -100,7 +100,7 @@ module LeagueModels =
     type CreateLeaguePostModel = { name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueViewModel = { id:string; name:string; (* league table *) }
+    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueInviteViewModel = { id:string; name:string; inviteLink:string; }

@@ -7,7 +7,7 @@ module Domain =
     type LgId = LgId of Guid
     type FxId = FxId of Guid
     type GwId = GwId of Guid
-    type PlId = PlId of string //Guid
+    type PlId = PlId of Guid
     type PrId = PrId of Guid
     type RsId = RsId of Guid
     type SnId = SnId of Guid
@@ -16,6 +16,11 @@ module Domain =
     type Team = string
     type KickOff = DateTime
     type Role = User | Admin
+    type LeagueName = LeagueName of string
+    type ShareableLeagueId = ShareableLeagueId of string
+    type ExternalPlayerId = ExternalPlayerId of string
+    type ExternalLoginProvider = ExternalLoginProvider of string
+    type PlayerName = PlayerName of string
 
     let nguid() = Guid.NewGuid()
     let newLgId() = nguid()|>LgId
@@ -24,7 +29,9 @@ module Domain =
     let newGwId() = nguid()|>GwId
     let newRsId() = nguid()|>RsId
     let newSnId() = nguid()|>SnId
-    //let newPlId() = nguid()|>PlId
+    let newPlId() = nguid()|>PlId
+    let makeLeagueName (name:string) =
+        (if name.Length > 50 then name.Substring(0, 50) else name) |> LeagueName
     
     let getPlayerId (PlId id) = id
     let getGameWeekNo (GwNo n) = n
@@ -35,12 +42,14 @@ module Domain =
     let getRsId (RsId id) = id
     let getSnId (SnId id) = id
     let getSnYr (SnYr year) = year
+    let getPlayerName (PlayerName plrName) = plrName
+    let getLeagueName (LeagueName lgeName) = lgeName
 
     let currentSeason = SnYr "2014/15"
     let monthFormat = "MMMM yyyy"
 
     type Score = int * int
-    type Player = { id:PlId; name:string; role:Role; authToken:string }
+    type Player = { id:PlId; name:PlayerName; }
     type Prediction = { id:PrId; score:Score; player:Player }
     type Result = { id:RsId; score:Score }
     type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
@@ -52,7 +61,7 @@ module Domain =
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
 
-    type League = { id:LgId; name:string; players:Player list}
+    type League = { id:LgId; name:LeagueName; players:Player list}
 
     type AppError =
         | NotLoggedIn of string
@@ -316,8 +325,8 @@ module Domain =
         else if home = away then invalid "fixture home and away team cannot be the same"
         else Success({id=newFxId(); home=home; away=away; kickoff=kickoff; predictions=[]})
 
-    let getShareableLeagueId (league:League) =
-        (str <| getLgId league.id).Substring(0, 8)
+    let getShareableLeagueId (leagueId:LgId) =
+        (str <| getLgId leagueId).Substring(0, 8)
 
 module FormGuide =
 
@@ -348,3 +357,25 @@ module FormGuide =
         |> Seq.toList
         |> List.rev
     
+module LeagueTableCalculation =
+
+    open Domain
+
+    type LeagueTableRow = { diffPosition:int; position:int; player:Player; correctScores:int; correctOutcomes:int; points:int }
+    
+    let getLeagueTableRows (league:League) gwsWithResults =
+        let players = league.players
+        let getSafeTail collection = if collection |> List.exists(fun _ -> true) then collection |> List.tail else collection
+        let gwsWithResultsWithoutMax = gwsWithResults |> List.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> getSafeTail
+        let recentFixtures = getFixturesForGameWeeks gwsWithResults
+        let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
+        let recentLge = getLeagueTable players recentFixtures
+        let priorLge = getLeagueTable players priorFixtures
+        let findPlayerPriorPos player currentPos =
+            let playerPriorLgeRow = priorLge |> List.tryFind(fun (_, pl, _, _, _) -> pl = player)
+            match playerPriorLgeRow with | Some (pos, _, _, _, _) -> pos | None -> currentPos
+        let toDiffLgeRow (pos, pl, cs, co, pts) =
+            let priorPos = findPlayerPriorPos pl pos
+            let diffPos = priorPos - pos
+            { diffPosition=diffPos; position=pos; player=pl; correctScores=cs; correctOutcomes=co; points=pts }
+        recentLge |> List.map(toDiffLgeRow)

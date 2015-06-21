@@ -1,5 +1,32 @@
 <h4>League: {{model.name}}</h4>
 
-<table>league table</table>
-
 <a ng-href="#/leagueinvite/{{model.id}}">Invite To Join</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="numeric-cell-heading">Pos.</th>
+            <th></th>
+            <th>Player</th>
+            <th class="numeric-cell-heading" title="Correct Scores">CS</th>
+            <th class="numeric-cell-heading" title="Correct Results">CR</th>
+            <th class="numeric-cell-heading">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td class="numeric-cell">{{row.position}}</td>
+            <td class="movement">
+                <span ng-if="row.diffPos > 0" class="diff-up glyphicon glyphicon-chevron-up" title="up {{row.diffPos}}"></span>
+                <span ng-if="row.diffPos == 0" class="diff-none glyphicon glyphicon-minus" title="no movement"></span>
+                <span ng-if="row.diffPos < 0" class="diff-down glyphicon glyphicon-chevron-down" title="down {{row.diffPos}}"></span>
+            </td>
+            <td>
+                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+            </td>
+            <td class="numeric-cell">{{row.correctScores}}</td>
+            <td class="numeric-cell">{{row.correctOutcomes}}</td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+</table>

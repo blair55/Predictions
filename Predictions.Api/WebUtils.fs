@@ -48,10 +48,10 @@ module WebUtils =
         res.Headers.Location <- new Uri(url)
         res
 
-    let logPlayerIn request (player:Player) =
-        let july1025 = new DateTime(2015, 7, 1)
-        let cookie = createCookie cookieName player.authToken july1025
-        getRedirectToResponseWithCookie request cookie
+//    let logPlayerIn request (player:Player) =
+//        let july1025 = new DateTime(2015, 7, 1)
+//        let cookie = createCookie cookieName player.authToken july1025
+//        getRedirectToResponseWithCookie request cookie
 
     let logPlayerOut (request:HttpRequestMessage) =
         let yesterday = DateTime.Now.AddDays(-1.0)
@@ -76,7 +76,7 @@ module WebUtils =
         response
 
     let checkPlayerIsAdmin (player:Player) =
-        match player.role with
+        match Admin with
         | Admin -> Success ()
         | _ -> Forbidden "player not admin" |> Failure 
 
@@ -113,9 +113,12 @@ module WebUtils =
                 response.RequestMessage <- request
                 Task.FromResult(response)
 
-    let buildPlUser (loginInfo:ExternalLoginInfo) =
-        new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
+//    let buildPlUser (loginInfo:ExternalLoginInfo) =
+//        new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
 
-    let getPlayerFromViewModel (pvm:PlayerViewModel) =
-        { Player.id=(PlId pvm.id); name=pvm.name; authToken=""; role=User}
-        
+    let register (loginInfo:ExternalLoginInfo) =
+        let externalId = loginInfo.ExternalIdentity.GetUserId() |> ExternalPlayerId
+        let provider = loginInfo.Login.LoginProvider |> ExternalLoginProvider
+        let userName = loginInfo.ExternalIdentity.GetUserName() |> PlayerName
+        let registeredPlayer = registerPlayerWithUserInfo externalId provider userName
+        new PlUser(registeredPlayer.id|>getPlayerId|>str, provider, registeredPlayer.name|>getPlayerName)
