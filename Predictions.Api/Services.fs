@@ -22,28 +22,50 @@ module DummyData =
     type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
     type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
+    
+    
+    type SaveSeasonCommand = { id:SnId; year:SnYr; }
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
+    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
+    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
+    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
+    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
+
      
     let buildSeason _ = { id=newSnId(); year=SnYr ""; gameWeeks=[] }
     
     let playersDictionary = new List<(PlId*ExternalPlayerId*ExternalLoginProvider*PlayerName)>()
-    let leaguesDictionary = new Dictionary<LgId,LeagueName>()
+    let leaguesDictionary = new List<(LgId*LeagueName)>()
     let leaguePlayersBridgeTable = new List<(LgId*PlId)>()
+    let predictionsDictionary = new List<(PlId*Prediction)>()
 
     let saveLeagueInDb (cmd:SaveLeagueCommand) = leaguesDictionary.Add(cmd.id, cmd.name)
     let joinLeagueInDb (cmd:JoinLeagueCommand) = leaguePlayersBridgeTable.Add(cmd.leagueId, cmd.playerId)
     let registerPlayerInDb (cmd:RegisterPlayerCommand) = playersDictionary.Add(cmd.player.id, cmd.explid, cmd.exProvider, cmd.player.name)
     let updateUserNameInDb (cmd:UpdateUserNameCommand) = ()
+    let savePlayer (cmd:SavePlayerCommand) = ()
+    let saveSeason (cmd:SaveSeasonCommand) = ()
+    let saveResult (cmd:SaveResultCommand) = ()
+    let savePrediction (cmd:SavePredictionCommand) = ()
+    let saveGameWeek (cmd:SaveGameWeekCommand) = ()
 
     let getLeagueIdsThatPlayerIsIn (player:Player) =
         leaguePlayersBridgeTable
         |> Seq.filter(fun (_,plid) -> plid = player.id)
         |> Seq.map(fun (lgid,_) -> lgid)
 
+    let getPredictionsForPlayer (playerId:PlId) =
+        predictionsDictionary
+        |> Seq.filter(fun (plid, _) -> plid = playerId)
+        |> Seq.map snd |> Seq.toList
+
+    let getAllPreditions() = predictionsDictionary |> Seq.map snd |> Seq.toList
+
     let tryFindPlayerAndMap findFunc =
         playersDictionary
         |> Seq.tryFind(findFunc)
         |> function
-        | Some (plid, _, _, name) -> Some { Player.id=plid; name=name }
+        | Some (plid, _, _, name) -> Some { Player.id=plid; name=name; predictions=plid|>getPredictionsForPlayer }
         | None -> None
 
     let tryFindPlayerByPlayerId playerId =
@@ -62,24 +84,24 @@ module DummyData =
         | Some p -> p |> Success
         | None -> NotFound "player not found" |> Failure
 
-    let getLeague (lgId:LgId) =
-        let found,name = leaguesDictionary.TryGetValue(lgId)
-        match found with
-        | false -> NotFound "League not found" |> Failure
-        | true ->
-            let players = getPlayerIdsForLeague lgId |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-            Success { League.id=lgId; name=name; players=players }
-
-    let getLeagueUnsafe (lgId:LgId) =
-        let name = leaguesDictionary.[lgId]
-        let players = getPlayerIdsForLeague lgId |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-        { League.id=lgId; name=name; players=players }
-
-    let getLeagueByShareableId shareableLeagueId =
-        let result = leaguesDictionary.Keys |> Seq.tryFind(fun k -> (k|>getShareableLeagueId) = shareableLeagueId)
+    let getLeague (leagueId:LgId) =
+        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> lgid = leagueId)
         match result with
         | None -> NotFound "League not found" |> Failure
-        | Some lgid -> getLeague lgid
+        | Some (lgid,name) ->
+            let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
+            Success { League.id=lgid; name=name; players=players }
+
+    let getLeagueUnsafe (leagueId:LgId) =
+        let (lgid,name) = leaguesDictionary |> Seq.find(fun (lgid,_) -> lgid = leagueId)
+        let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
+        { League.id=lgid; name=name; players=players }
+
+    let getLeagueByShareableId shareableLeagueId =
+        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> (lgid|>getShareableLeagueId) = shareableLeagueId)
+        match result with
+        | None -> NotFound "League not found" |> Failure
+        | Some (lgid,name) -> getLeague lgid
 
 [<AutoOpen>]
 module Services =
@@ -257,7 +279,7 @@ module Services =
             NotFound "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
-             >> bind (switch (fun fd -> fd, (GetOutcomeCounts fd.predictions (0, 0, 0))))
+             >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPreditions()) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
 
     let getGameWeeksWithClosedFixtures() =
@@ -356,18 +378,6 @@ module Services =
 
     // persistence
     
-    type SaveSeasonCommand = { id:SnId; year:SnYr; }
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
-    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
-    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
-    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
-    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
-
-    let savePlayer (cmd:SavePlayerCommand) = ()
-    let saveSeason (cmd:SaveSeasonCommand) = ()
-    let saveResult (cmd:SaveResultCommand) = ()
-    let savePrediction (cmd:SavePredictionCommand) = ()
-    let saveGameWeek (cmd:SaveGameWeekCommand) = ()
 
     let trySaveResultPostModel (rpm:ResultPostModel) =
         let gws = gameWeeks()
@@ -403,12 +413,12 @@ module Services =
     let trySavePrediction (ppm:PredictionPostModel) (player:Player) =
         let gws = gameWeeks()
         let fxId = FxId (sToGuid ppm.fixtureId)
-        let makeSureFixtureExists p = match (tryFindFixture gws fxId) with | Some f -> Success (p, f) | None -> Invalid "fixture does not exist" |> Failure
-        let makeSureFixtureIsOpen (plr, f:Fixture) = match f with | OpenFixture fd -> Success (plr, fd) | ClosedFixture f -> Invalid "fixture is closed" |> Failure
-        let createScore (plr, fd) = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(plr, fd, s) | Failure msg -> Failure msg
-        let createPrediction (plr, fd, s) = (plr, fd, (createPrediction plr s))
-        let updatePrediction ((plr:Player), (fd:FixtureData), (pr:Prediction)) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=fd.id; playerId=plr.id; score=pr.score }
-        player |> (makeSureFixtureExists
+        let makeSureFixtureExists fxid = match (tryFindFixture gws fxid) with | Some f -> Success f | None -> Invalid "fixture does not exist" |> Failure
+        let makeSureFixtureIsOpen (f:Fixture) = match f with | OpenFixture fd -> Success fd | ClosedFixture f -> Invalid "fixture is closed" |> Failure
+        let createScore fd = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(fd, s) | Failure msg -> Failure msg
+        let createPrediction (fd:FixtureData, s) = createPrediction fd.id s
+        let updatePrediction (pr:Prediction) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=pr.fixtureId; playerId=player.id; score=pr.score }
+        fxId |> (makeSureFixtureExists
                >> bind makeSureFixtureIsOpen
                >> bind createScore
                >> bind (switch createPrediction)
@@ -428,7 +438,7 @@ module Services =
             updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
             player
         | None -> 
-            let player = { Player.id=newPlId(); name=userName }
+            let player = { Player.id=newPlId(); name=userName; predictions=[] }
             registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; }
             player
 
