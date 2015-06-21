@@ -1,7 +1,6 @@
 namespace Predictions.Api
 
 open System
-open System.Collections.Generic
 open System.Net
 open System.Net.Http
 open System.Web
@@ -13,95 +12,8 @@ open Newtonsoft.Json
 open Predictions.Api.Domain
 open Predictions.Api.FormGuide
 open Predictions.Api.Common
+open Predictions.Api.Data
 open Predictions.Api.LeagueTableCalculation
-
-[<AutoOpen>]
-module DummyData =
-
-    type SaveLeagueCommand = { id:LgId; name:LeagueName }
-    type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
-    type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
-    type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
-    
-    
-    type SaveSeasonCommand = { id:SnId; year:SnYr; }
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
-    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
-    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
-    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
-    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
-
-     
-    let buildSeason _ = { id=newSnId(); year=SnYr ""; gameWeeks=[] }
-    
-    let playersDictionary = new List<(PlId*ExternalPlayerId*ExternalLoginProvider*PlayerName)>()
-    let leaguesDictionary = new List<(LgId*LeagueName)>()
-    let leaguePlayersBridgeTable = new List<(LgId*PlId)>()
-    let predictionsDictionary = new List<(PlId*Prediction)>()
-
-    let saveLeagueInDb (cmd:SaveLeagueCommand) = leaguesDictionary.Add(cmd.id, cmd.name)
-    let joinLeagueInDb (cmd:JoinLeagueCommand) = leaguePlayersBridgeTable.Add(cmd.leagueId, cmd.playerId)
-    let registerPlayerInDb (cmd:RegisterPlayerCommand) = playersDictionary.Add(cmd.player.id, cmd.explid, cmd.exProvider, cmd.player.name)
-    let updateUserNameInDb (cmd:UpdateUserNameCommand) = ()
-    let savePlayer (cmd:SavePlayerCommand) = ()
-    let saveSeason (cmd:SaveSeasonCommand) = ()
-    let saveResult (cmd:SaveResultCommand) = ()
-    let savePrediction (cmd:SavePredictionCommand) = ()
-    let saveGameWeek (cmd:SaveGameWeekCommand) = ()
-
-    let getLeagueIdsThatPlayerIsIn (player:Player) =
-        leaguePlayersBridgeTable
-        |> Seq.filter(fun (_,plid) -> plid = player.id)
-        |> Seq.map(fun (lgid,_) -> lgid)
-
-    let getPredictionsForPlayer (playerId:PlId) =
-        predictionsDictionary
-        |> Seq.filter(fun (plid, _) -> plid = playerId)
-        |> Seq.map snd |> Seq.toList
-
-    let getAllPreditions() = predictionsDictionary |> Seq.map snd |> Seq.toList
-
-    let tryFindPlayerAndMap findFunc =
-        playersDictionary
-        |> Seq.tryFind(findFunc)
-        |> function
-        | Some (plid, _, _, name) -> Some { Player.id=plid; name=name; predictions=plid|>getPredictionsForPlayer }
-        | None -> None
-
-    let tryFindPlayerByPlayerId playerId =
-        tryFindPlayerAndMap (fun (plid, _, _, _) -> plid = playerId)
-
-    let tryFindPlayerByExternalId externalPlayerId =
-        tryFindPlayerAndMap (fun (_, explid, _, _) -> explid = externalPlayerId)
-
-    let getPlayerIdsForLeague leagueId =
-        leaguePlayersBridgeTable
-        |> Seq.filter(fun (lgid,_) -> lgid = leagueId)
-        |> Seq.map(fun (_,plid) -> plid)
-
-    let getPlayer (plId:PlId) =
-        match tryFindPlayerByPlayerId (plId) with
-        | Some p -> p |> Success
-        | None -> NotFound "player not found" |> Failure
-
-    let getLeague (leagueId:LgId) =
-        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> lgid = leagueId)
-        match result with
-        | None -> NotFound "League not found" |> Failure
-        | Some (lgid,name) ->
-            let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-            Success { League.id=lgid; name=name; players=players }
-
-    let getLeagueUnsafe (leagueId:LgId) =
-        let (lgid,name) = leaguesDictionary |> Seq.find(fun (lgid,_) -> lgid = leagueId)
-        let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-        { League.id=lgid; name=name; players=players }
-
-    let getLeagueByShareableId shareableLeagueId =
-        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> (lgid|>getShareableLeagueId) = shareableLeagueId)
-        match result with
-        | None -> NotFound "League not found" |> Failure
-        | Some (lgid,name) -> getLeague lgid
 
 [<AutoOpen>]
 module Services =
@@ -118,21 +30,11 @@ module Services =
     let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
     let gameWeeksWithResults() = gameWeeks() |> getGameWeeksWithAnyClosedFixturesWithResults
 
-//    let getImmediateSiblings collection item =
-//        match collection |> List.tryFindIndex(fun c -> c = item) with
-//        | None -> (None, None)
-//        | Some i -> let p = i - 1
-//                    let n = i + 1
-//                    let prev = if (p >= 0) then collection.[p] else None
-//                    let next = if (n <= collection.Length) then collection.[p] else None
-//                    (prev, next)
-        
-    let predictionOptionToScoreViewModel (pr:Prediction option) =
-        match pr with
-        | Some p -> toScoreViewModel p.score
-        | None -> noScoreViewModel
-
     let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) gameWeeks =
+        let predictionOptionToScoreViewModel (pr:Prediction option) =
+            match pr with
+            | Some p -> toScoreViewModel p.score
+            | None -> noScoreViewModel
         let getFormGuide team =
             (getTeamFormGuide gameWeeks team)
             |> List.map(fun o -> match o with | Win -> "w" | Draw -> "d" | Lose -> "l" )
@@ -320,7 +222,6 @@ module Services =
                    |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
         { InPlayViewModel.rows = rows }
 
-
     let leagueToViewModel (league:League) = 
         let leagueTable = getLeagueTableRows league (gameWeeksWithResults())
         let rows = leagueTable |> List.map(leagueTableRowToViewModel)
@@ -377,7 +278,6 @@ module Services =
         LgId leagueId |> (getLeague >> bind (switch getGameWeekPointsViewModel))
 
     // persistence
-    
 
     let trySaveResultPostModel (rpm:ResultPostModel) =
         let gws = gameWeeks()

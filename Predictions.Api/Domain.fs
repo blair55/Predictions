@@ -50,12 +50,10 @@ module Domain =
 
     type Score = int * int
     type Result = { id:RsId; score:Score }
-//    type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; predictions:Prediction list; }
-    type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff; }
+    type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff }
     type Fixture =
         | OpenFixture of FixtureData
         | ClosedFixture of (FixtureData * Result option)
-        
     type Prediction = { id:PrId; score:Score; fixtureId:FxId }
     type Player = { id:PlId; name:PlayerName; predictions:Prediction list }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
@@ -163,7 +161,6 @@ module Domain =
             if predictionOutcome = resultOutcome then CorrectOutcome
             else Incorrect
 
-//    let tryFindPlayerPrediction (predictions:Prediction list) player = predictions |> List.tryFind(fun p -> p.player = player)
     let tryFindPlayerPredictionForFixture (player:Player) (fd:FixtureData) =
         player.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
     
