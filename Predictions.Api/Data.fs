@@ -3,9 +3,10 @@
 open System
 open System.IO
 open System.Data
+open System.Data.SqlClient
 open System.Configuration
 open System.Collections.Generic
-open Npgsql
+open Dapper
 open Predictions.Api.Domain
 
 module Data =
@@ -21,15 +22,20 @@ module Data =
     type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
     type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
 
-    let buildSeason _ = { id=newSnId(); year=SnYr ""; gameWeeks=[] }
-    
-    let playersDictionary = new List<(PlId*ExternalPlayerId*ExternalLoginProvider*PlayerName)>()
-    let leaguesDictionary = new List<(LgId*LeagueName)>()
-    let leaguePlayersBridgeTable = new List<(LgId*PlId)>()
-    let predictionsDictionary = new List<(PlId*Prediction)>()
+    let connString = ConfigurationManager.AppSettings.["DefaultConnection"]
+    let newConn() = new SqlConnection(connString)
+    let nonQuery sql args =
+        use conn = newConn()
+        conn.Execute(sql, args) |> ignore
 
-    let saveLeagueInDb (cmd:SaveLeagueCommand) = leaguesDictionary.Add(cmd.id, cmd.name)
-    let joinLeagueInDb (cmd:JoinLeagueCommand) = leaguePlayersBridgeTable.Add(cmd.leagueId, cmd.playerId)
+    type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string }
+    let saveLeagueInDb (cmd:SaveLeagueCommand) = 
+        nonQuery  @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@Id, @ShareableId, @Name)"
+            { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId }
+
+    let playersDictionary = new List<(PlId*ExternalPlayerId*ExternalLoginProvider*PlayerName)>()
+
+    let joinLeagueInDb (cmd:JoinLeagueCommand) = ()
     let registerPlayerInDb (cmd:RegisterPlayerCommand) = playersDictionary.Add(cmd.player.id, cmd.explid, cmd.exProvider, cmd.player.name)
     let updateUserNameInDb (cmd:UpdateUserNameCommand) = ()
     let savePlayer (cmd:SavePlayerCommand) = ()
@@ -37,6 +43,12 @@ module Data =
     let saveResult (cmd:SaveResultCommand) = ()
     let savePrediction (cmd:SavePredictionCommand) = ()
     let saveGameWeek (cmd:SaveGameWeekCommand) = ()
+
+    let buildSeason _ = { id=newSnId(); year=SnYr ""; gameWeeks=[] }
+    
+    let leaguesDictionary = new List<(LgId*LeagueName)>()
+    let leaguePlayersBridgeTable = new List<(LgId*PlId)>()
+    let predictionsDictionary = new List<(PlId*Prediction)>()
 
     let getLeagueIdsThatPlayerIsIn (player:Player) =
         leaguePlayersBridgeTable

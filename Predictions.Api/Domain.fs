@@ -52,8 +52,8 @@ module Domain =
     type Result = { id:RsId; score:Score }
     type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff }
     type Fixture =
-        | OpenFixture of FixtureData
-        | ClosedFixture of (FixtureData * Result option)
+         | OpenFixture of FixtureData
+         | ClosedFixture of (FixtureData * Result option)
     type Prediction = { id:PrId; score:Score; fixtureId:FxId }
     type Player = { id:PlId; name:PlayerName; predictions:Prediction list }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }

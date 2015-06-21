@@ -3,7 +3,6 @@ namespace Predictions.Api
 open System
 open Predictions.Api.Common
 open Predictions.Api.Domain
-//open Predictions.Api.Data
 open Newtonsoft.Json
 
 [<AutoOpen>]
