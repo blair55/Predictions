@@ -18,7 +18,7 @@ open Predictions.Api.LeagueTableCalculation
 [<AutoOpen>]
 module Services =
     
-    let getPlayerViewModel (p:Player) = { PlayerViewModel.id=getPlayerId p.id|>str; name=p.name|>getPlayerName; isAdmin=false } 
+    let getPlayerViewModel (p:Player) = { PlayerViewModel.id=getPlayerId p.id|>str; name=p.name|>getPlayerName; isAdmin=true } 
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let toFixtureViewModel (fd:FixtureData) (gw:GameWeek) =
@@ -283,29 +283,32 @@ module Services =
         let gws = gameWeeks()
         let fxid = FxId (sToGuid rpm.fixtureId)
         let createScore() = tryToCreateScoreFromSbm rpm.score.home rpm.score.away
-        let createResult score = { Result.id=newRsId(); score=score }
+        let createResult score = { Result.score=score }
         let makeSureFixtureExists r =
             match (tryFindFixture gws fxid) with
             | Some _ -> Success (fxid,r)
             | None -> invalid "fixture does not exist"
-        let saveResult (fxid,(r:Result)) = saveResult { SaveResultCommand.id=r.id; fixtureId=fxid; score=r.score }
+        let saveResult (fxid,(r:Result)) = saveResult { SaveResultCommand.fixtureId=fxid; score=r.score }
         () |> (createScore
            >> bind (switch createResult)
            >> bind makeSureFixtureExists
            >> bind (switch saveResult))
 
-    let rec tryCreateFixturesFromPostModels (viewModels:FixturePostModel list) fixtures =
+    let rec tryCreateSaveFixtureCommandsFromPostModels (viewModels:FixturePostModel list) cmds =
         match viewModels with
-        | h::t -> let fixtureData = tryToCreateFixtureDataFromSbm h.home h.away h.kickOff
-                  match fixtureData with
-                  | Success fd -> tryCreateFixturesFromPostModels t (fd::fixtures)
+        | h::t -> let result = tryToCreateKoFromSbm h.home h.away h.kickOff
+                  match result with
+                  | Success ko ->
+                      let saveFixtureCommand = { SaveFixtureCommand.id=newFxId(); home=h.home; away=h.away; kickoff=ko }
+                      tryCreateSaveFixtureCommandsFromPostModels t (saveFixtureCommand::cmds)
                   | Failure msg -> Failure msg
-        | [] -> Success fixtures
+        | [] -> Success cmds
 
     let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
         let snid = season().id
-        let createFixtures viewModels = tryCreateFixturesFromPostModels viewModels []
-        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=snid; fixtures=fixtures; description="" }
+        let createFixtures viewModels = tryCreateSaveFixtureCommandsFromPostModels viewModels []
+        // get next game week no *****************************************************************
+        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=snid; saveFixtureCommands=fixtures; description=""; gwno=1|>GwNo }
         gwpm.fixtures |> (createFixtures
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))
@@ -313,16 +316,14 @@ module Services =
     let trySavePrediction (ppm:PredictionPostModel) (player:Player) =
         let gws = gameWeeks()
         let fxId = FxId (sToGuid ppm.fixtureId)
-        let makeSureFixtureExists fxid = match (tryFindFixture gws fxid) with | Some f -> Success f | None -> Invalid "fixture does not exist" |> Failure
+        let makeSureFixtureExists fxid = match (tryFindFixture gws fxid) with | Some f -> Success f | None -> NotFound "fixture does not exist" |> Failure
         let makeSureFixtureIsOpen (f:Fixture) = match f with | OpenFixture fd -> Success fd | ClosedFixture f -> Invalid "fixture is closed" |> Failure
         let createScore fd = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(fd, s) | Failure msg -> Failure msg
-        let createPrediction (fd:FixtureData, s) = createPrediction fd.id s
-        let updatePrediction (pr:Prediction) = savePrediction { SavePredictionCommand.id=pr.id; fixtureId=pr.fixtureId; playerId=player.id; score=pr.score }
+        let createPrediction (fd:FixtureData, s) = savePrediction { SavePredictionCommand.id=newPrId(); fixtureId=fd.id; playerId=player.id; score=s }
         fxId |> (makeSureFixtureExists
                >> bind makeSureFixtureIsOpen
                >> bind createScore
-               >> bind (switch createPrediction)
-               >> bind (switch updatePrediction))
+               >> bind (switch createPrediction))
 
     let trySaveLeague (player:Player) (createLeague:CreateLeaguePostModel) =
         let name = makeLeagueName createLeague.name
@@ -332,19 +333,17 @@ module Services =
         getLeagueView (getLgId lgid)
 
     let registerPlayerWithUserInfo externalId provider userName =
-        let result = tryFindPlayerByExternalId externalId
-        match result with
-        | Some player ->
+        match getPlayerByExternalLogin (externalId,provider) with
+        | Success player ->
             updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
             player
-        | None -> 
+        | _ -> 
             let player = { Player.id=newPlId(); name=userName; predictions=[] }
             registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; }
             player
 
-    let getLoggedInPlayer plId =
-        let result = tryFindPlayerByPlayerId plId
-        match result with
-        | Some p -> p
-        | None -> failwith "no player found"
+    let getLoggedInPlayer plId = 
+        match getPlayer plId with
+        | Success p -> p
+        | _ -> failwith "no player found"
 

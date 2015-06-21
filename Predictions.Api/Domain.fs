@@ -9,7 +9,6 @@ module Domain =
     type GwId = GwId of Guid
     type PlId = PlId of Guid
     type PrId = PrId of Guid
-    type RsId = RsId of Guid
     type SnId = SnId of Guid
     type GwNo = GwNo of int
     type SnYr = SnYr of string
@@ -27,7 +26,6 @@ module Domain =
     let newFxId() = nguid()|>FxId
     let newPrId() = nguid()|>PrId
     let newGwId() = nguid()|>GwId
-    let newRsId() = nguid()|>RsId
     let newSnId() = nguid()|>SnId
     let newPlId() = nguid()|>PlId
     let makeLeagueName (name:string) =
@@ -39,22 +37,23 @@ module Domain =
     let getFxId (FxId id) = id
     let getGwId (GwId id) = id
     let getPrId (PrId id) = id
-    let getRsId (RsId id) = id
     let getSnId (SnId id) = id
     let getSnYr (SnYr year) = year
     let getPlayerName (PlayerName plrName) = plrName
     let getLeagueName (LeagueName lgeName) = lgeName
+    let getExternalPlayerId (ExternalPlayerId expid) = expid
+    let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
 
     let currentSeason = SnYr "2014/15"
     let monthFormat = "MMMM yyyy"
 
     type Score = int * int
-    type Result = { id:RsId; score:Score }
-    type FixtureData = { id:FxId; home:Team; away:Team; kickoff:KickOff }
+    type Result = { score:Score }
+    type FixtureData = { id:FxId; gwId:GwId; home:Team; away:Team; kickoff:KickOff }
     type Fixture =
          | OpenFixture of FixtureData
          | ClosedFixture of (FixtureData * Result option)
-    type Prediction = { id:PrId; score:Score; fixtureId:FxId }
+    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId }
     type Player = { id:PlId; name:PlayerName; predictions:Prediction list }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
@@ -299,7 +298,7 @@ module Domain =
 
     let invalid msg = Invalid msg |> Failure
     
-    let createPrediction fixtureId score = { Prediction.id=newPrId(); score=score; fixtureId=fixtureId }
+    //let createPrediction fixtureId score = { Prediction.id=newPrId(); score=score; fixtureId=fixtureId;  }
 
     let checkFixtureIsOpen (f, p) =
         match f with
@@ -318,12 +317,12 @@ module Domain =
     let tryToCreateScoreFromSbm home away =
         if home >= 0 && away >= 0 then Success(home, away) else invalid "cannot submit negative score"
 
-    let tryToCreateFixtureDataFromSbm home away (ko:string) =
+    let tryToCreateKoFromSbm home away (ko:string) =
         let (isKoValid, kickoff) = DateTime.TryParse(ko)
         if isKoValid=false then invalid "fixture kickoff time is invalid"
         else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
         else if home = away then invalid "fixture home and away team cannot be the same"
-        else Success({ id=newFxId(); home=home; away=away; kickoff=kickoff })
+        else Success kickoff
 
     let getShareableLeagueId (leagueId:LgId) =
         (str <| getLgId leagueId).Substring(0, 8)

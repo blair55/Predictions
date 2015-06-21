@@ -10,252 +10,207 @@ open Dapper
 open Predictions.Api.Domain
 
 module Data =
-
-    type SaveLeagueCommand = { id:LgId; name:LeagueName }
-    type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
-    type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
-    type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
-    type SaveSeasonCommand = { id:SnId; year:SnYr; }
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
-    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
-    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
-    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
-    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
-
+    
     let connString = ConfigurationManager.AppSettings.["DefaultConnection"]
     let newConn() = new SqlConnection(connString)
     let nonQuery sql args =
         use conn = newConn()
         conn.Execute(sql, args) |> ignore
 
+    type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
+    type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string }
+    let registerPlayerInDb (cmd:RegisterPlayerCommand) =
+        nonQuery  @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName) values (@id, @externalId, @externalProvider, @Name)"
+            { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider }
+
+    type SaveLeagueCommand = { id:LgId; name:LeagueName }
     type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string }
     let saveLeagueInDb (cmd:SaveLeagueCommand) = 
-        nonQuery  @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@Id, @ShareableId, @Name)"
+        nonQuery  @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@id, @shareableId, @name)"
             { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId }
 
-    let playersDictionary = new List<(PlId*ExternalPlayerId*ExternalLoginProvider*PlayerName)>()
+    type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
+    type JoinLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
+    let joinLeagueInDb (cmd:JoinLeagueCommand) = 
+        nonQuery  @"insert into LeaguePlayerBridge(LeagueId, PlayerId) values (@leagueId, @playerId)"
+            { JoinLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
 
-    let joinLeagueInDb (cmd:JoinLeagueCommand) = ()
-    let registerPlayerInDb (cmd:RegisterPlayerCommand) = playersDictionary.Add(cmd.player.id, cmd.explid, cmd.exProvider, cmd.player.name)
-    let updateUserNameInDb (cmd:UpdateUserNameCommand) = ()
-    let savePlayer (cmd:SavePlayerCommand) = ()
-    let saveSeason (cmd:SaveSeasonCommand) = ()
-    let saveResult (cmd:SaveResultCommand) = ()
-    let savePrediction (cmd:SavePredictionCommand) = ()
-    let saveGameWeek (cmd:SaveGameWeekCommand) = ()
+    type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
+    type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
+    let updateUserNameInDb (cmd:UpdateUserNameCommand) =
+        nonQuery  @"UPDATE Players SET PlayerName = @playerName WHERE PlayerId = @playerId"
+            { UpdateUserNameCommandArgs.playerId=cmd.playerId|>getPlayerId; playerName=cmd.playerName|>getPlayerName }
+            
+    type SaveResultCommand = { fixtureId:FxId; score:Score }
+    type SaveResultCommandArgs = { fixtureId:Guid; homeScore:int; awayScore:int }
+    let saveResult (cmd:SaveResultCommand) =
+        nonQuery  @"UPDATE Fixtures SET HomeTeamScore = @homeScore, AwayTeamScore = @AwayScore WHERE FixtureId = @fixtureId"
+            { SaveResultCommandArgs.fixtureId=cmd.fixtureId|>getFxId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
 
-    let buildSeason _ = { id=newSnId(); year=SnYr ""; gameWeeks=[] }
+    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
+    type SavePredictionCommandArgs = { id:Guid; fixtureId:Guid; playerId:Guid; homeScore:int; awayScore:int }
+    let savePrediction (cmd:SavePredictionCommand) =
+        nonQuery  @"insert into Predictions(PredictionId, FixtureId, PlayerId, HomeTeamScore, AwayTeamScore) values (@PredictionId, @FixtureId, @PlayerId, @HomeScore, @AwayScore)"
+            { SavePredictionCommandArgs.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
+
+    type SaveFixtureCommand = { id:FxId; home:Team; away:Team; kickoff:KickOff }
+    type SaveGameWeekCommand = { id:GwId; gwno:GwNo; seasonId:SnId; description:string; saveFixtureCommands:SaveFixtureCommand list }
+    type SaveGameWeekCommandArgs = { id:Guid; gwno:int; seasonId:Guid; description:string; }
+    type SaveFixtureCommandArgs = { id:Guid; gameWeekId:Guid; ko:DateTime; home:string; away:string }
+    let saveGameWeek (cmd:SaveGameWeekCommand) =
+        nonQuery  @"insert into Predictions(PredictionId, FixtureId, PlayerId, HomeTeamScore, AwayTeamScore) values (@PredictionId, @FixtureId, @PlayerId, @HomeScore, @AwayScore)"
+                { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonId=cmd.seasonId|>getSnId; gwno=cmd.gwno|>getGameWeekNo; description=cmd.description }
+        let saveFixture (fd:SaveFixtureCommand) =
+            nonQuery @"insert into Fixtures(FixtureId, GameWeekId, KickOff, HomeTeamName, AwayTeamName) values (@Id, @GameWeekId, @ko, @Home, @Away)"
+                { SaveFixtureCommandArgs.id=fd.id|>getFxId; gameWeekId=cmd.id|>getGwId; ko=fd.kickoff; home=fd.home; away=fd.away }
+        cmd.saveFixtureCommands |> List.iter saveFixture
+
+    type BuildSeasonQueryArgs = { seasonYear:string; }
+    type [<CLIMutable>] BuildSeasonQueryResult = { seasonId:Guid; seasonYear:string }
+    type [<CLIMutable>] BuildGameWeekQueryResult = { gameWeekId:Guid; seasonId:Guid; gameWeekNumber:int; gameWeekDescription:string }
+    type [<CLIMutable>] BuildFixtureQueryResult = { fixtureId:Guid; gameWeekId:Guid; kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:Nullable<int>; awayTeamScore:Nullable<int> }
+    let buildSeason (year:SnYr) =
+        let args = { BuildSeasonQueryArgs.seasonYear=year|>getSnYr; }
+        let sql = @"select sns.seasonId, sns.seasonYear
+                    from seasons sns
+                    where sns.SeasonYear = @seasonYear
+                    select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription
+                    from seasons sns
+                    join gameWeeks gws on sns.SeasonId = gws.SeasonId
+                    where sns.SeasonYear = @seasonYear
+                    select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore
+                    from seasons sns
+                    join gameWeeks gws on sns.SeasonId = gws.SeasonId
+                    join fixtures fxs on gws.GameWeekId = fxs.GameWeekId
+                    where sns.SeasonYear = @seasonYear"
+        use conn = newConn()
+        let multi = conn.QueryMultiple(sql, args)
+        let seasonResult = multi.Read<BuildSeasonQueryResult>() |> Seq.head
+        let gameWeeksResult = multi.Read<BuildGameWeekQueryResult>()
+        let fixturesResult = multi.Read<BuildFixtureQueryResult>()
+        let buildFixture (result:BuildFixtureQueryResult) =
+            let fd = { FixtureData.id=result.fixtureId|>FxId; gwId=result.gameWeekId|>GwId; home=result.homeTeamName; away=result.awayTeamName; kickoff=result.kickoff }
+            let resultExists = result.homeTeamScore.HasValue && result.awayTeamScore.HasValue
+            let r = if resultExists then Some { Result.score=(result.homeTeamScore.Value, result.awayTeamScore.Value) } else None
+            fd, r
+        let buildGameWeek (fdrs:seq<(FixtureData*Result option)>) (result:BuildGameWeekQueryResult) =
+            let gwFixtures =
+                fdrs
+                |> Seq.filter(fun (fd, _) -> fd.gwId=(result.gameWeekId|>GwId))
+                |> Seq.map(fun (fd, r) -> fixtureDataToFixture fd r)
+                |> Seq.toList
+            { GameWeek.id=result.gameWeekId|>GwId; number=result.gameWeekNumber|>GwNo; description=result.gameWeekDescription; fixtures=gwFixtures }
+        let fdrs = fixturesResult |> Seq.map buildFixture
+        let gameWeeks = gameWeeksResult |> Seq.map(buildGameWeek fdrs) |> Seq.toList
+        { id=seasonResult.seasonId|>SnId; year=seasonResult.seasonYear|>SnYr; gameWeeks=gameWeeks }
     
-    let leaguesDictionary = new List<(LgId*LeagueName)>()
-    let leaguePlayersBridgeTable = new List<(LgId*PlId)>()
-    let predictionsDictionary = new List<(PlId*Prediction)>()
-
+    type LeagueIdsPlayerIsInQueryArgs = { playerId:Guid }
+    type [<CLIMutable>] LeagueIdsPlayerIsInQueryResult = { leagueId:Guid }
     let getLeagueIdsThatPlayerIsIn (player:Player) =
-        leaguePlayersBridgeTable
-        |> Seq.filter(fun (_,plid) -> plid = player.id)
-        |> Seq.map(fun (lgid,_) -> lgid)
+        let args = { LeagueIdsPlayerIsInQueryArgs.playerId=player.id|>getPlayerId }
+        let sql = @"select leagueId from leaguePlayerBridge where playerId = @playerId"
+        use conn = newConn()
+        let result = conn.Query<LeagueIdsPlayerIsInQueryResult>(sql, args)
+        result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toList
 
-    let getPredictionsForPlayer (playerId:PlId) =
-        predictionsDictionary
-        |> Seq.filter(fun (plid, _) -> plid = playerId)
-        |> Seq.map snd |> Seq.toList
-
-    let getAllPreditions() = predictionsDictionary |> Seq.map snd |> Seq.toList
-
-    let tryFindPlayerAndMap findFunc =
-        playersDictionary
-        |> Seq.tryFind(findFunc)
-        |> function
-        | Some (plid, _, _, name) -> Some { Player.id=plid; name=name; predictions=plid|>getPredictionsForPlayer }
-        | None -> None
-
+    let getAllPreditions() = []
+    
+    type FindPlayerByPlayerIdQueryArgs = { playerId:Guid }
+    type [<CLIMutable>] FindPlayerByPlayerIdQueryResult = { playerId:Guid; playerName:string }
+    type [<CLIMutable>] FindPredictionsByPlayerIdQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
     let tryFindPlayerByPlayerId playerId =
-        tryFindPlayerAndMap (fun (plid, _, _, _) -> plid = playerId)
+        let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
+        let sql = @"select playerId, playerName from players where playerId = @playerId
+                    select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions where playerId = @playerId"
+        use conn = newConn()
+        let multi = conn.QueryMultiple(sql, args)
+        let playersResult = multi.Read<FindPlayerByPlayerIdQueryResult>() |> Seq.toList
+        if playersResult.IsEmpty then None
+        else
+            let predictions =
+                multi.Read<FindPredictionsByPlayerIdQueryResult>()
+                |> Seq.map(fun p -> { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore) })
+                |> Seq.toList
+            let player = playersResult |> List.head
+            Some { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=predictions }
 
-    let tryFindPlayerByExternalId externalPlayerId =
-        tryFindPlayerAndMap (fun (_, explid, _, _) -> explid = externalPlayerId)
+    type FindPlayerByExternalIdQueryArgs = { externalId:string; externalProvider:string }
+    let tryFindPlayerByExternalId externalPlayerId externalLoginProvider =
+        let args = { FindPlayerByExternalIdQueryArgs.externalId=externalPlayerId|>getExternalPlayerId; externalProvider=externalLoginProvider|>getExternalLoginProvider }
+        let sql = @"select playerId, playerName from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider"
+        use conn = newConn()
+        let result = conn.Query<FindPlayerByPlayerIdQueryResult>(sql, args) |> Seq.toList
+        if result.IsEmpty then None
+        else
+            let player = result |> List.head
+            Some { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=[] }
 
-    let getPlayerIdsForLeague leagueId =
-        leaguePlayersBridgeTable
-        |> Seq.filter(fun (lgid,_) -> lgid = leagueId)
-        |> Seq.map(fun (_,plid) -> plid)
+    type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
+    type [<CLIMutable>] FindLeagueByLeagueIdQueryResult = { leagueId:Guid; leagueName:string }
+    type [<CLIMutable>] FindPlayersByLeagueIdQueryResult = { playerId:Guid; playerName:string }
+    type [<CLIMutable>] FindPredictionsByLeagueIdQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
+    let tryFindLeagueByLeagueId leagueId =
+        let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
+        let sql = @"select lgs.LeagueId, lgs.LeagueName
+                    from Leagues lgs
+                    where lgs.LeagueId = @leagueId
+                    select pls.PlayerId, pls.PlayerName
+                    from Players pls
+                    join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
+                    where lpb.LeagueId = @leagueId
+                    select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore
+                    from Predictions pds
+                    join Players pls on pds.PlayerId = pls.PlayerId
+                    join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
+                    where lpb.LeagueId = @leagueId"
+        use conn = newConn()
+        let multi = conn.QueryMultiple(sql, args)
+        let leagueResult = multi.Read<FindLeagueByLeagueIdQueryResult>() |> Seq.toList
+        if leagueResult.IsEmpty then None
+        else
+            let predictions =
+                multi.Read<FindPredictionsByLeagueIdQueryResult>()
+                |> Seq.map(fun p -> { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore,p.awayTeamScore); })
+                |> Seq.toList
+            let players =
+                multi.Read<FindPlayersByLeagueIdQueryResult>()
+                |> Seq.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=predictions|>List.filter(fun pr -> pr.playerId=(p.playerId|>PlId)) })
+                |> Seq.toList
+            let league = leagueResult |> List.head
+            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players }
+            
+    type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
+    let tryFindLeagueByShareableId shareableLeagueId =
+        let args = { FindLeagueByShareableLeagueIdQueryArgs.shareableLeagueId=shareableLeagueId }
+        let sql = @"select LeagueId, LeagueName from Leagues where ShareableLeagueId = @shareableLeagueId"
+        use conn = newConn()
+        let result = conn.Query<FindLeagueByLeagueIdQueryResult>(sql, args) |> Seq.toList
+        if result.IsEmpty then None
+        else
+            let league = result |> List.head
+            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=[] }
+
+    let getPlayerByExternalLogin (explid:ExternalPlayerId, exprov:ExternalLoginProvider) =
+        match tryFindPlayerByExternalId explid exprov with
+        | Some p -> p |> Success
+        | None -> NotFound "Player not found" |> Failure
 
     let getPlayer (plId:PlId) =
-        match tryFindPlayerByPlayerId (plId) with
+        match tryFindPlayerByPlayerId plId with
         | Some p -> p |> Success
-        | None -> NotFound "player not found" |> Failure
+        | None -> NotFound "Player not found" |> Failure
 
     let getLeague (leagueId:LgId) =
-        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> lgid = leagueId)
-        match result with
+        match tryFindLeagueByLeagueId leagueId with
         | None -> NotFound "League not found" |> Failure
-        | Some (lgid,name) ->
-            let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-            Success { League.id=lgid; name=name; players=players }
+        | Some league -> league |> Success
 
     let getLeagueUnsafe (leagueId:LgId) =
-        let (lgid,name) = leaguesDictionary |> Seq.find(fun (lgid,_) -> lgid = leagueId)
-        let players = getPlayerIdsForLeague lgid |> Seq.choose(tryFindPlayerByPlayerId) |> Seq.toList
-        { League.id=lgid; name=name; players=players }
+        match tryFindLeagueByLeagueId leagueId with
+        | None -> failwith "League not found" 
+        | Some league -> league
 
     let getLeagueByShareableId shareableLeagueId =
-        let result = leaguesDictionary |> Seq.tryFind(fun (lgid,_) -> (lgid|>getShareableLeagueId) = shareableLeagueId)
-        match result with
+        match tryFindLeagueByShareableId shareableLeagueId with
         | None -> NotFound "League not found" |> Failure
-        | Some (lgid,name) -> getLeague lgid
-
-
-//    let connStr =
-//        let s = ConfigurationManager.AppSettings.["ELEPHANTSQL_URL"]
-//        let uriString = if String.IsNullOrEmpty(s) then "postgres://vagrant:password@127.0.0.1:5433/vagrant" else s
-//        let uri = new Uri(uriString)
-//        let db = uri.AbsolutePath.Trim('/')
-//        let user = uri.UserInfo.Split(':').[0]
-//        let passwd = uri.UserInfo.Split(':').[1]
-//        let port = if uri.Port > 0 then uri.Port else 5432
-//        String.Format("Server={0};Database={1};User Id={2};Password={3};Port={4}", uri.Host, db, user, passwd, port);
-//       
-//    //let getConn() = new NpgsqlConnection("Server=127.0.0.1;Port=5433;User Id=vagrant; Password=password; Database=vagrant;")
-//    let getConn() = new NpgsqlConnection(connStr)
-//    let getQuery cn s = new NpgsqlCommand(s, cn)
-//
-//    let executeNonQuery nq =
-//        use cn = getConn()
-//        cn.Open()
-//        let cmd = getQuery cn nq
-//        let sw = System.Diagnostics.Stopwatch.StartNew()
-//        cmd.ExecuteNonQuery() |> ignore
-//        sw.Stop()
-//        sprintf "%i / %s" sw.ElapsedMilliseconds nq |> log
-//        cn.Close()
-//        
-//    let rec getListFromReader (r:NpgsqlDataReader) readerToTypeStrategy list =
-//        match r.Read() with
-//        | true -> let item = readerToTypeStrategy r
-//                  let newList = item::list
-//                  getListFromReader r readerToTypeStrategy newList
-//        | false -> list
-//
-//    let executeQuery q readerToTypeStrategy =
-//        use cn = getConn()
-//        cn.Open()
-//        let cmd = getQuery cn q
-//        let sw = System.Diagnostics.Stopwatch.StartNew()
-//        let reader = cmd.ExecuteReader()
-//        sw.Stop()
-//        sprintf "%s / %i" q sw.ElapsedMilliseconds |> log
-//        let results = getListFromReader reader readerToTypeStrategy []
-//        cn.Close()
-//        results
-//
-//
-//    // writing
-//    
-//    type SeasonDto = { id:Guid; year:string; }
-//    type GameWeekDto = { id:Guid; seasonId:Guid; number:int; description:string; }
-//    type FixtureDto = { id:Guid; gameWeekId:Guid; home:string; away:string; kickoff:DateTime }
-//    type ResultDto = { id:Guid; fixtureId:Guid; homeScore:int; awayScore:int }
-//    type PredictionDto = { id:Guid; fixtureId:Guid; playerId:Guid; homeScore:int; awayScore:int }
-//    type PlayerDto = { id:Guid; name:string; role:string; email:string; authToken:string }
-//    
-//    type SaveSeasonCommand = { id:SnId; year:SnYr; }
-//    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; fixtures:FixtureData list }
-//    type SaveResultCommand = { id:RsId; fixtureId:FxId; score:Score }
-//    type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
-//    type SavePlayerCommand = { id:PlId; name:string; role:Role; email:string; authToken:string }
-//    type SaveFixtureCommand = { id:FxId; gameWeekId:GwId; home:Team; away:Team; ko:KickOff }
-//    
-//    let roleToString r = match r with | User -> "User" | Admin -> "Admin"
-//    let stringToRole s = match s with | "User" -> User | "Admin" -> Admin | _ -> User
-//    let kostr (k:DateTime) = String.Format("{0:u}", k)
-//
-//    let getInsertSeasonQuery (s:SeasonDto) = sprintf "insert into seasons values ('%s', '%s')" (str s.id) s.year
-//    let getInsertGameWeekQuery (g:GameWeekDto) = sprintf "insert into gameweeks (id, seasonId, description) values ('%s', '%s', '%s')" (str g.id) (str g.seasonId) g.description
-//    let getInsertFixtureQuery (f:FixtureDto) = sprintf "insert into fixtures values ('%s', '%s', '%s', '%s', '%s')" (str f.id) (str f.gameWeekId) f.home f.away (kostr f.kickoff)
-//    let getInsertResultQuery (r:ResultDto) = sprintf "insert into results values ('%s', '%s', %i, %i)" (str r.id) (str r.fixtureId) (r.homeScore) (r.awayScore)
-//    let getInsertPredictionQuery (p:PredictionDto) = sprintf "insert into predictions values ('%s', '%s', %i, %i, '%s')" (str p.id) (str p.fixtureId) (p.homeScore) (p.awayScore) (str p.playerId)
-//    let getInsertPlayerQuery (p:PlayerDto) = sprintf "insert into players values ('%s', '%s', '%s', '%s', '%s')" (str p.id) p.name p.role p.email p.authToken
-//    let getDeletePredictionQuery (p:PredictionDto) = sprintf "delete from predictions where fixtureId = '%s' and playerId = '%s'" (str p.fixtureId) (str p.playerId)
-//    let getDeleteResultQuery (p:ResultDto) = sprintf "delete from results where fixtureId = '%s'" (str p.fixtureId)
-//
-//    let getSeasonDto (cmd:SaveSeasonCommand) = { SeasonDto.id=cmd.id|>getSnId; year=cmd.year|>getSnYr; }
-//    let getGameWeekDto (cmd:SaveGameWeekCommand) = { GameWeekDto.id=cmd.id|>getGwId; number=0(*cmd.number|>getGameWeekNo*); seasonId=cmd.seasonId|>getSnId; description=cmd.description; }
-//    let getFixtureDto (cmd:SaveFixtureCommand) = { FixtureDto.id=cmd.id|>getFxId; gameWeekId=cmd.gameWeekId|>getGwId; home=cmd.home; away=cmd.away; kickoff=cmd.ko }
-//    let getResultDto (cmd:SaveResultCommand) = { ResultDto.id=cmd.id|>getRsId; fixtureId=cmd.fixtureId|>getFxId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
-//    let getPredictionDto (cmd:SavePredictionCommand) = { PredictionDto.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=(fst cmd.score); awayScore=(snd cmd.score); }
-//    let getPlayerDto (cmd:SavePlayerCommand) = { PlayerDto.id=cmd.id|>getPlayerId; name=(cmd.name); role=(roleToString cmd.role); email=cmd.email; authToken=cmd.authToken }
-//
-//    let savePlayer (cmd:SavePlayerCommand) = cmd |> getPlayerDto |> getInsertPlayerQuery |> executeNonQuery
-//    let saveSeason (cmd:SaveSeasonCommand) = cmd |> getSeasonDto |> getInsertSeasonQuery |> executeNonQuery
-//    let saveResult (cmd:SaveResultCommand) =
-//        let rdto = cmd |> getResultDto
-//        rdto |> getDeleteResultQuery |> executeNonQuery
-//        rdto |> getInsertResultQuery |> executeNonQuery
-//    let savePrediction (cmd:SavePredictionCommand) =
-//        let pdto = cmd |> getPredictionDto
-//        pdto |> getDeletePredictionQuery |> executeNonQuery
-//        pdto |> getInsertPredictionQuery |> executeNonQuery
-//    let saveGameWeek (cmd:SaveGameWeekCommand) =
-//        let saveFixtureCommands = cmd.fixtures |> List.map(fun fd -> { SaveFixtureCommand.id=fd.id; gameWeekId=cmd.id; home=fd.home; away=fd.away; ko=fd.kickoff })
-//        cmd |> getGameWeekDto |> getInsertGameWeekQuery |> fun igwq -> printfn "%s" |> ignore; igwq |> executeNonQuery
-//        saveFixtureCommands |> List.iter(fun fd -> fd |> getFixtureDto |> getInsertFixtureQuery |> executeNonQuery)
-//
-//
-//    // reading
-//    
-//    let readGuidAtPosition (r:NpgsqlDataReader) i = r.GetGuid(i)
-//    let readStringAtPosition (r:NpgsqlDataReader) i = r.GetString(i)
-//    let readIntAtPosition (r:NpgsqlDataReader) i = r.GetInt32(i)
-//    let readDateTimeAtPosition (r:NpgsqlDataReader) i = r.GetDateTime(i)    
-//    
-//    let readerToSeasonDto r = { SeasonDto.id = (readGuidAtPosition r 0); year=(readStringAtPosition r 1) }
-//    let readerToGameWeekDto (r) = { GameWeekDto.id = (readGuidAtPosition r 0); seasonId=(readGuidAtPosition r 1); number=(readIntAtPosition r 2); description=(readStringAtPosition r 3) }
-//    let readerToFixtureDto (r) = { FixtureDto.id = (readGuidAtPosition r 0); gameWeekId=(readGuidAtPosition r 1); home=(readStringAtPosition r 2); away=(readStringAtPosition r 3); kickoff=(readDateTimeAtPosition r 4) }
-//    let readerToResultDto (r) = { ResultDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3) }
-//    let readerToPredictionDto (r) = { PredictionDto.id = (readGuidAtPosition r 0); fixtureId = (readGuidAtPosition r 1); homeScore=(readIntAtPosition r 2); awayScore=(readIntAtPosition r 3); playerId=(readGuidAtPosition r 4) }
-//    let readerToPlayerDto (r) = { PlayerDto.id = (readGuidAtPosition r 0); name=(readStringAtPosition r 1); role=(readStringAtPosition r 2); email=(readStringAtPosition r 3); authToken=(readStringAtPosition r 4) }
-//    
-//    let readPlayer authToken = (executeQuery (sprintf "select * from players where authtoken = '%s'" authToken) readerToPlayerDto)
-//    let readPlayers() = (executeQuery "select * from players" readerToPlayerDto)
-//    let readResults() = (executeQuery "select * from results" readerToResultDto)
-//    let readPredictions() = (executeQuery "select * from predictions" readerToPredictionDto)
-//    let readFixtures() = (executeQuery "select * from fixtures" readerToFixtureDto)
-//    let readGameWeeks() = (executeQuery "select * from gameweeks" readerToGameWeekDto)
-//    let readSeasons() = (executeQuery "select * from seasons" readerToSeasonDto)
-//
-//    let toPlayer (p:PlayerDto) = { Player.id=PlId p.id; name=p.name; role=(stringToRole p.role); authToken=p.authToken }
-//    let toResult (r:ResultDto) = { Result.id=RsId r.id; score=(r.homeScore, r.awayScore) }
-//    let toPrediction (p:PredictionDto) player = { Prediction.id=PrId p.id; score=(p.homeScore, p.awayScore); player=player }
-//    let toFixture (f:FixtureDto) predictions = { FixtureData.id=FxId f.id; home=f.home; away=f.away; kickoff=f.kickoff; predictions=predictions }
-//    let toGameWeek (gw:GameWeekDto) fixtures = { GameWeek.id=gw.id|>GwId; number=gw.number|>GwNo; description=gw.description; fixtures=fixtures }
-//    let toSeason (s:SeasonDto) gameWeeks = { Season.id=SnId s.id; year=SnYr s.year; gameWeeks=gameWeeks }
-//    
-//    let buildSeason year =
-//
-//        let snDtos = readSeasons()
-//        let gwDtos = readGameWeeks()
-//        let fxDtos = readFixtures()
-//        let prDtos = readPredictions()
-//        let rsDtos = readResults()
-//        let plDtos = readPlayers()
-//
-//        let playerPairs = plDtos |> List.map(fun plDto -> plDto, toPlayer plDto)
-//        let findPlayerById id = playerPairs |> List.find(fun (dto, model) -> dto.id = id) |> snd
-//        let resultPairs = rsDtos |> List.map(fun rsDto -> rsDto, toResult rsDto)
-//        let tryFindResultForFixture fxid = resultPairs |> List.tryFind(fun (dto, model) -> dto.fixtureId = fxid) |> sndOption
-//        let predictionPairs = prDtos |> List.map(fun prDto -> prDto,toPrediction prDto (findPlayerById prDto.playerId))
-//        let findPredictionsForFixture fxid = predictionPairs |> List.filter(fun (dto, _) -> dto.fixtureId = fxid) |> List.map(fun (_, model) -> model)
-//        let fixturePairs = fxDtos |> List.map(fun fxDto -> fxDto, toFixture fxDto (findPredictionsForFixture fxDto.id))
-//        let findFixturesForGameWeek gwid = fixturePairs |> List.filter(fun (dto, _) -> dto.gameWeekId = gwid) |> List.map(fun (_, fd) -> fixtureDataToFixture fd (tryFindResultForFixture (getFxId fd.id)))
-//        let gameWeekPairs = gwDtos |> List.map(fun gwDto -> gwDto, toGameWeek gwDto (findFixturesForGameWeek gwDto.id))
-//        let findGameWeeksForSeason snid = gameWeekPairs |> List.filter(fun (dto, _) -> dto.seasonId = snid) |> List.map(fun (_, model) -> model)
-//        let seasonPairs = snDtos |> List.map(fun snDto -> snDto, toSeason snDto (findGameWeeksForSeason snDto.id))
-//
-//        seasonPairs |> List.find(fun (_, model) -> model.year = year) |> snd
-//        
-//    let getPlayer authToken =
-//        let p = readPlayer authToken
-//        if p.IsEmpty then None else p.Head |> toPlayer |> Some
-//    
-//    let getPlayers() = readPlayers() |> List.map(toPlayer) |> List.sortBy(fun p -> p.name)
-    
+        | Some league -> league |> Success
