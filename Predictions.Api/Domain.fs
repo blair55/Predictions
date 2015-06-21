@@ -44,7 +44,7 @@ module Domain =
     let getExternalPlayerId (ExternalPlayerId expid) = expid
     let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
 
-    let currentSeason = SnYr "2014/15"
+    let currentSeason = SnYr "2015/16"
     let monthFormat = "MMMM yyyy"
 
     type Score = int * int
