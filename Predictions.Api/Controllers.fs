@@ -105,6 +105,11 @@ type HomeController() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((joinLeague player) >> resultToHttp)
 
+    [<HttpPost>][<Route("leagueleave/{leagueId:Guid}")>]
+    member this.LeaveLeague (leagueId:Guid) =
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        leagueId |> ((leaveLeague player) >> resultToHttp)
+
 
 
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]

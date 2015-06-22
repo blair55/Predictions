@@ -35,6 +35,12 @@ module Data =
         nonQuery @"insert into LeaguePlayerBridge(LeagueId, PlayerId) values (@leagueId, @playerId)"
             { JoinLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
 
+    type LeaveLeagueCommand = { leagueId:LgId; playerId:PlId }
+    type LeaveLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
+    let leaveLeagueInDb (cmd:LeaveLeagueCommand) = 
+        nonQuery @"delete from LeaguePlayerBridge where LeagueId = @leagueId and PlayerId = @playerId"
+            { LeaveLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
+
     type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
     type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
     let updateUserNameInDb (cmd:UpdateUserNameCommand) =

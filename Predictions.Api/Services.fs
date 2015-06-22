@@ -243,11 +243,19 @@ module Services =
         shareableLeagueId |> (getLeagueByShareableId >> bind (switch leagueToViewModel))
 
     let joinLeague (player:Player) leagueId =
-        let lgid = LgId leagueId
+        let lgid = leagueId|>LgId
         let joinLge league = joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         let returnLeague() = getLeagueView leagueId
         lgid |> (getLeague
                  >> bind (switch joinLge)
+                 >> bind (switch returnLeague))
+
+    let leaveLeague (player:Player) leagueId =
+        let lgid = leagueId|>LgId
+        let leaveLge league = leaveLeagueInDb { LeaveLeagueCommand.leagueId=lgid; playerId=player.id }
+        let returnLeague() = getLeagueView leagueId
+        lgid |> (getLeague
+                 >> bind (switch leaveLge)
                  >> bind (switch returnLeague))
 
     let getPastMonthsWithWinner leagueId =
