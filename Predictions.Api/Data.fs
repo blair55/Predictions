@@ -213,18 +213,18 @@ module Data =
         match tryFindPlayerByPlayerId plId with
         | Some p -> p |> Success
         | None -> NotFound "Player not found" |> Failure
+        
+    let getLeagueByShareableId shareableLeagueId =
+        match tryFindLeagueByShareableId shareableLeagueId with
+        | Some league -> league |> Success
+        | None -> NotFound "League not found" |> Failure
 
     let getLeague (leagueId:LgId) =
         match tryFindLeagueByLeagueId leagueId with
-        | None -> NotFound "League not found" |> Failure
         | Some league -> league |> Success
+        | None -> NotFound "League not found" |> Failure
 
     let getLeagueUnsafe (leagueId:LgId) =
         match tryFindLeagueByLeagueId leagueId with
-        | None -> failwith "League not found" 
         | Some league -> league
-
-    let getLeagueByShareableId shareableLeagueId =
-        match tryFindLeagueByShareableId shareableLeagueId with
-        | None -> NotFound "League not found" |> Failure
-        | Some league -> league |> Success
+        | None -> failwith "League not found" 

@@ -107,6 +107,20 @@ module LeagueModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueInviteViewModel = { id:string; name:string; inviteLink:string; }
 
+[<AutoOpen>]
+module GameWeekMatrixModels =
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeekMatrixPlayerRowPredictionViewModel = { isSubmitted:bool; score:ScoreViewModel }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeekMatrixPlayerRowViewModel = { player:PlayerViewModel; predictions:GameWeekMatrixPlayerRowPredictionViewModel list }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeekMatrixFixtureColumnViewModel = { home:string; away:string; fxId:string; }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GameWeekMatrixViewModel = { gameWeekNo:int; league:MicroLeagueViewModel; rows:GameWeekMatrixPlayerRowViewModel list; columns:GameWeekMatrixFixtureColumnViewModel list }
 
 [<AutoOpen>]
 module PostModels =

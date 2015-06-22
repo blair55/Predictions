@@ -253,10 +253,7 @@ module Services =
     let leaveLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId
         let leaveLge league = leaveLeagueInDb { LeaveLeagueCommand.leagueId=lgid; playerId=player.id }
-        let returnLeague() = getLeagueView leagueId
-        lgid |> (getLeague
-                 >> bind (switch leaveLge)
-                 >> bind (switch returnLeague))
+        lgid |> (getLeague >> bind (switch leaveLge))
 
     let getPastMonthsWithWinner leagueId =
         let getHistoryByMonthViewModel (league:League) =
@@ -287,6 +284,28 @@ module Services =
             let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
             { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getGameWeekPointsViewModel))
+
+    let getGameWeekMatrix gwno leagueId =
+        let getGameWeekMatrixViewModel (league:League) =
+            let fixtures =
+                gameWeeks()
+                |> List.filter(fun gw -> gw.number = gwno)
+                |> getFixturesForGameWeeks
+                |> List.map(fixtureToFixtureData)
+                |> List.sortBy(fun fd -> fd.kickoff)
+            let predictionToMatrixRow = function
+                | Some (p:Prediction) -> { GameWeekMatrixPlayerRowPredictionViewModel.isSubmitted=true; score=(p.score|>toScoreViewModel) }
+                | None -> { GameWeekMatrixPlayerRowPredictionViewModel.isSubmitted=false; score=noScoreViewModel }
+            let playerToMatrixRow (player:Player) =
+                let predictions =
+                    fixtures
+                    |> List.map(fun fd ->  player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id))
+                    |> List.map(predictionToMatrixRow)
+                { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions }
+            let rows = league.players |> List.map(playerToMatrixRow)
+            let columns = fixtures |> List.map(fun fd -> { GameWeekMatrixFixtureColumnViewModel.fxId=fd.id|>getFxId|>str; home=fd.home; away=fd.away })
+            { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; columns=columns; league=league|>getMircoLeagueViewModel }
+        LgId leagueId |> (getLeague >> bind (switch getGameWeekMatrixViewModel))
 
     // persistence
 

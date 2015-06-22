@@ -150,9 +150,15 @@ type HomeController() =
 
     [<Route("leaguehistory/{leagueId:Guid}/gameweek/{gwno:int}")>]
     member this.GetGameWeekPoints (leagueId:Guid, gwno) =
-        let getGwPointsView = (GwNo gwno) |> getGameWeekPointsView
+        let getGwPointsView = gwno |> GwNo |> getGameWeekPointsView
         leagueId |> (getGwPointsView >> resultToHttp)
 
+        
+    [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}")>]
+    member this.GetGameWeekMatrix (leagueId:Guid, gwno) =
+        let getResult = gwno |> GwNo |> getGameWeekMatrix
+        leagueId |> (getResult >> resultToHttp)
+        
 
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
