@@ -24,6 +24,7 @@ module Common =
     let switch f x = f x |> Success
 
     let optionToResult x msg = match x with | Some y -> Success y | None -> Failure msg
+    let doIfSome o f = match o with | Some r -> r |> f |> Some | None -> None
 
     let log msg =
         printfn "%s" msg

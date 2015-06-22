@@ -64,7 +64,7 @@ type HomeController() =
         let id = this.AuthManager.User.Claims
                  |> Seq.find(fun c -> c.Type = idtype)
                  |> (fun c -> c.Value)
-        { PlayerViewModel.id=id; name=name; isAdmin=false }
+        { PlayerViewModel.id=id; name=name; isAdmin=true }
 
     member this.Host() = this.Request.RequestUri.GetLeftPart(UriPartial.Authority)
 

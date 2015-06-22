@@ -20,46 +20,52 @@ module Data =
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
     type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string }
     let registerPlayerInDb (cmd:RegisterPlayerCommand) =
-        nonQuery  @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName) values (@id, @externalId, @externalProvider, @Name)"
+        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName) values (@id, @externalId, @externalProvider, @Name)"
             { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider }
 
     type SaveLeagueCommand = { id:LgId; name:LeagueName }
     type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string }
     let saveLeagueInDb (cmd:SaveLeagueCommand) = 
-        nonQuery  @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@id, @shareableId, @name)"
+        nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@id, @shareableId, @name)"
             { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId }
 
     type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
     type JoinLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
     let joinLeagueInDb (cmd:JoinLeagueCommand) = 
-        nonQuery  @"insert into LeaguePlayerBridge(LeagueId, PlayerId) values (@leagueId, @playerId)"
+        nonQuery @"insert into LeaguePlayerBridge(LeagueId, PlayerId) values (@leagueId, @playerId)"
             { JoinLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
 
     type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
     type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
     let updateUserNameInDb (cmd:UpdateUserNameCommand) =
-        nonQuery  @"UPDATE Players SET PlayerName = @playerName WHERE PlayerId = @playerId"
+        nonQuery @"UPDATE Players SET PlayerName = @playerName WHERE PlayerId = @playerId"
             { UpdateUserNameCommandArgs.playerId=cmd.playerId|>getPlayerId; playerName=cmd.playerName|>getPlayerName }
             
     type SaveResultCommand = { fixtureId:FxId; score:Score }
     type SaveResultCommandArgs = { fixtureId:Guid; homeScore:int; awayScore:int }
     let saveResult (cmd:SaveResultCommand) =
-        nonQuery  @"UPDATE Fixtures SET HomeTeamScore = @homeScore, AwayTeamScore = @AwayScore WHERE FixtureId = @fixtureId"
+        nonQuery @"UPDATE Fixtures SET HomeTeamScore = @homeScore, AwayTeamScore = @AwayScore WHERE FixtureId = @fixtureId"
             { SaveResultCommandArgs.fixtureId=cmd.fixtureId|>getFxId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
 
     type SavePredictionCommand = { id:PrId; fixtureId:FxId; playerId:PlId; score:Score }
     type SavePredictionCommandArgs = { id:Guid; fixtureId:Guid; playerId:Guid; homeScore:int; awayScore:int }
     let savePrediction (cmd:SavePredictionCommand) =
-        nonQuery  @"insert into Predictions(PredictionId, FixtureId, PlayerId, HomeTeamScore, AwayTeamScore) values (@PredictionId, @FixtureId, @PlayerId, @HomeScore, @AwayScore)"
+        nonQuery @"
+        IF EXISTS(SELECT * FROM Predictions WHERE FixtureId = @FixtureId AND PlayerId = @PlayerId)
+        BEGIN UPDATE Predictions SET HomeTeamScore = @homeScore, AwayTeamScore = @AwayScore WHERE FixtureId = @FixtureId AND PlayerId = @PlayerId END ELSE
+        BEGIN INSERT INTO Predictions(PredictionId, FixtureId, PlayerId, HomeTeamScore, AwayTeamScore) VALUES (@Id, @FixtureId, @PlayerId, @HomeScore, @AwayScore) END"
             { SavePredictionCommandArgs.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
 
     type SaveFixtureCommand = { id:FxId; home:Team; away:Team; kickoff:KickOff }
-    type SaveGameWeekCommand = { id:GwId; gwno:GwNo; seasonId:SnId; description:string; saveFixtureCommands:SaveFixtureCommand list }
-    type SaveGameWeekCommandArgs = { id:Guid; gwno:int; seasonId:Guid; description:string; }
+    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; saveFixtureCommands:SaveFixtureCommand list }
+    type SaveGameWeekCommandArgs = { id:Guid; seasonId:Guid; description:string; }
     type SaveFixtureCommandArgs = { id:Guid; gameWeekId:Guid; ko:DateTime; home:string; away:string }
     let saveGameWeek (cmd:SaveGameWeekCommand) =
-        nonQuery  @"insert into Predictions(PredictionId, FixtureId, PlayerId, HomeTeamScore, AwayTeamScore) values (@PredictionId, @FixtureId, @PlayerId, @HomeScore, @AwayScore)"
-                { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonId=cmd.seasonId|>getSnId; gwno=cmd.gwno|>getGameWeekNo; description=cmd.description }
+        nonQuery @"
+        declare @nextGameWeek int
+        select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
+        insert into GameWeeks(GameWeekId, SeasonId, GameWeekNumber, GameWeekDescription) values (@Id, @SeasonId, @nextGameWeek, @description)"
+                { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonId=cmd.seasonId|>getSnId; description=cmd.description }
         let saveFixture (fd:SaveFixtureCommand) =
             nonQuery @"insert into Fixtures(FixtureId, GameWeekId, KickOff, HomeTeamName, AwayTeamName) values (@Id, @GameWeekId, @ko, @Home, @Away)"
                 { SaveFixtureCommandArgs.id=fd.id|>getFxId; gameWeekId=cmd.id|>getGwId; ko=fd.kickoff; home=fd.home; away=fd.away }
@@ -168,12 +174,14 @@ module Data =
         let leagueResult = multi.Read<FindLeagueByLeagueIdQueryResult>() |> Seq.toList
         if leagueResult.IsEmpty then None
         else
+            let playersResult = multi.Read<FindPlayersByLeagueIdQueryResult>()
+            let predictionsResult = multi.Read<FindPredictionsByLeagueIdQueryResult>()
             let predictions =
-                multi.Read<FindPredictionsByLeagueIdQueryResult>()
+                predictionsResult
                 |> Seq.map(fun p -> { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore,p.awayTeamScore); })
                 |> Seq.toList
             let players =
-                multi.Read<FindPlayersByLeagueIdQueryResult>()
+                playersResult
                 |> Seq.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=predictions|>List.filter(fun pr -> pr.playerId=(p.playerId|>PlId)) })
                 |> Seq.toList
             let league = leagueResult |> List.head

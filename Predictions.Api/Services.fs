@@ -111,11 +111,14 @@ module Services =
     let getMircoLeagueViewModel (league:League) =
         { MicroLeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName }
 
-    let leagueToRowViewModel (league:League) player =
-        let leagueTableRowForPlayer = getLeagueTableRows league (gameWeeksWithResults()) |> Seq.find(fun row -> row.player = player)
-        { LeaguesRowViewModel.id=str (getLgId league.id); name=(getLeagueName league.name); position=leagueTableRowForPlayer.position; diffPos=leagueTableRowForPlayer.diffPosition }
-
     let getLeaguesView player =
+        let leagueToRowViewModel (league:League) (player:Player) =
+            let buildRow position diffPos = 
+                { LeaguesRowViewModel.id=str (getLgId league.id); name=(getLeagueName league.name); position=position; diffPos=diffPos }
+            let result = getLeagueTableRows league (gameWeeksWithResults()) |> Seq.tryFind(fun row -> row.player.id = player.id)
+            match result with
+            | Some row -> buildRow row.position row.diffPosition
+            | None -> buildRow 1 0
         let rows =
             getLeagueIdsThatPlayerIsIn player
             |> Seq.map getLeagueUnsafe
@@ -305,10 +308,8 @@ module Services =
         | [] -> Success cmds
 
     let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
-        let snid = season().id
         let createFixtures viewModels = tryCreateSaveFixtureCommandsFromPostModels viewModels []
-        // get next game week no *****************************************************************
-        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=snid; saveFixtureCommands=fixtures; description=""; gwno=1|>GwNo }
+        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=season().id; saveFixtureCommands=fixtures; description="" }
         gwpm.fixtures |> (createFixtures
                       >> bind (switch createGameWeek)
                       >> bind (switch saveGameWeek))
