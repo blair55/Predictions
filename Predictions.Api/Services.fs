@@ -244,11 +244,13 @@ module Services =
 
     let joinLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId
-        let joinLge league = joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
+        let joinLge (league:League) =
+            let playerAlreadyInLeague = league.players |> List.exists(fun p -> p = player)
+            if playerAlreadyInLeague then () else joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         let returnLeague() = getLeagueView leagueId
         lgid |> (getLeague
                  >> bind (switch joinLge)
-                 >> bind (switch returnLeague))
+                 >> bind returnLeague)
 
     let leaveLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId

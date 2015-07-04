@@ -119,3 +119,7 @@ h4{margin-top:0;}
     color: #fff;
 }
 
+.table.matrix > thead > tr > th {
+    position: relative;
+    font-weight: normal;
+}

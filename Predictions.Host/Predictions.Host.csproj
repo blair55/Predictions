@@ -90,6 +90,7 @@
     <Content Include="scripts\controllers\leagues.js" />
     <Content Include="scripts\controllers\login.js" />
     <Content Include="scripts\controllers\main.js" />
+    <Content Include="scripts\controllers\matrix.js" />
     <Content Include="scripts\controllers\nav.js" />
     <Content Include="scripts\controllers\openfixtures.js" />
     <Content Include="scripts\controllers\player.js" />
@@ -118,6 +119,7 @@
     <Content Include="views\directives\loading.html" />
     <Content Include="views\login.html" />
     <Content Include="views\main.html" />
+    <Content Include="views\matrix.html" />
     <Content Include="views\nav.html" />
     <Content Include="views\openfixtures.html" />
     <Content Include="views\player.html" />

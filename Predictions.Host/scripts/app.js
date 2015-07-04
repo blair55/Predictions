@@ -102,6 +102,10 @@ angular
           templateUrl: 'views/leaguejoin.html',
           controller: 'LeaguejoinCtrl'
         })
+        .when('/matrix/:leagueId/:gameweekno', {
+          templateUrl: 'views/matrix.html',
+          controller: 'MatrixCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

@@ -1,0 +1,32 @@
+<h4>{{model.league.name}} / GW#{{model.gameWeekNo}} Matrix</h4>
+
+<table class="table table-striped matrix">
+    <thead>
+        <tr>
+            <th></th>
+            <th ng-repeat="col in model.columns" class="matrix-col-head">
+                <span ng-if="col.fixture.isOpen">
+                    {{col.home}} v {{col.away}}
+                </span>
+                <a ng-if="!col.fixture.isOpen" href="#/fixture/{{col.fxId}}">
+                    {{col.home}} v {{col.away}}
+                </a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td>
+                <a href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
+            </td>
+            <td ng-repeat="prd in row.predictions">
+                {{prd.score.home}} - {{prd.score.away}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<a ng-href="#league/{{model.league.id}}">Back to League</a>
+<br />
+<a ng-href="#history/{{model.league.id}}/gameweek">Back to Game Week History</a>
