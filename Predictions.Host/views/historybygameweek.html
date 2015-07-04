@@ -11,10 +11,13 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/history/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
+                <a href="#/history/{{model.league.id}}/gameweek/{{row.gameWeekNo}}">GW#{{row.gameWeekNo}}</a>
             </td>
             <td>
-                <a href="#/player/{{row.winner.id}}">{{row.winner.name}}</a>
+                <a href="#/player/{{row.winner.id}}/{{model.league.id}}">{{row.winner.name}}</a>
+            </td>
+            <td>
+                <a href="#/matrix/{{model.league.id}}/{{row.gameWeekNo}}">Matrix</a>
             </td>
             <td class="numeric-cell">{{row.points}}</td>
         </tr>

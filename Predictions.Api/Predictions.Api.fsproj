@@ -60,9 +60,10 @@
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
     <None Include="AdhocTasks.fsx" />
+    <None Include="DummyDataImport2.fsx" />
     <None Include="packages.config" />
-    <None Include="DummyDataImport.fsx" />
     <None Include="RealDataImport.fsx" />
+    <None Include="DummyDataImport.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Dapper">

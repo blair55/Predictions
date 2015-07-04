@@ -15,7 +15,7 @@
         <tr ng-repeat="row in model.rows">
             <td class="numeric-cell">{{row.position}}</td>
             <td>
-                <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+                <a href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
             </td>
             <td class="numeric-cell">{{row.correctScores}}</td>
             <td class="numeric-cell">{{row.correctOutcomes}}</td>
