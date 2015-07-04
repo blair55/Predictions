@@ -1,17 +1,25 @@
-<h4>{{model.league.name}} / GW#{{model.gameWeekNo}} Matrix</h4>
+<h4>{{model.league.name}} / Game Week #{{model.gameWeekNo}} Matrix</h4>
 
 <table class="table table-striped matrix">
     <thead>
         <tr>
             <th></th>
-            <th ng-repeat="col in model.columns" class="matrix-col-head">
-                <span ng-if="col.fixture.isOpen">
-                    {{col.home}} v {{col.away}}
-                </span>
-                <a ng-if="!col.fixture.isOpen" href="#/fixture/{{col.fxId}}">
-                    {{col.home}} v {{col.away}}
-                </a>
+            <th ng-repeat="fixture in model.fixtures">
+                <div ng-if="fixture.isOpen">
+                    <div>
+                        <span class="fixture-head-team">{{fixture.home}}</span>
+                        <span class="fixture-head-team">{{fixture.away}}</span>
+                    </div>
+                    <span class="label label-default">{{ fixture.kickoff | date:'MMM dd' }}</span>
+                </div>
+                <div ng-if="!fixture.isOpen">
+                    <a href="#/fixture/{{fixture.fxId}}">
+                        <span class="fixture-head-team">{{fixture.home}}</span>
+                        <span class="fixture-head-team">{{fixture.away}}</span>
+                    </a>
+                </div>
             </th>
+            <th>pts.</th>
         </tr>
     </thead>
     <tbody>
@@ -19,8 +27,17 @@
             <td>
                 <a href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
             </td>
-            <td ng-repeat="prd in row.predictions">
-                {{prd.score.home}} - {{prd.score.away}}
+            <td ng-repeat="prd in row.predictions" class="score-cell {{prd.bracketClass}}">
+                <div ng-if="!prd.isFixtureOpen">
+                    <span ng-if="prd.isSubmitted">{{prd.score.home}} - {{prd.score.away}}</span>
+                    <span ng-if="!prd.isSubmitted">-</span>
+                </div>
+                <div ng-if="prd.isFixtureOpen">
+                    <span>-</span>
+                </div>
+            </td>
+            <td class="score-cell">
+                {{row.points}}
             </td>
         </tr>
     </tbody>

@@ -111,16 +111,16 @@ module LeagueModels =
 module GameWeekMatrixModels =
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekMatrixPlayerRowPredictionViewModel = { isSubmitted:bool; score:ScoreViewModel }
+    type GameWeekMatrixPlayerRowPredictionViewModel = { isSubmitted:bool; isFixtureOpen:bool; score:ScoreViewModel; bracketClass:string }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekMatrixPlayerRowViewModel = { player:PlayerViewModel; predictions:GameWeekMatrixPlayerRowPredictionViewModel list }
+    type GameWeekMatrixPlayerRowViewModel = { player:PlayerViewModel; predictions:GameWeekMatrixPlayerRowPredictionViewModel list; points:int }
+//
+//    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+//    type GameWeekMatrixFixtureColumnViewModel = { home:string; away:string; fxId:string; isOpen:bool; :ScoreViewModel }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekMatrixFixtureColumnViewModel = { home:string; away:string; fxId:string; }
-
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekMatrixViewModel = { gameWeekNo:int; league:MicroLeagueViewModel; rows:GameWeekMatrixPlayerRowViewModel list; columns:GameWeekMatrixFixtureColumnViewModel list }
+    type GameWeekMatrixViewModel = { gameWeekNo:int; league:MicroLeagueViewModel; rows:GameWeekMatrixPlayerRowViewModel list; fixtures:FixtureViewModel list }
 
 [<AutoOpen>]
 module PostModels =

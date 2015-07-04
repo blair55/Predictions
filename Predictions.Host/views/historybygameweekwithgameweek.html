@@ -1,6 +1,10 @@
 <h4>{{model.league.name}} / Game Week #{{model.gameWeekNo}}</h4>
-<p>In Month <a href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a> 
-<!--<a href="#/playergameweek/{{model.player.id}}/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Predictions</a>--></p>
+<p>
+    In Month <a href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a>
+</p>
+<p>
+    <a href="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}">Matrix</a>
+</p>
 <table class="table table-striped">
     <thead>
         <tr>

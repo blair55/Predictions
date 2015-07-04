@@ -120,6 +120,26 @@ h4{margin-top:0;}
 }
 
 .table.matrix > thead > tr > th {
-    position: relative;
     font-weight: normal;
+    text-align: center;
 }
+.table.matrix > tbody > tr > td {
+    white-space: nowrap;
+}
+.table.matrix > tbody > tr > td.score-cell {
+    text-align: center;
+}
+
+.table.matrix > tbody > tr > td.score-cell.cs {
+    background-color: mediumseagreen;
+}
+.table.matrix > tbody > tr > td.score-cell.co {
+    background-color: palegreen;
+}
+
+
+.table.matrix .fixture-head-team {
+    text-transform: uppercase;
+}
+
+

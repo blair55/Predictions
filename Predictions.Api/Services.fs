@@ -288,26 +288,43 @@ module Services =
         LgId leagueId |> (getLeague >> bind (switch getGameWeekPointsViewModel))
 
     let getGameWeekMatrix gwno leagueId =
-        let getGameWeekMatrixViewModel (league:League) =
-            let fixtures =
-                gameWeeks()
-                |> List.filter(fun gw -> gw.number = gwno)
-                |> getFixturesForGameWeeks
-                |> List.map(fixtureToFixtureData)
+        let getGameWeek gwno =
+            match gameWeeks() |> List.tryFind(fun gw -> gw.number = gwno) with
+            | Some gw -> Success gw
+            | None -> NotFound "game week not found" |> Failure
+
+        let getLeagueAndCarryGameWeek gw =
+            LgId leagueId |> (getLeague >> bind (switch (fun lge -> (gw, lge))))
+
+        let getGameWeekMatrixViewModel (gameWeek:GameWeek, league:League) =
+            let fixtures = getFixturesForGameWeeks [gameWeek]
+            let fixtureDataWithResults = fixtures |> List.map(fixtureToFixtureDataWithResult)
+            let fixtureViewModels =
+                fixtures
+                |> List.map fixtureToFixtureData
                 |> List.sortBy(fun fd -> fd.kickoff)
-            let predictionToMatrixRow = function
-                | Some (p:Prediction) -> { GameWeekMatrixPlayerRowPredictionViewModel.isSubmitted=true; score=(p.score|>toScoreViewModel) }
-                | None -> { GameWeekMatrixPlayerRowPredictionViewModel.isSubmitted=false; score=noScoreViewModel }
+                |> List.map(fun fd -> toFixtureViewModel fd gameWeek)
+                |> List.map(fun fvm -> { fvm with home = fvm.home.Substring(0,3); away = fvm.away.Substring(0, 3) })
             let playerToMatrixRow (player:Player) =
-                let predictions =
-                    fixtures
-                    |> List.map(fun fd ->  player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id))
-                    |> List.map(predictionToMatrixRow)
-                { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions }
-            let rows = league.players |> List.map(playerToMatrixRow)
-            let columns = fixtures |> List.map(fun fd -> { GameWeekMatrixFixtureColumnViewModel.fxId=fd.id|>getFxId|>str; home=fd.home; away=fd.away })
-            { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; columns=columns; league=league|>getMircoLeagueViewModel }
-        LgId leagueId |> (getLeague >> bind (switch getGameWeekMatrixViewModel))
+                let getPredictionViewModel ((fd:FixtureData), r) =
+                    let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
+                    let bracketClass =
+                        match getBracketForPredictionComparedToResult prd r with
+                        | CorrectScore -> "cs" | CorrectOutcome -> "co" | Incorrect -> ""
+                    match fixtureDataToFixture fd r with
+                    | OpenFixture fd -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=true; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
+                     | ClosedFixture (fd, r) ->
+                        match prd with
+                        | Some p -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=true; score=(p.score|>toScoreViewModel); bracketClass=bracketClass }
+                        | None -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
+                let predictions = fixtureDataWithResults |> List.map(getPredictionViewModel)
+                let (_, _, _, points) = getPlayerBracketProfile fixtures player
+                { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }
+            let rows = league.players |> List.sortBy(fun p -> p.name) |> List.map(playerToMatrixRow)
+            { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; fixtures=fixtureViewModels; league=league|>getMircoLeagueViewModel }
+        gwno |> (getGameWeek
+             >> bind getLeagueAndCarryGameWeek
+             >> bind (switch getGameWeekMatrixViewModel))
 
     // persistence
 

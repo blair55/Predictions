@@ -140,8 +140,7 @@ module Domain =
 
     // base calculations
 
-    let getPointsForBracket b =
-        match b with
+    let getPointsForBracket = function
         | CorrectScore -> 3
         | CorrectOutcome -> 1
         | Incorrect -> 0
