@@ -1,18 +1,15 @@
 <h4>
-    <a ng-href="#/league/{{model.league.id}}">{{model.league.name}}</a>
-    /
-    <a ng-href="#/playerprofile/{{model.player.id}}">{{model.player.name}}</a>
+    <a ng-href="#/playerprofile/{{model.player.id}}">{{model.player.name}}</a> / Profile
 </h4>
 <p>
-    League Position: {{ model.position | ordinal }}
+    Total Points: {{model.totalPoints}}
 </p>
-<canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>
-<br />
+<canvas class="chart chart-bar" height="80" data="data" labels="labels" options="options"></canvas>
+<br/>
 <table class="table table-striped">
     <thead>
         <tr>
             <th></th>
-            <th class="numeric-cell-heading">Pos.</th>
             <th class="numeric-cell-heading" title="Correct Scores">CS</th>
             <th class="numeric-cell-heading" title="Correct Results">CR</th>
             <th class="numeric-cell-heading">Pts.</th>
@@ -22,17 +19,14 @@
         <tr ng-repeat="row in model.rows">
             <td>
                 <span class="label label-default">GW#{{row.gameWeekNo}}</span>
-                <a ng-href="#/history/{{model.league.id}}/gameweek/{{row.gameWeekNo}}">Table</a> /
-                <a ng-href="#/matrix/{{model.league.id}}/{{row.gameWeekNo}}">Matrix</a>
+                <a ng-href="#/playergameweek/{{model.player.id}}/{{row.gameWeekNo}}">Predictions</a>
                 <span class="text-muted small">&middot; {{ row.firstKo | date:'MMM' | uppercase }}</span>
             </td>
-                
-            <td ng-if="row.hasResults" class=" numeric-cell">{{row.position}}</td>
+
             <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctScores}}</td>
             <td ng-if="row.hasResults" class=" numeric-cell">{{row.correctOutcomes}}</td>
             <td ng-if="row.hasResults" class=" numeric-cell">{{row.points}}</td>
 
-            <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
             <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
             <td ng-if="!row.hasResults" class=" numeric-cell">-</td>
             <td ng-if="!row.hasResults" class=" numeric-cell">-</td>

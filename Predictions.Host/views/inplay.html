@@ -10,7 +10,7 @@
         <tbody>
             <tr ng-repeat="row in model.rows">
                 <td>
-                    <a href="#/fixture/{{row.fixture.fxId}}">
+                    <a ng-href="#/fixture/{{row.fixture.fxId}}">
                         {{row.fixture.home}} v {{row.fixture.away}}
                     </a>
                 </td>

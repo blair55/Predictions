@@ -125,6 +125,15 @@ type HomeController() =
         let getPoints = getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo
         playerId |> (getPoints >> resultToHttp)
 
+    [<Route("playerprofile/{playerId:Guid}")>]
+    member this.GetPlayerProfile (playerId:Guid) =
+        (playerId) |> (getPlayerProfileView >> resultToHttp)
+
+    [<Route("playerprofilegraph/{playerId:Guid}")>]
+    member this.GetPlayerProfileGraph (playerId:Guid) =
+        (playerId) |> (getPlayerProfileGraph >> resultToHttp)
+
+
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer

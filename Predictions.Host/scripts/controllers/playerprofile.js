@@ -2,20 +2,20 @@
 
 /**
  * @ngdoc function
- * @name frontendApp.controller:PlayerCtrl
+ * @name frontendApp.controller:PlayerprofileCtrl
  * @description
- * # PlayerCtrl
+ * # PlayerprofileCtrl
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('PlayerCtrl', function ($scope, $http, $routeParams) {
+  .controller('PlayerprofileCtrl', function ($scope, $http, $routeParams) {
 
-      var url = '/api/player/' + $routeParams.playerId + "/" + $routeParams.leagueId;
+      var url = '/api/playerprofile/' + $routeParams.playerId;
       $http.get(url).success(function (data) {
           $scope.model = data;
       });
 
-      var graphUrl = '/api/leaguepositiongraphforplayer/' + $routeParams.playerId + "/" + $routeParams.leagueId;
+      var graphUrl = '/api/playerprofilegraph/' + $routeParams.playerId;
       $http.get(graphUrl).success(function (data) {
           $scope.labels = data.labels;
           $scope.data = data.data;
@@ -23,14 +23,14 @@ angular.module('frontendApp')
               animationSteps: 10,
               //showScale: !window.mobilecheck(),
               showScale: false,
-              scaleOverride: true,
+              scaleOverride: false,
               // ** Required if scaleOverride is true **
               // Number - The number of steps in a hard coded scale
-              scaleSteps: 16,
-              // Number - The value jump in the hard coded scale
-              scaleStepWidth: -1,
-              // Number - The scale starting value
-              scaleStartValue: 17,
+              //scaleSteps: 16,
+              //// Number - The value jump in the hard coded scale
+              //scaleStepWidth: 1,
+              //// Number - The scale starting value
+              //scaleStartValue: 0,
           };
       });
   });

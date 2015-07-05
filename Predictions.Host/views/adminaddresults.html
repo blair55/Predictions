@@ -12,7 +12,7 @@
         <tbody>
             <tr ng-repeat="row in model.rows">
                 <td>
-                    <a href="#/admin/addresults/{{row.gwno}}">GW#{{row.gwno}}</a>
+                    <a ng-href="#/admin/addresults/{{row.gwno}}">GW#{{row.gwno}}</a>
                 </td>
                 <td>
                     <ng-pluralize count="row.closedFixtureCount"

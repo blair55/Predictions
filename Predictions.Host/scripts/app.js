@@ -38,6 +38,10 @@ angular
             templateUrl: 'views/playergameweek.html',
             controller: 'PlayergameweekCtrl'
         })
+        .when('/playerprofile/:playerId', {
+            templateUrl: 'views/playerprofile.html',
+            controller: 'PlayerprofileCtrl'
+        })
         .when('/openfixtures', {
             templateUrl: 'views/openfixtures.html',
             controller: 'OpenfixturesCtrl'

@@ -1,4 +1,6 @@
-<h4>{{model.league.name}} / Month History</h4>
+<h4>
+    <a ng-href="#/league/{{model.league.id}}">{{model.league.name}}</a> / Month History
+</h4>
 
 <table class="table table-striped">
     <thead>
@@ -11,14 +13,12 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <a href="#/history/{{model.league.id}}/month/{{row.month}}">{{row.month}}</a>
+                <a ng-href="#/history/{{model.league.id}}/month/{{row.month}}">{{row.month}}</a>
             </td>
             <td>
-                <a href="#/player/{{row.winner.id}}/{{model.league.id}}">{{row.winner.name}}</a>
+                <a ng-href="#/player/{{row.winner.id}}/{{model.league.id}}">{{row.winner.name}}</a>
             </td>
             <td class="numeric-cell">{{row.points}}</td>
         </tr>
     </tbody>
 </table>
-
-<a ng-href="#league/{{model.league.id}}">Back to League</a>

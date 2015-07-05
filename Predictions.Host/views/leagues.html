@@ -1,7 +1,7 @@
 
 <h4>Leagues</h4>
 
-<a class="" href="#createleague">Create League</a>
+<a class="" ng-href="#createleague">Create League</a>
 
 <table class="table table-striped">
     <thead>
@@ -19,7 +19,7 @@
                 <span ng-if="row.diffPos < 0" class="diff-down glyphicon glyphicon-chevron-down" title="down {{row.diffPos}}"></span>
             </td>
             <td>
-                <a href="#/league/{{row.id}}">{{row.name}}</a>
+                <a ng-href="#/league/{{row.id}}">{{row.name}}</a>
             </td>
             <td class="numeric-cell">{{row.position}}</td>
         </tr>

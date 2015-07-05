@@ -1,9 +1,11 @@
-<h4>{{model.league.name}} / Game Week #{{model.gameWeekNo}}</h4>
+<h4>
+    <a ng-href="#/league/{{model.league.id}}">{{model.league.name}}</a> / Game Week #{{model.gameWeekNo}} Table
+</h4>
 <p>
-    In Month <a href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a>
+    In Month <a ng-href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a>
 </p>
 <p>
-    <a href="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}">Matrix</a>
+    <a ng-href="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}">View Matrix</a>
 </p>
 <table class="table table-striped">
     <thead>
@@ -19,7 +21,7 @@
         <tr ng-repeat="row in model.rows">
             <td class="numeric-cell">{{row.position}}</td>
             <td>
-                <a href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
+                <a ng-href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
             </td>
             <td class="numeric-cell">{{row.correctScores}}</td>
             <td class="numeric-cell">{{row.correctOutcomes}}</td>
@@ -27,5 +29,3 @@
         </tr>
     </tbody>
 </table>
-
-<a ng-href="#league/{{model.league.id}}">Back to League</a>

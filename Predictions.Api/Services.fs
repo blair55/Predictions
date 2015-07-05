@@ -25,6 +25,7 @@ module Services =
         let f = fixtureDataToFixture fd None
         let createVm isOpen = { FixtureViewModel.home=fd.home; away=fd.away; fxId=(getFxId fd.id)|>str; kickoff=fd.kickoff; gameWeekNumber=(getGameWeekNo gw.number); isOpen=isOpen }
         f |> isFixtureOpen |> createVm
+    
     let season() = buildSeason currentSeason
     let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
     let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
@@ -177,6 +178,27 @@ module Services =
             { LeaguePositionGraphData.data=data; labels=labels }
         LgId leagueId |> (getLeague >> bind (switch getResult))
 
+    let getPlayerProfileView playerId =
+        let getResult player =
+            let gws = gameWeeks()
+            let buildRow ((gw:GameWeek), cs, co, pts) = {
+                    PlayerProfileViewModelRow.gameWeekNo=(getGameWeekNo gw.number);
+                    hasResults=(doesGameWeekHaveAnyResults gw); firstKo=(getFirstKoForGw gw);
+                    correctScores=cs; correctOutcomes=co; points=pts }
+            let rows = (getPlayerProfilePointsForGameWeeks player gws) |> List.map(buildRow)
+            let totalPoints = rows |> List.sumBy(fun r -> r.points)
+            { PlayerProfileViewModel.player=player|>getPlayerViewModel; totalPoints=totalPoints; rows=rows }
+        PlId playerId |> (getPlayer >> bind (switch getResult))
+
+    let getPlayerProfileGraph playerId =
+        let getResult player =
+            let gws = gameWeeks()
+            let data = gws |> List.map(fun gw -> getGameWeekDetailsForPlayer player gw |> List.sumBy(fun (_, _, _, pts) -> pts))
+            let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+            { PlayerProfileGraphData.data=[data]; labels=labels }
+        PlId playerId |> (getPlayer >> bind (switch getResult))
+
+
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
@@ -299,12 +321,17 @@ module Services =
         let getGameWeekMatrixViewModel (gameWeek:GameWeek, league:League) =
             let fixtures = getFixturesForGameWeeks [gameWeek]
             let fixtureDataWithResults = fixtures |> List.map(fixtureToFixtureDataWithResult)
-            let fixtureViewModels =
+            let columns =
+                let toColumn (fd, result:Result option) =
+                     let vm = toFixtureViewModel fd gameWeek
+                     let fvm = { vm with home = vm.home.Substring(0,3); away = vm.away.Substring(0, 3) }
+                     match result with
+                     | Some r -> { GameWeekMatrixFixtureColumnViewModel.fixture=fvm; isSubmitted=true; score=r.score|>toScoreViewModel }
+                     | None -> { GameWeekMatrixFixtureColumnViewModel.fixture=fvm; isSubmitted=false; score=noScoreViewModel }
                 fixtures
-                |> List.map fixtureToFixtureData
-                |> List.sortBy(fun fd -> fd.kickoff)
-                |> List.map(fun fd -> toFixtureViewModel fd gameWeek)
-                |> List.map(fun fvm -> { fvm with home = fvm.home.Substring(0,3); away = fvm.away.Substring(0, 3) })
+                |> List.map fixtureToFixtureDataWithResult
+                |> List.sortBy(fun (fd, _) -> fd.kickoff)
+                |> List.map toColumn
             let playerToMatrixRow (player:Player) =
                 let getPredictionViewModel ((fd:FixtureData), r) =
                     let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
@@ -321,7 +348,7 @@ module Services =
                 let (_, _, _, points) = getPlayerBracketProfile fixtures player
                 { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }
             let rows = league.players |> List.sortBy(fun p -> p.name) |> List.map(playerToMatrixRow)
-            { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; fixtures=fixtureViewModels; league=league|>getMircoLeagueViewModel }
+            { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; columns=columns; league=league|>getMircoLeagueViewModel }
         gwno |> (getGameWeek
              >> bind getLeagueAndCarryGameWeek
              >> bind (switch getGameWeekMatrixViewModel))

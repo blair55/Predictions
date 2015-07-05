@@ -215,6 +215,14 @@ module Domain =
         |> List.map(fun (gw, fixtures) -> gw, getLeagueTable allPlayers fixtures)
         |> List.map(fun (gwno, ltrList) -> gwno, ltrList |> List.tryFind(fun (_, p, _, _, _) -> p = player))
 
+
+    let getPlayerProfilePointsForGameWeeks player gameWeeks =
+        gameWeeks
+        |> List.map(fun gw -> 
+                    let fixtures = getFixturesForGameWeeks [gw]
+                    let (p, cs, co, tp) = getPlayerBracketProfile fixtures player
+                    (gw, cs, co, tp))
+
     let getGameWeekDetailsForPlayer player gameWeek =
         getFixturesForGameWeeks [gameWeek]
         |> List.map(fixtureToFixtureDataWithResult)
@@ -226,7 +234,6 @@ module Domain =
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
         |> List.map(fixtureToFixtureData)
-//        |> List.map(fun fd -> fd, fd.predictions |> List.tryFind(fun p -> p.player = player))
         |> List.map(fun fd -> fd, player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id))
         |> List.sortBy(fun (fd, _) -> fd.kickoff)
 
@@ -235,7 +242,6 @@ module Domain =
         |> getFixturesForGameWeeks
         |> List.choose(onlyOpenFixtures)
         |> List.map(fixtureToFixtureData)
-//        |> List.filter(fun fd -> fd.predictions |> List.exists(fun p -> p.player = player) = false)
         |> List.filter(fun fd -> player.predictions |> List.exists(fun p -> p.fixtureId = fd.id) = false)
         |> List.sortBy(fun fd -> fd.kickoff)
 

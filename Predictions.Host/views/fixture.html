@@ -26,7 +26,7 @@
         <tbody>
             <tr ng-repeat="row in model.rows">
                 <td>
-                    <a href="#/player/{{row.player.id}}">{{row.player.name}}</a>
+                    <a ng-href="#/player/{{row.player.id}}">{{row.player.name}}</a>
                 </td>
                 <td>
                     <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>

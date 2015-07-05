@@ -1,57 +1,55 @@
-<div ng-if="model">
-    <h4>{{model.player.name}} / GW#{{model.gameWeekNo}}</h4>
-    <p>Total Points: {{model.totalPoints}}</p>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Fixture</th>
-                <th class="score-cell-heading">Prediction</th>
-                <th class="score-cell-heading">Result</th>
-                <th class="numeric-cell-heading">Pts.</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in model.rows">
-                <td>
-                    <span ng-if="row.fixture.isOpen">
-                        {{row.fixture.home}} v {{row.fixture.away}}
-                    </span>
-                    <a ng-if="!row.fixture.isOpen" href="#/fixture/{{row.fixture.fxId}}">
-                        {{row.fixture.home}} v {{row.fixture.away}}
-                    </a>
-                </td>
-                <td>
-                    <div ng-if="!row.fixture.isOpen">
-                        <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
-                        <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
-                    </div>
-                    <div ng-if="row.fixture.isOpen">
-                        <i>will be shown after kick off</i>
-                    </div>
-                </td>
-                <td>
-                    <div ng-if="row.fixture.isOpen">
-                        <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-                    </div>
-                    <div ng-if="!row.fixture.isOpen">
-                        <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
-                        <span ng-if="!row.resultSubmitted"><i>result not yet submitted</i></span>
-                    </div>
-                </td>
-                <td class="numeric-cell">{{row.points}}</td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td class="numeric-cell">
-                    <span>{{model.totalPoints}}</span>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-
-<loading model="model" no-rows-msg="no results"></loading>
+<h4>
+    <a ng-href="#/playerprofile/{{model.player.id}}">{{model.player.name}}</a> / Game Week #{{model.gameWeekNo}}
+</h4>
+<p>Total Points: {{model.totalPoints}}</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fixture</th>
+            <th class="score-cell-heading">Prediction</th>
+            <th class="score-cell-heading">Result</th>
+            <th class="numeric-cell-heading">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td>
+                <span ng-if="row.fixture.isOpen">
+                    {{row.fixture.home}} v {{row.fixture.away}}
+                </span>
+                <a ng-if="!row.fixture.isOpen" href="#/fixture/{{row.fixture.fxId}}">
+                    {{row.fixture.home}} v {{row.fixture.away}}
+                </a>
+            </td>
+            <td>
+                <div ng-if="!row.fixture.isOpen">
+                    <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
+                    <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
+                </div>
+                <div ng-if="row.fixture.isOpen">
+                    <i>will be shown after kick off</i>
+                </div>
+            </td>
+            <td>
+                <div ng-if="row.fixture.isOpen">
+                    <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+                </div>
+                <div ng-if="!row.fixture.isOpen">
+                    <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
+                    <span ng-if="!row.resultSubmitted"><i>result not yet submitted</i></span>
+                </div>
+            </td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="numeric-cell">
+                <span>{{model.totalPoints}}</span>
+            </td>
+        </tr>
+    </tfoot>
+</table>

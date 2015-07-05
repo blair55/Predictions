@@ -21,6 +21,17 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
+// fixture page with past results & ability to predict & all players pie chart
+// inplay -> this week & matrix link
+// global league view
+// player overall rank
+// league admin
+// share league with facebook/twitter
+
+// matrix include fixture results
+// player page / bar graph
+
+
 ////// issues
 // organise service/domain layer
 // logging
@@ -34,7 +45,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 // make mono-able
 // google analytics
 // 'horizontal' navigation
-// leagues / registration
 // odds checker integration
 // head to head
 // 'captain' game double points
@@ -50,6 +60,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 //
 
 ////// done
+// leagues / registration
 // form guide
 // position grouping
 // fixtures in play
