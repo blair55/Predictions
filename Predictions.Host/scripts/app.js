@@ -110,6 +110,10 @@ angular
           templateUrl: 'views/matrix.html',
           controller: 'MatrixCtrl'
         })
+        .when('/globalleague/:page', {
+          templateUrl: 'views/globalleague.html',
+          controller: 'GloballeagueCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

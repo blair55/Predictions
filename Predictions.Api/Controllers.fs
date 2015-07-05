@@ -161,21 +161,30 @@ type HomeController() =
     member this.GetGameWeekPoints (leagueId:Guid, gwno) =
         let getGwPointsView = gwno |> GwNo |> getGameWeekPointsView
         leagueId |> (getGwPointsView >> resultToHttp)
-
         
     [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}")>]
     member this.GetGameWeekMatrix (leagueId:Guid, gwno) =
         let getResult = gwno |> GwNo |> getGameWeekMatrix
         leagueId |> (getResult >> resultToHttp)
-        
 
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
-        FxId fxId |> (getPlayerPointsForFixture >> resultToHttp)
+        let getResult = this.GetLoggedInPlayerId() |> getLoggedInPlayer |> getPlayerPointsForFixture
+        FxId fxId |> (getResult >> resultToHttp)
 
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =
         FxId fxId |> (getFixturePredictionGraphData >> resultToHttp)
+
+    [<Route("getleaguepositionforplayer")>]
+    member this.Getleaguepositionforplayer() =
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> (switch getleaguePositionforplayer >> resultToHttp)
+
+    [<Route("globalleague/{page:int}")>]
+    member this.Getleaguepositionforplayer(page:int) =
+        let getResult = this.GetLoggedInPlayerId() |> getLoggedInPlayer |> getGlobalLeagueTablePage
+        page |> (switch getResult >> resultToHttp)
 
     [<Route("getlastgameweekandwinner")>]
     member this.GetLastGameWeekAndWinner() =

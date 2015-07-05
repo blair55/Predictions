@@ -1,13 +1,12 @@
 <h4>
-    <a ng-href="#/league/{{model.id}}">{{model.name}}</a>
+    Global League Table
 </h4>
 <p>
-    Including results for GW#{{model.latestGameWeekNo}}
-    <a ng-href="#/matrix/{{model.id}}/{{model.latestGameWeekNo}}">Lastest Matrix</a>
+    Including results for GW#{{model.latestGameWeekNo}} <a ng-href="#/globalleague/0">View Top of the League</a>
 </p>
-<a ng-href="#/leagueinvite/{{model.id}}">Invite To Join</a>
-<a ng-href="#/history/{{model.id}}/gameweek">Previous Weeks</a>
-<a ng-href="#/history/{{model.id}}/month">Previous Months</a>
+
+<!--<a ng-href="#/history/{{model.id}}/gameweek">Previous Weeks</a>
+<a ng-href="#/history/{{model.id}}/month">Previous Months</a>-->
 
 <table class="table table-striped">
     <thead>
@@ -29,7 +28,7 @@
                 <span ng-if="row.diffPos < 0" class="diff-down glyphicon glyphicon-chevron-down" title="down {{row.diffPos}}"></span>
             </td>
             <td>
-                <a ng-href="#/player/{{row.player.id}}/{{model.id}}">{{row.player.name}}</a>
+                <a ng-href="#/playerprofile/{{row.player.id}}">{{row.player.name}}</a>
             </td>
             <td class="numeric-cell">{{row.correctScores}}</td>
             <td class="numeric-cell">{{row.correctOutcomes}}</td>

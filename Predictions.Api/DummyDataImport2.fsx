@@ -5,6 +5,8 @@ open System.Data
 open Predictions.Api.Common
 open Predictions.Api.Domain
 open Predictions.Api.Data
+#load @"DummyNames.fs"
+open DummynamesModule
 
 let rnd = new System.Random()
 let ko = new DateTime(2014,10,2);
@@ -49,7 +51,10 @@ let rescmds = gwcmds |> getSaveResultCommandList;;
 //rescmds |> List.iter saveResult;;
 
 
-let playersList = [ for p in [ "Adam"; "Antony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] -> { Player.id=newPlId(); name=p|>PlayerName; predictions=[] } ]
+//let playersList = [ for p in [ "Adam"; "Antony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] ->
+let lotsofDummyNames = (dummynames)
+let playersList = [ for p in lotsofDummyNames ->
+                    { Player.id=newPlId(); name=p|>PlayerName; predictions=[] } ]
 let getRandomExpId() = Guid.NewGuid() |> str |> ExternalPlayerId
 
 let getRegisterPlayerCommands() =
@@ -57,7 +62,7 @@ let getRegisterPlayerCommands() =
     |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider})
     
 let rpcmds = getRegisterPlayerCommands()
-//rpcmds |> List.iter registerPlayerInDb
+rpcmds |> List.iter registerPlayerInDb
 
 let playerIds = rpcmds |> List.map(fun p -> p.player.id)
 let fixtureIds =
@@ -75,10 +80,10 @@ let getSavePredictionCommandList (pids) (fids) =
     |> List.collect(fun cmd -> cmd)
 
 let prcmds = getSavePredictionCommandList playerIds fixtureIds
-//prcmds |> List.iter savePrediction
+prcmds |> List.iter savePrediction
 
 let getJoinLeagueCommands() =
-    let lgid = "3C5652CB-1DA7-4FEA-9C81-61BD06694DF8" |> sToGuid |> LgId
+    let lgid = "87e4cb66-8b74-44f0-9361-cb2e967955d7" |> sToGuid |> LgId
     playerIds
     |> List.map(fun pid -> { JoinLeagueCommand.playerId=pid; leagueId=lgid })
 

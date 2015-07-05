@@ -46,6 +46,7 @@ module Domain =
 
     let currentSeason = SnYr "2015/16"
     let monthFormat = "MMMM yyyy"
+    let globalLeaguePageSize = 30
 
     type Score = int * int
     type Result = { score:Score }
@@ -314,10 +315,10 @@ module Domain =
 //        let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
 //        if hasAlreadySubmitted then invalid "cannot submit more than one prediction for fixture" else Success (fd, pr)
 
-    let tryViewFixture f =
-        match f with
-        | OpenFixture _ -> invalid "cannot view fixture with ko in future"
-        | ClosedFixture(fd, r) -> Success(fd, r)
+//    let tryViewFixture f =
+//        match f with
+//        | OpenFixture _ -> invalid "cannot view fixture with ko in future"
+//        | ClosedFixture(fd, r) -> Success(fd, r)
 
     let tryToCreateScoreFromSbm home away =
         if home >= 0 && away >= 0 then Success(home, away) else invalid "cannot submit negative score"

@@ -38,7 +38,7 @@ module ViewModels =
     type MicroLeagueViewModel = { id:string; name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PastGameWeekRowViewModel = { gameWeekNo:int; winner:PlayerViewModel; points:int }
+    type PastGameWeekRowViewModel = { gameWeekNo:int; winner:PlayerViewModel; points:int; hasResult:bool }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PastGameWeeksViewModel = { league:MicroLeagueViewModel; rows:PastGameWeekRowViewModel list }
@@ -69,7 +69,7 @@ module ViewModels =
     type FixturePointsRowViewModel = { player:PlayerViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; (*rows:FixturePointsRowViewModel list*) }
+    type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; openFixturesViewModelRow:OpenFixturesViewModelRow }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeaguePositionGraphData = { data:int list list; labels:string list }
@@ -88,6 +88,13 @@ module ViewModels =
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type InPlayViewModel = { rows:InPlayRowViewModel list; }
+    
+[<AutoOpen>]
+module HomePageModels =
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type LeaguePositionViewModelRow = { leaguePosition:int; totalPlayerCount:int; playerLeaguePage:int }
+
 
 [<AutoOpen>]
 module PlayerProfileModels =
@@ -114,7 +121,7 @@ module LeagueModels =
     type CreateLeaguePostModel = { name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list }
+    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list; latestGameWeekNo:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueInviteViewModel = { id:string; name:string; inviteLink:string; }

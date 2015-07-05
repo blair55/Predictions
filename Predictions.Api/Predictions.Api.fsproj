@@ -60,6 +60,7 @@
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
     <None Include="AdhocTasks.fsx" />
+    <Compile Include="DummyNames.fs" />
     <None Include="DummyDataImport2.fsx" />
     <None Include="packages.config" />
     <None Include="RealDataImport.fsx" />

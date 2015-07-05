@@ -57,33 +57,30 @@ module Services =
                    |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
-    let getFixtureViewDetails (gw, (fd:FixtureData), (r:Result option)) =
-        let getPredictionScoreViewModel (prediction:Prediction option) =
-            match prediction with
-            | Some p -> toScoreViewModel p.score
-            | None -> noScoreViewModel
-        let getResultScoreViewModel (result:Result option) =
-            match result with
-            | Some rslt -> toScoreViewModel rslt.score
-            | None -> noScoreViewModel
-//        let rows = players
-//                   |> List.map(fun plr -> plr, (fd.predictions |> List.tryFind(fun pr -> pr.player = plr)))
-//                   |> List.map(fun (plr, pr) -> plr, pr, (getBracketForPredictionComparedToResult pr r) |> getPointsForBracket)
-//                   |> List.map(fun (plr, pr, pts) -> { FixturePointsRowViewModel.player=(getPlayerViewModel plr); predictionSubmitted=pr.IsSome; prediction=(getPredictionScoreViewModel pr); points=pts })
-        { FixturePointsViewModel.fixture=(toFixtureViewModel fd gw); resultSubmitted=r.IsSome; result=r|>getResultScoreViewModel; (*rows=rows*) }
-
-    let getPlayerPointsForFixture (fxid:FxId) =
+    let getPlayerPointsForFixture (player:Player) (fxid:FxId) =
+        let gws = gameWeeks()
+        let getResult (gw, (fd:FixtureData), (r:Result option)) =
+            let getPredictionScoreViewModel (prediction:Prediction option) =
+                match prediction with
+                | Some p -> toScoreViewModel p.score
+                | None -> noScoreViewModel
+            let getResultScoreViewModel (result:Result option) =
+                match result with
+                | Some rslt -> toScoreViewModel rslt.score
+                | None -> noScoreViewModel
+            let prediction = tryFindPlayerPredictionForFixture player fd
+            let row = toOpenFixtureViewModelRow (gw, fd, prediction) gws 
+            { FixturePointsViewModel.fixture=(toFixtureViewModel fd gw); resultSubmitted=r.IsSome; result=r|>getResultScoreViewModel; openFixturesViewModelRow=row }
         let findFixtureAndGameWeek() =
-            match tryFindFixtureWithGameWeek (gameWeeks()) fxid with
+            match tryFindFixtureWithGameWeek gws fxid with
             | Some f -> Success f
             | None -> NotFound "could not find fixture" |> Failure
         let viewFixture (gw, f, _) =
-            match tryViewFixture f with
-            | Success (fd, r) -> Success(gw, fd, r)
-            | Failure msg -> Failure msg
+            let (fd, r) = fixtureToFixtureDataWithResult f
+            (gw, fd, r)
         () |> (findFixtureAndGameWeek
-           >> bind viewFixture
-           >> bind (switch getFixtureViewDetails))
+           >> bind (switch viewFixture)
+           >> bind (switch getResult))
 
     let leagueTableRowToViewModel (ltr:LeagueTableRow) = {
         LeagueTableRowViewModel.diffPos=ltr.diffPosition
@@ -113,10 +110,11 @@ module Services =
         { MicroLeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName }
 
     let getLeaguesView player =
+        let gws = gameWeeksWithResults()
         let leagueToRowViewModel (league:League) (player:Player) =
             let buildRow position diffPos = 
                 { LeaguesRowViewModel.id=str (getLgId league.id); name=(getLeagueName league.name); position=position; diffPos=diffPos }
-            let result = getLeagueTableRows league (gameWeeksWithResults()) |> Seq.tryFind(fun row -> row.player.id = player.id)
+            let result = getLeagueTableRows league gws |> Seq.tryFind(fun row -> row.player.id = player.id)
             match result with
             | Some row -> buildRow row.position row.diffPosition
             | None -> buildRow 1 0
@@ -198,7 +196,6 @@ module Services =
             { PlayerProfileGraphData.data=[data]; labels=labels }
         PlId playerId |> (getPlayer >> bind (switch getResult))
 
-
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
         let makeSureFixtureExists fxid =
@@ -206,7 +203,7 @@ module Services =
             NotFound "fixture does not exist" |> optionToResult fixture
         fxid |> (makeSureFixtureExists
              >> bind (switch fixtureToFixtureData)
-             >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPreditions()) (0, 0, 0))))
+             >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
 
     let getGameWeeksWithClosedFixtures() =
@@ -221,18 +218,12 @@ module Services =
         | None -> noScoreViewModel
 
     let getClosedFixturesForGameWeek gwno =
-        let gws = gameWeeks()
-        let rows = gws
+        let rows = gameWeeks()
                    |> List.filter(fun gw -> gw.number = gwno)
                    |> List.map(fun gw -> gw, getClosedFixturesForGameWeeks [gw])
                    |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) -> { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); newScore=None; scoreSubmitted=r.IsSome; existingScore=r|>resultToScoreViewModel; homeFormGuide=[]; awayFormGuide=[] }))
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
-
-    let getLastGameWeekAndWinner() = 
-//        getPastGameWeeksWithWinner().rows |> Seq.last
-        let (p:PlayerViewModel) = {PlayerViewModel.name=""; id=""; isAdmin=false }
-        { PastGameWeekRowViewModel.gameWeekNo=2; winner=p; points=2 }
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =
         getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) player
@@ -247,10 +238,14 @@ module Services =
                    |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
         { InPlayViewModel.rows = rows }
 
+    let getlatestGameWeekNo gws = gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
+
     let leagueToViewModel (league:League) = 
-        let leagueTable = getLeagueTableRows league (gameWeeksWithResults())
+        let gws = gameWeeksWithResults()
+        let leagueTable = getLeagueTableRows league gws
         let rows = leagueTable |> List.map(leagueTableRowToViewModel)
-        { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName; rows=rows }
+        let latestGameWeekNo = gws |> getlatestGameWeekNo
+        { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName; rows=rows; latestGameWeekNo=latestGameWeekNo }
 
     let getLeagueView leagueId =
         LgId leagueId |> (getLeague >> bind (switch leagueToViewModel))
@@ -297,7 +292,7 @@ module Services =
     let getPastGameWeeksWithWinner leagueId =
         let getPastGameWeeksViewModel (league:League) =
             let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
-                       |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts })
+                       |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
             { PastGameWeeksViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getPastGameWeeksViewModel))
 
@@ -347,11 +342,59 @@ module Services =
                 let predictions = fixtureDataWithResults |> List.map(getPredictionViewModel)
                 let (_, _, _, points) = getPlayerBracketProfile fixtures player
                 { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }
-            let rows = league.players |> List.sortBy(fun p -> p.name) |> List.map(playerToMatrixRow)
+            let rows = league.players |> List.map(playerToMatrixRow) |> List.sortBy(fun row -> -row.points)
             { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; columns=columns; league=league|>getMircoLeagueViewModel }
         gwno |> (getGameWeek
              >> bind getLeagueAndCarryGameWeek
              >> bind (switch getGameWeekMatrixViewModel))
+
+    let getGlobalTableRows gws =
+        let allPlayers = getAllPlayers()
+        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers }
+        getLeagueTableRows globalLeague gws
+        
+    let getleaguePositionforplayer player =
+        let gws = gameWeeksWithResults()
+        let globalTableRows = getGlobalTableRows gws
+        let pos = globalTableRows |> Seq.find(fun r -> r.player = player) |> (fun r -> r.position)
+        let total = globalTableRows.Length
+        let page = (pos/globalLeaguePageSize)
+        { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
+
+    let getGlobalLeagueTablePage player page =
+        let gws = gameWeeksWithResults()
+        let globalTableRows = getGlobalTableRows gws
+        let amountToTake =
+            let totalPages = (globalTableRows.Length/globalLeaguePageSize)
+            if totalPages = page then
+                let totalPossibleRows = ((totalPages + 1) * globalLeaguePageSize)
+                (globalLeaguePageSize - (totalPossibleRows - globalTableRows.Length))
+            else globalLeaguePageSize
+        let rows =
+            globalTableRows
+            |> Seq.skip(page*globalLeaguePageSize)
+            |> Seq.take(amountToTake)
+            |> Seq.map(leagueTableRowToViewModel)
+            |> Seq.toList
+        let latestGameWeekNo = gws |> getlatestGameWeekNo
+        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo }
+    
+    let getLastGameWeekAndWinner() = 
+        let gws = gameWeeksWithResults()
+        
+        let globalTableRows = getGlobalTableRows gws
+        // todo: get for this week only
+        if globalTableRows.IsEmpty
+        then
+            let (p:PlayerViewModel) = {PlayerViewModel.name=""; id=""; isAdmin=false }
+            { PastGameWeekRowViewModel.gameWeekNo=0; winner=p; points=0; hasResult=false }
+        else
+            let winner = globalTableRows |> Seq.head
+            let latestGameWeekNo = gws |> getlatestGameWeekNo
+            let (p:PlayerViewModel) = {PlayerViewModel.name=winner.player.name|>getPlayerName; id=winner.player.id|>getPlayerId|>str; isAdmin=false }
+            { PastGameWeekRowViewModel.gameWeekNo=latestGameWeekNo; winner=p; points=winner.points; hasResult=true }
+        
+
 
     // persistence
 

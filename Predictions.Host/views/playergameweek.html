@@ -14,10 +14,7 @@
     <tbody>
         <tr ng-repeat="row in model.rows">
             <td>
-                <span ng-if="row.fixture.isOpen">
-                    {{row.fixture.home}} v {{row.fixture.away}}
-                </span>
-                <a ng-if="!row.fixture.isOpen" href="#/fixture/{{row.fixture.fxId}}">
+                <a ng-href="#/fixture/{{row.fixture.fxId}}">
                     {{row.fixture.home}} v {{row.fixture.away}}
                 </a>
             </td>
@@ -27,7 +24,7 @@
                     <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
                 </div>
                 <div ng-if="row.fixture.isOpen">
-                    <i>will be shown after kick off</i>
+                    <i>shown after ko</i>
                 </div>
             </td>
             <td>
