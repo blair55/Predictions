@@ -29,6 +29,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // max players per league
 // share league with facebook/twitter
 // fixture page previous results of fixture (footballdata)
+// log sql query duration
 
 // matrix include fixture results
 // player page / bar graph
