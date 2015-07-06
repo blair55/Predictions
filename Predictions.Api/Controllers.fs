@@ -104,12 +104,11 @@ type HomeController() =
     member this.JoinLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((joinLeague player) >> resultToHttp)
-
+        
     [<HttpPost>][<Route("leagueleave/{leagueId:Guid}")>]
     member this.LeaveLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((leaveLeague player) >> resultToHttp)
-
 
 
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
@@ -146,7 +145,7 @@ type HomeController() =
 
     [<Route("leaguehistory/{leagueId:Guid}/month")>]
     member this.GetHistoryByMonth(leagueId:Guid) =
-        leagueId |> (getPastMonthsWithWinner >> resultToHttp)
+        leagueId |> (getPastMonthsWithWinnerView >> resultToHttp)
 
     [<Route("leaguehistory/{leagueId:Guid}/month/{month}")>]
     member this.GetHistoryByMonth (leagueId:Guid, month) =
@@ -155,7 +154,7 @@ type HomeController() =
 
     [<Route("leaguehistory/{leagueId:Guid}/gameweek")>]
     member this.GetPastGameWeeks(leagueId:Guid) =
-        leagueId |> (getPastGameWeeksWithWinner >> resultToHttp)
+        leagueId |> (getPastGameWeeksWithWinnerView >> resultToHttp)
 
     [<Route("leaguehistory/{leagueId:Guid}/gameweek/{gwno:int}")>]
     member this.GetGameWeekPoints (leagueId:Guid, gwno) =
@@ -188,7 +187,7 @@ type HomeController() =
 
     [<Route("getlastgameweekandwinner")>]
     member this.GetLastGameWeekAndWinner() =
-        () |> (switch getLastGameWeekAndWinner >> resultToHttp)
+        () |> (switch getGlobalLastGameWeekAndWinner >> resultToHttp)
 
     [<Route("getopenfixtureswithnopredictionsforplayercount")>]
     member this.GetOpenFixturesWithNoPredictionsForPlayerCount() =

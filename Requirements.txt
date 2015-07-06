@@ -21,16 +21,18 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-// last weeks winner
-// inplay -> this week & matrix link
-// league admin
-// leave league
-// delete league
-// max players per league
+// inplay -> this week
+// league admin?
+// delete league?
 // share league with facebook/twitter
+// google analytics
+// tidy up buttons
 // fixture page previous results of fixture (footballdata)
 // log sql query duration
 
+// leave league
+// max players per league
+// last weeks winner
 // matrix include fixture results
 // player page / bar graph
 // fixture page ability to predict & all players pie chart
@@ -49,7 +51,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 // edit/delete fixture
 // gravatars
 // make mono-able
-// google analytics
 // 'horizontal' navigation
 // odds checker integration
 // head to head

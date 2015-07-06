@@ -47,6 +47,7 @@ module Domain =
     let currentSeason = SnYr "2015/16"
     let monthFormat = "MMMM yyyy"
     let globalLeaguePageSize = 30
+    let maxPlayersPerLeague = 100
 
     type Score = int * int
     type Result = { score:Score }

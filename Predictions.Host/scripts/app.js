@@ -114,6 +114,10 @@ angular
           templateUrl: 'views/globalleague.html',
           controller: 'GloballeagueCtrl'
         })
+        .when('/leagueleave/:leagueId', {
+          templateUrl: 'views/leagueleave.html',
+          controller: 'LeagueleaveCtrl'
+        })
         .otherwise({
             redirectTo: '/'
         });

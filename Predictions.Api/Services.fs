@@ -261,20 +261,24 @@ module Services =
 
     let joinLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId
+        let checkLeagueNotFull (league:League) =
+            if league.players.Length < maxPlayersPerLeague then league |> Success
+            else Invalid "League has reached maximum number of players" |> Failure
         let joinLge (league:League) =
             let playerAlreadyInLeague = league.players |> List.exists(fun p -> p = player)
             if playerAlreadyInLeague then () else joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         let returnLeague() = getLeagueView leagueId
         lgid |> (getLeague
+                 >> bind (checkLeagueNotFull)
                  >> bind (switch joinLge)
                  >> bind returnLeague)
-
+    
     let leaveLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId
         let leaveLge league = leaveLeagueInDb { LeaveLeagueCommand.leagueId=lgid; playerId=player.id }
         lgid |> (getLeague >> bind (switch leaveLge))
 
-    let getPastMonthsWithWinner leagueId =
+    let getPastMonthsWithWinnerView leagueId =
         let getHistoryByMonthViewModel (league:League) =
             let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
                        |> List.map(fun (m, plr, pts) -> { HistoryByMonthRowViewModel.month=m; winner=(getPlayerViewModel plr); points=pts })
@@ -289,7 +293,7 @@ module Services =
             { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo); league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthWithMonthViewModel))
     
-    let getPastGameWeeksWithWinner leagueId =
+    let getPastGameWeeksWithWinnerView leagueId =
         let getPastGameWeeksViewModel (league:League) =
             let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
                        |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
@@ -347,54 +351,6 @@ module Services =
         gwno |> (getGameWeek
              >> bind getLeagueAndCarryGameWeek
              >> bind (switch getGameWeekMatrixViewModel))
-
-    let getGlobalTableRows gws =
-        let allPlayers = getAllPlayers()
-        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers }
-        getLeagueTableRows globalLeague gws
-        
-    let getleaguePositionforplayer player =
-        let gws = gameWeeksWithResults()
-        let globalTableRows = getGlobalTableRows gws
-        let pos = globalTableRows |> Seq.find(fun r -> r.player = player) |> (fun r -> r.position)
-        let total = globalTableRows.Length
-        let page = (pos/globalLeaguePageSize)
-        { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
-
-    let getGlobalLeagueTablePage player page =
-        let gws = gameWeeksWithResults()
-        let globalTableRows = getGlobalTableRows gws
-        let amountToTake =
-            let totalPages = (globalTableRows.Length/globalLeaguePageSize)
-            if totalPages = page then
-                let totalPossibleRows = ((totalPages + 1) * globalLeaguePageSize)
-                (globalLeaguePageSize - (totalPossibleRows - globalTableRows.Length))
-            else globalLeaguePageSize
-        let rows =
-            globalTableRows
-            |> Seq.skip(page*globalLeaguePageSize)
-            |> Seq.take(amountToTake)
-            |> Seq.map(leagueTableRowToViewModel)
-            |> Seq.toList
-        let latestGameWeekNo = gws |> getlatestGameWeekNo
-        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo }
-    
-    let getLastGameWeekAndWinner() = 
-        let gws = gameWeeksWithResults()
-        
-        let globalTableRows = getGlobalTableRows gws
-        // todo: get for this week only
-        if globalTableRows.IsEmpty
-        then
-            let (p:PlayerViewModel) = {PlayerViewModel.name=""; id=""; isAdmin=false }
-            { PastGameWeekRowViewModel.gameWeekNo=0; winner=p; points=0; hasResult=false }
-        else
-            let winner = globalTableRows |> Seq.head
-            let latestGameWeekNo = gws |> getlatestGameWeekNo
-            let (p:PlayerViewModel) = {PlayerViewModel.name=winner.player.name|>getPlayerName; id=winner.player.id|>getPlayerId|>str; isAdmin=false }
-            { PastGameWeekRowViewModel.gameWeekNo=latestGameWeekNo; winner=p; points=winner.points; hasResult=true }
-        
-
 
     // persistence
 
@@ -464,3 +420,43 @@ module Services =
         | Success p -> p
         | _ -> failwith "no player found"
 
+
+    // global league functions
+
+    let getGlobalTableRows gws =
+        let allPlayers = getAllPlayers()
+        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers }
+        getLeagueTableRows globalLeague gws
+        
+    let getleaguePositionforplayer player =
+        let gws = gameWeeksWithResults()
+        let globalTableRows = getGlobalTableRows gws
+        let pos = globalTableRows |> Seq.find(fun r -> r.player = player) |> (fun r -> r.position)
+        let total = globalTableRows.Length
+        let page = (pos/globalLeaguePageSize)
+        { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
+
+    let getGlobalLeagueTablePage player page =
+        let gws = gameWeeksWithResults()
+        let globalTableRows = getGlobalTableRows gws
+        let amountToTake =
+            let totalPages = (globalTableRows.Length/globalLeaguePageSize)
+            if totalPages = page then
+                let totalPossibleRows = ((totalPages + 1) * globalLeaguePageSize)
+                (globalLeaguePageSize - (totalPossibleRows - globalTableRows.Length))
+            else globalLeaguePageSize
+        let rows =
+            globalTableRows
+            |> Seq.skip(page*globalLeaguePageSize)
+            |> Seq.take(amountToTake)
+            |> Seq.map(leagueTableRowToViewModel)
+            |> Seq.toList
+        let latestGameWeekNo = gws |> getlatestGameWeekNo
+        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo }
+    
+    let getGlobalLastGameWeekAndWinner() = 
+        let gws = gameWeeksWithResults()
+        let allPlayers = getAllPlayers()
+        getPastGameWeeksWithWinner gws allPlayers
+        |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
+        |> List.maxBy(fun r -> r.gameWeekNo)

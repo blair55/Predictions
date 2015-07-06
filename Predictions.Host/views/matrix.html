@@ -31,9 +31,9 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="row in model.rows">
+        <tr ng-repeat="row in model.rows" class="{{ row.player.id == loggedInPlayer.id ? 'info' : '' }}">
             <td>
-                <a ng-href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>    
+                <a ng-href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
             </td>
             <td ng-repeat="prd in row.predictions" class="score-cell {{prd.bracketClass}}">
                 <div ng-if="!prd.isFixtureOpen">
