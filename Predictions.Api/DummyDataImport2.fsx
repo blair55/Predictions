@@ -8,6 +8,11 @@ open Predictions.Api.Data
 #load @"DummyNames.fs"
 open DummynamesModule
 
+#r @"C:\Users\Nick\lab\Predictions\packages\FSharp.Data.2.0.15\lib\net40\FSharp.Data.dll"
+open FSharp.Data
+
+
+
 let rnd = new System.Random()
 let ko = new DateTime(2014,10,2);
 let seasonId = "2C3B0ED1-C4A8-4D99-B0F5-5AC7312EB7C9" |> sToGuid |> SnId
@@ -89,3 +94,5 @@ let getJoinLeagueCommands() =
 
 let jlcmds = getJoinLeagueCommands()
 jlcmds |> List.iter joinLeagueInDb
+
+

@@ -100,6 +100,7 @@
     <Content Include="scripts\controllers\playerprofile.js" />
     <Content Include="scripts\directives\formguide.js" />
     <Content Include="scripts\directives\loading.js" />
+    <Content Include="scripts\directives\previousmeetingrow.js" />
     <Content Include="scripts\directives\submitscore.js" />
     <Content Include="scripts\services\auth.js" />
     <Content Include="scripts\services\interceptor.js" />

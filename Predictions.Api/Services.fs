@@ -196,15 +196,32 @@ module Services =
             { PlayerProfileGraphData.data=[data]; labels=labels }
         PlId playerId |> (getPlayer >> bind (switch getResult))
 
+    let makeSureFixtureExists gws fxid =
+        let fixture = tryFindFixture gws fxid
+        NotFound "fixture does not exist" |> optionToResult fixture
+
     let getFixturePredictionGraphData fxid =
         let gws = gameWeeks()
-        let makeSureFixtureExists fxid =
-            let fixture = tryFindFixture gws fxid
-            NotFound "fixture does not exist" |> optionToResult fixture
-        fxid |> (makeSureFixtureExists
+        fxid |> ((makeSureFixtureExists gws)
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
+
+    let getFixturePreviousMeetingsView fxid =
+        let gws = gameWeeks()
+        let getResult (fixture:Fixture) =
+            let fd = fixtureToFixtureData fixture
+            let rows = getFixturePreviousMeetingsData fd.home fd.away
+                        |> List.map(fun (kickoff, homeTeamName, awayTeamName, homeTeamScore, awayTeamScore) ->
+                            { FixturePreviousMeetingsQueryResultViewModelRow.kickoff=kickoff; homeTeamName=homeTeamName; awayTeamName=awayTeamName; homeTeamScore=homeTeamScore; awayTeamScore=awayTeamScore } )
+                        |> List.sortBy(fun r -> r.kickoff)
+                        |> List.rev
+            let thisFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.home)
+            let reverseFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.away)
+            { FixturePreviousMeetingsQueryResultViewModel.rows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
+        fxid |> ((makeSureFixtureExists gws)
+             >> bind (switch getResult))
+        
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()

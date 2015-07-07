@@ -78,6 +78,15 @@ module ViewModels =
     type FixturePredictionGraphData = { data:int list; labels:string list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixturePreviousMeetingsQueryResultViewModelRow = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixturePreviousMeetingsQueryResultViewModel = {
+        thisFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list;
+        reverseFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list; 
+        rows:FixturePreviousMeetingsQueryResultViewModelRow list; }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeeksWithClosedFixturesRowViewModel = { gwno:int; closedFixtureCount:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]

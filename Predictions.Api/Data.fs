@@ -216,6 +216,18 @@ module Data =
         |> Seq.map queryResultToPrediction
         |> Seq.toList
 
+    type GetFixturePreviousMeetingsArgs = { homeTeamName:string; awayTeamName:string }
+    type [<CLIMutable>] GetFixturePreviousMeetingsQueryResult = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
+    let getFixturePreviousMeetingsData home away =
+        let args = { GetFixturePreviousMeetingsArgs.homeTeamName=home; awayTeamName=away }
+        let sql = @"SELECT kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore FROM Fixtures
+                    where (hometeamname = @homeTeamName and awayteamname = @awayTeamName)
+                    or (awayteamname = @homeTeamName and hometeamname = @awayTeamName)"
+        use conn = newConn()
+        conn.Query<GetFixturePreviousMeetingsQueryResult>(sql, args)
+        |> Seq.map(fun r -> (r.kickoff, r.homeTeamName, r.awayTeamName, r.homeTeamScore, r.awayTeamScore))
+        |> Seq.toList
+
     let getAllPlayers() =
         let sql = @"select playerId, playerName from players
                     select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions"
@@ -256,3 +268,5 @@ module Data =
         match tryFindLeagueByLeagueId leagueId with
         | Some league -> league
         | None -> failwith "League not found" 
+
+    

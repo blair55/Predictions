@@ -25,4 +25,9 @@ angular.module('frontendApp')
               animateScale: true
           };
       });
+
+      var previousMeetingsUrl = '/api/fixturepreviousmeetings/' + $routeParams.fxid;
+      $http.get(previousMeetingsUrl).success(function (data) {
+          $scope.previousMeetings = data;
+      });
   });
