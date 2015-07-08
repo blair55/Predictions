@@ -27,8 +27,13 @@ compare outcome variation each week to see which game weeks are more/less predic
 // share league with facebook/twitter
 // google analytics
 // tidy up buttons
+// fixture page submit score
+// nlog to log entries
 // log sql query duration
+// azure hosting
+// consolidate team names
 
+// fixture page form guide
 // fixture page previous results of fixture (footballdata)
 // leave league
 // max players per league
