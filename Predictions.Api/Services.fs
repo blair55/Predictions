@@ -31,14 +31,16 @@ module Services =
     let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
     let gameWeeksWithResults() = gameWeeks() |> getGameWeeksWithAnyClosedFixturesWithResults
 
+    let formGuideOutcomeToString = function | Win -> "w" | Draw -> "d" | Lose -> "l"
+
     let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) gameWeeks =
         let predictionOptionToScoreViewModel (pr:Prediction option) =
             match pr with
             | Some p -> toScoreViewModel p.score
             | None -> noScoreViewModel
         let getFormGuide team =
-            (getTeamFormGuide gameWeeks team)
-            |> List.map(fun o -> match o with | Win -> "w" | Draw -> "d" | Lose -> "l" )
+            (getTeamFormGuideOutcome gameWeeks team)
+            |> List.map(formGuideOutcomeToString)
         {
             OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
             scoreSubmitted=pr.IsSome
@@ -222,6 +224,26 @@ module Services =
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
         
+    let getFixtureFormGuideView fxid =
+        let gws = gameWeeks()
+        let getResult (fixture:Fixture) =
+            let fd = fixtureToFixtureData fixture
+            let homeFormGuide = getTeamFormGuide gws fd.home
+            let awayFormGuide = getTeamFormGuide gws fd.away
+            let zipped = List.zip homeFormGuide awayFormGuide
+            let rows =
+                zipped
+                |> List.map(fun (h, a) -> {
+                                            homeFixture=toFixtureViewModel h.fd h.gameWeek
+                                            awayFixture=toFixtureViewModel a.fd a.gameWeek
+                                            homeResult=toScoreViewModel h.result.score
+                                            awayResult=toScoreViewModel a.result.score
+                                            homeOutcome=formGuideOutcomeToString h.outcome
+                                            awayOutcome=formGuideOutcomeToString a.outcome})
+            { FixtureFormGuideViewModel.rows=rows }
+        fxid |> ((makeSureFixtureExists gws)
+             >> bind (switch getResult))
+    
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()

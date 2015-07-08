@@ -15,7 +15,28 @@
         Aggregated Predictions
     </div>
     <div class="panel-body">
-        <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>  
+        <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Form Guide
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed">
+            <tr ng-repeat="row in formGuide.rows">
+                <td>{{row.homeFixture.home}}</td>
+                <td>{{row.homeResult.home}} - {{row.homeResult.away}}</td>
+                <td>{{row.homeFixture.away}}</td>
+                <td><fixtureformguide guide="row.homeOutcome" /></td>
+                <td></td>
+                <td><fixtureformguide guide="row.awayOutcome" /></td>
+                <td>{{row.awayFixture.home}}</td>
+                <td>{{row.awayResult.home}} - {{row.awayResult.away}}</td>
+                <td>{{row.awayFixture.away}}</td>
+            </tr>
+        </table>
     </div>
 </div>
 
@@ -26,23 +47,23 @@
     <div class="panel-body">
         <tabset>
             <tab heading="This Fixture">
-                <table class="table">
+                <table class="table table-no-top-border">
                     <tbody>
                         <tr ng-repeat="row in previousMeetings.thisFixtureRows" previousmeetingrow="row"></tr>
                     </tbody>
                 </table>
             </tab>
-            <tab heading="All">
-                <table class="table">
+            <tab heading="Reverse Fxiture">
+                <table class="table table-no-top-border">
                     <tbody>
-                        <tr ng-repeat="row in previousMeetings.rows" previousmeetingrow="row"></tr>
+                        <tr ng-repeat="row in previousMeetings.reverseFixtureRows" previousmeetingrow="row"></tr>
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Reverse Fxiture">
-                <table class="table">
+            <tab heading="All">
+                <table class="table table-no-top-border">
                     <tbody>
-                        <tr ng-repeat="row in previousMeetings.reverseFixtureRows" previousmeetingrow="row"></tr>
+                        <tr ng-repeat="row in previousMeetings.rows" previousmeetingrow="row"></tr>
                     </tbody>
                 </table>
             </tab>

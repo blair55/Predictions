@@ -143,4 +143,6 @@ h4{margin-top:0;}
     text-transform: uppercase;
 }
 
-
+table.table-no-top-border > tbody > tr:first-child > td {
+    border-top: 0;
+}

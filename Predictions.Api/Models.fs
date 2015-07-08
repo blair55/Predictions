@@ -81,6 +81,14 @@ module ViewModels =
     type FixturePreviousMeetingsQueryResultViewModelRow = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixtureFormGuideViewModelRow = { 
+        homeFixture:FixtureViewModel; homeResult:ScoreViewModel; homeOutcome:string
+        awayFixture:FixtureViewModel; awayResult:ScoreViewModel; awayOutcome:string }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixtureFormGuideViewModel = { rows:FixtureFormGuideViewModelRow list }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePreviousMeetingsQueryResultViewModel = {
         thisFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list;
         reverseFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list; 

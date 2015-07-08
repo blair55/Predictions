@@ -26,6 +26,11 @@ angular.module('frontendApp')
           };
       });
 
+      var formGuideUrl = '/api/fixtureformguide/' + $routeParams.fxid;
+      $http.get(formGuideUrl).success(function (data) {
+          $scope.formGuide = data;
+      });
+
       var previousMeetingsUrl = '/api/fixturepreviousmeetings/' + $routeParams.fxid;
       $http.get(previousMeetingsUrl).success(function (data) {
           $scope.previousMeetings = data;

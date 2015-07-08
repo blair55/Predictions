@@ -339,17 +339,19 @@ module FormGuide =
     open Domain
 
     type FormGuideOutcome = Win | Lose | Draw
-
-    let private isTeamInFixture (fd:FixtureData) team = fd.home = team || fd.away = team
-    let private getResultForTeam team (fd:FixtureData, result:Result) =
-        let isHomeTeam = fd.home = team
-        let outcome = getResultOutcome result.score
-        match outcome with
-        | Outcome.Draw -> Draw
-        | HomeWin -> if isHomeTeam then Win else Lose
-        | AwayWin -> if isHomeTeam then Lose else Win
+    type FormGuideResultContainer = { gameWeek:GameWeek; fd:FixtureData; result:Result; outcome:FormGuideOutcome }
 
     let getTeamFormGuide (gws:GameWeek list) team =
+        let isTeamInFixture (fd:FixtureData) = fd.home = team || fd.away = team
+        let getResultForTeam (fd:FixtureData, result:Result) =
+            let gw = gws |> List.find(fun gw -> gw.id = fd.gwId)
+            let isHomeTeam = fd.home = team
+            let outcome = 
+                match getResultOutcome result.score with
+                | Outcome.Draw -> Draw
+                | HomeWin -> if isHomeTeam then Win else Lose
+                | AwayWin -> if isHomeTeam then Lose else Win
+            { FormGuideResultContainer.gameWeek=gw; fd=fd; result=result; outcome=outcome }
         gws
         |> getFixturesForGameWeeks
         |> List.choose(onlyClosedFixtures)
@@ -357,12 +359,16 @@ module FormGuide =
         |> List.filter(fun (_, r) -> r.IsSome)
         |> List.map(fun (fd, r) -> fd, r.Value)
         |> List.sortBy(fun (fd, _) -> fd.kickoff) |> List.rev
-        |> List.filter(fun (fd, _) -> isTeamInFixture fd team)
+        |> List.filter(fun (fd, _) -> isTeamInFixture fd)
         |> Seq.truncate 6
-        |> Seq.map(getResultForTeam team)
+        |> Seq.map(getResultForTeam)
         |> Seq.toList
         |> List.rev
-    
+
+    let getTeamFormGuideOutcome (gws:GameWeek list) team =
+        getTeamFormGuide gws team |> List.map(fun r -> r.outcome)
+
+
 module LeagueTableCalculation =
 
     open Domain
@@ -385,3 +391,16 @@ module LeagueTableCalculation =
             let diffPos = priorPos - pos
             { diffPosition=diffPos; position=pos; player=pl; correctScores=cs; correctOutcomes=co; points=pts }
         recentLge |> List.map(toDiffLgeRow)
+
+module List =
+    
+    type private ListLengthResult = | AisShorter | BisShorter | Same
+    let makeListsEqualLength (a:List<_>) (b:List<_>) =
+        let result =
+            if a.Length < b.Length then AisShorter
+            else if b.Length < a.Length then BisShorter
+            else Same
+        match result with
+        | AisShorter -> (a, b |> Seq.truncate a.Length |> Seq.toList)
+        | BisShorter -> (a |> Seq.truncate b.Length |> Seq.toList, b)
+        | Same -> (a, b)

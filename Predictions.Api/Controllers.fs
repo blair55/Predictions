@@ -179,6 +179,10 @@ type HomeController() =
     member this.GetFixturePreviousMeetings (fxId:Guid) =
         FxId fxId |> (getFixturePreviousMeetingsView >> resultToHttp)
 
+    [<Route("fixtureformguide/{fxId:Guid}")>]
+    member this.GetFixtureFormGuide (fxId:Guid) =
+        FxId fxId |> (getFixtureFormGuideView >> resultToHttp)
+
     [<Route("getleaguepositionforplayer")>]
     member this.Getleaguepositionforplayer() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
