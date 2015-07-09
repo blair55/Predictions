@@ -71,6 +71,9 @@ module Domain =
         | NotFound of string
         | InternalError of string
 
+    let toShortTeamName =
+        ()
+
     let fixtureDataToFixture fd r =
         match fd.kickoff > DateTime.Now with
         | true -> OpenFixture fd

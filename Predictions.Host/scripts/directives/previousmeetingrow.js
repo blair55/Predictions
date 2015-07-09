@@ -13,13 +13,13 @@ angular.module('frontendApp')
           template:
               '<td><span class="label label-default">{{ row.kickoff | date:"dd MMM yyyy" }}</span></td>' +
               '<td>' +
-                  '<span class="abrv-team-name">{{row.homeTeamName}}</span>' +
+                  '<span class="team-name">{{row.homeTeamName}}</span>' +
               '</td>' +
               '<td>{{row.homeTeamScore}}</td>' +
               '<td>-</td>' +
               '<td>{{row.awayTeamScore}}</td>' +
               '<td>' +
-                  '<span class="abrv-team-name">{{row.awayTeamName}}</span>' +
+                  '<span class="team-name">{{row.awayTeamName}}</span>' +
               '</td>',
           restrict: 'EA',
           scope: {

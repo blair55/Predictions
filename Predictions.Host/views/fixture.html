@@ -1,6 +1,8 @@
 
-<h4 ng-if="model.resultSubmitted">{{model.fixture.home}} {{model.result.home}} - {{model.result.away}} {{model.fixture.away}}</h4>
-<h4 ng-if="!model.resultSubmitted">{{model.fixture.home}} v {{model.fixture.away}}</h4>
+<h4>
+    <span class="team-name">{{model.fixture.home}}</span> v
+    <span class="team-name">{{model.fixture.away}}</span>
+</h4>
 
 <p>
     <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
@@ -10,6 +12,10 @@
 <p ng-if="!model.resultSubmitted">
     <i>Awaiting Result</i>
 </p>
+<p ng-if="model.resultSubmitted">
+    {{model.result.home}} - {{model.result.away}}
+</p>
+
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -22,62 +28,63 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Form Guide
+        {{model.fixture.home}} Form
     </div>
-    <div class="panel-body">
-        <table class="table table-condensed">
-            <tr ng-repeat="row in formGuide.rows">
-                <td>
-                    <span class="abrv-team-name">{{row.homeFixture.home}}</span>
-                </td>
-                <td>{{row.homeResult.home}} - {{row.homeResult.away}}</td>
-                <td>
-                    <span class="abrv-team-name">{{row.homeFixture.away}}</span>
-                </td>
-                <td><fixtureformguide guide="row.homeOutcome" /></td>
-                <td></td>
-                <td><fixtureformguide guide="row.awayOutcome" /></td>
-                <td>
-                    <span class="abrv-team-name">{{row.awayFixture.home}}</span>
-                </td>
-                <td>{{row.awayResult.home}} - {{row.awayResult.away}}</td>
-                <td>
-                    <span class="abrv-team-name">{{row.awayFixture.away}}</span>
-                </td>
-            </tr>
-        </table>
+    <table class="table">
+        <tr ng-repeat="row in formGuide.homeRows">
+            <td>
+                <span class="label label-default">GW#{{row.fixture.gameWeekNumber}}</span>
+            </td>
+            <td>
+                <span class="team-name">{{row.fixture.home}}</span>
+            </td>
+            <td>
+                {{row.result.home}} - {{row.result.away}}
+            </td>
+            <td>
+                <span class="team-name">{{row.fixture.away}}</span>
+            </td>
+            <td>
+                <fixtureformguide guide="row.outcome" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        {{model.fixture.away}} Form
     </div>
+    <table class="table">
+        <tr ng-repeat="row in formGuide.awayRows">
+            <td>
+                <span class="label label-default">GW#{{row.fixture.gameWeekNumber}}</span>
+            </td>
+            <td>
+                <span class="team-name">{{row.fixture.home}}</span>
+            </td>
+            <td>
+                {{row.result.home}} - {{row.result.away}}
+            </td>
+            <td>
+                <span class="team-name">{{row.fixture.away}}</span>
+            </td>
+            <td>
+                <fixtureformguide guide="row.outcome" />
+            </td>
+        </tr>
+    </table>
 </div>
 
 <div class="panel panel-default" style="margin-bottom: 163px;">
     <div class="panel-heading">
-        Previous Meetings
+        Fixture History
     </div>
-    <div class="panel-body">
-        <tabset>
-            <tab heading="This Fixture">
-                <table class="table table-condensed table-no-top-border">
-                    <tbody>
-                        <tr ng-repeat="row in previousMeetings.thisFixtureRows" previousmeetingrow="row"></tr>
-                    </tbody>
-                </table>
-            </tab>
-            <tab heading="Reverse Fxiture">
-                <table class="table table-condensed table-no-top-border">
-                    <tbody>
-                        <tr ng-repeat="row in previousMeetings.reverseFixtureRows" previousmeetingrow="row"></tr>
-                    </tbody>
-                </table>
-            </tab>
-            <tab heading="All">
-                <table class="table table-condensed table-no-top-border">
-                    <tbody>
-                        <tr ng-repeat="row in previousMeetings.rows" previousmeetingrow="row"></tr>
-                    </tbody>
-                </table>
-            </tab>
-        </tabset>
-    </div>
+    <table class="table table-no-top-border">
+        <tbody>
+            <tr ng-repeat="row in previousMeetings.thisFixtureRows" previousmeetingrow="row"></tr>
+        </tbody>
+    </table>
 </div>
 
 

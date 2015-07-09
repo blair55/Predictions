@@ -111,7 +111,6 @@
     <Content Include="views\leaguejoin.html" />
     <Content Include="views\leagueleave.html" />
     <Content Include="views\leagues.html" />
-    <Content Include="views\login.html" />
     <Content Include="views\main.html" />
     <Content Include="views\matrix.html" />
     <Content Include="views\nav.html" />

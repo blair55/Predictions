@@ -91,7 +91,6 @@
     <Content Include="scripts\controllers\leaguejoin.js" />
     <Content Include="scripts\controllers\leagueleave.js" />
     <Content Include="scripts\controllers\leagues.js" />
-    <Content Include="scripts\controllers\login.js" />
     <Content Include="scripts\controllers\main.js" />
     <Content Include="scripts\controllers\matrix.js" />
     <Content Include="scripts\controllers\nav.js" />
@@ -125,7 +124,6 @@
     <Content Include="views\leagueleave.html" />
     <Content Include="views\leagues.html" />
     <Content Include="views\directives\loading.html" />
-    <Content Include="views\login.html" />
     <Content Include="views\main.html" />
     <Content Include="views\matrix.html" />
     <Content Include="views\nav.html" />

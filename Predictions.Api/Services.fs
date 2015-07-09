@@ -233,20 +233,13 @@ module Services =
             let fd = fixtureToFixtureData fixture
             let homeFormGuide = getTeamFormGuide gws fd.home
             let awayFormGuide = getTeamFormGuide gws fd.away
-            let zipped = List.zip homeFormGuide awayFormGuide
-            let rows =
-                zipped
-                |> List.map(fun (h, a) -> {
-                                            homeFixture=toFixtureViewModel h.fd h.gameWeek |> abrvFixtureViewModel
-                                            awayFixture=toFixtureViewModel a.fd a.gameWeek |> abrvFixtureViewModel
-                                            homeResult=toScoreViewModel h.result.score
-                                            awayResult=toScoreViewModel a.result.score
-                                            homeOutcome=formGuideOutcomeToString h.outcome
-                                            awayOutcome=formGuideOutcomeToString a.outcome})
-            { FixtureFormGuideViewModel.rows=rows }
+            let toRow (fg:FormGuideResultContainer) = {
+                FixtureFormGuideViewModelRow.fixture=toFixtureViewModel fg.fd fg.gameWeek
+                result=toScoreViewModel fg.result.score
+                outcome=formGuideOutcomeToString fg.outcome }
+            { FixtureFormGuideViewModel.homeRows=homeFormGuide|>List.map toRow; awayRows=awayFormGuide|>List.map toRow }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
-    
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()

@@ -4,8 +4,10 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .diff-none{color:#969696;margin-left:-2px;}
 .diff-down{color:#a94442;margin-left:-2px;}
 
+.input-group,.label,button{ text-transform: uppercase;}
+
 .submit-score .team-label {width:50%;text-align:left;position:relative;}
-.submit-score .focused .form-guide li {opacity:1;}
+.submit-score.focused .form-guide li {opacity:1;}
 .submit-score .form-guide{margin:0;padding:0;display:block;position:absolute;top:9px;right:11px;}
 .submit-score .form-guide li{
     opacity:0.3;
@@ -28,7 +30,7 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .submit-score.min-mode .fixture-date,
 .submit-score.min-mode .more-link{ display: none;}
 
-.abrv-team-name{ text-transform: uppercase;}
+.team-name{ text-transform: uppercase;}
 .datetimepicker{width:auto;}
 
 .movement{width:5%; text-align:center;}

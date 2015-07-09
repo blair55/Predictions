@@ -82,10 +82,6 @@ angular
           templateUrl: 'views/inplay.html',
           controller: 'InplayCtrl'
         })
-        .when('/login', {
-          templateUrl: 'views/login.html',
-          controller: 'LoginCtrl'
-        })
         .when('/leagues', {
           templateUrl: 'views/leagues.html',
           controller: 'LeaguesCtrl'
