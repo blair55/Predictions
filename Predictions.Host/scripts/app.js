@@ -22,7 +22,8 @@ angular
         'ngToast',
         'chart.js',
         'ordinal',
-        'angular-loading-bar'
+        'angular-loading-bar',
+        'blockUI'
     ])
     .config(function ($routeProvider) {
       $routeProvider
@@ -123,6 +124,9 @@ angular
     })
     .config(function (localStorageServiceProvider) {
         localStorageServiceProvider.setPrefix('prdlge');
+    })
+    .config(function (blockUIConfig) {
+        blockUIConfig.message = '';
     })
 	.config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
 		cfpLoadingBarProvider.includeSpinner = false;
