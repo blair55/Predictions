@@ -442,7 +442,7 @@ module Services =
     let trySaveLeague (player:Player) (createLeague:CreateLeaguePostModel) =
         let name = makeLeagueName createLeague.name
         let lgid = newLgId()
-        saveLeagueInDb { SaveLeagueCommand.id=lgid; name=name }
+        saveLeagueInDb { SaveLeagueCommand.id=lgid; name=name; admin=player }
         joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         getLeagueView (getLgId lgid)
 

@@ -24,11 +24,11 @@ module Data =
         nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName) values (@id, @externalId, @externalProvider, @Name)"
             { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider }
 
-    type SaveLeagueCommand = { id:LgId; name:LeagueName }
-    type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string }
+    type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
+    type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string; adminId:Guid }
     let saveLeagueInDb (cmd:SaveLeagueCommand) = 
-        nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName) values (@id, @shareableId, @name)"
-            { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId }
+        nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName, LeagueAdminPlayerId) values (@id, @shareableId, @name, @adminId)"
+            { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId; adminId=cmd.admin.id|>getPlayerId }
 
     type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
     type JoinLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
