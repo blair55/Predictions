@@ -208,6 +208,9 @@ module Services =
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
+             
+    let abrvFixtureViewModel (vm:FixtureViewModel) =
+        { vm with home = vm.home.Substring(0,3); away = vm.away.Substring(0, 3) }
 
     let getFixturePreviousMeetingsView fxid =
         let gws = gameWeeks()
@@ -223,7 +226,7 @@ module Services =
             { FixturePreviousMeetingsQueryResultViewModel.rows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
-        
+    
     let getFixtureFormGuideView fxid =
         let gws = gameWeeks()
         let getResult (fixture:Fixture) =
@@ -234,8 +237,8 @@ module Services =
             let rows =
                 zipped
                 |> List.map(fun (h, a) -> {
-                                            homeFixture=toFixtureViewModel h.fd h.gameWeek
-                                            awayFixture=toFixtureViewModel a.fd a.gameWeek
+                                            homeFixture=toFixtureViewModel h.fd h.gameWeek |> abrvFixtureViewModel
+                                            awayFixture=toFixtureViewModel a.fd a.gameWeek |> abrvFixtureViewModel
                                             homeResult=toScoreViewModel h.result.score
                                             awayResult=toScoreViewModel a.result.score
                                             homeOutcome=formGuideOutcomeToString h.outcome
@@ -361,11 +364,10 @@ module Services =
             let fixtureDataWithResults = fixtures |> List.map(fixtureToFixtureDataWithResult)
             let columns =
                 let toColumn (fd, result:Result option) =
-                     let vm = toFixtureViewModel fd gameWeek
-                     let fvm = { vm with home = vm.home.Substring(0,3); away = vm.away.Substring(0, 3) }
+                     let vm = toFixtureViewModel fd gameWeek |> abrvFixtureViewModel
                      match result with
-                     | Some r -> { GameWeekMatrixFixtureColumnViewModel.fixture=fvm; isSubmitted=true; score=r.score|>toScoreViewModel }
-                     | None -> { GameWeekMatrixFixtureColumnViewModel.fixture=fvm; isSubmitted=false; score=noScoreViewModel }
+                     | Some r -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=true; score=r.score|>toScoreViewModel }
+                     | None -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=false; score=noScoreViewModel }
                 fixtures
                 |> List.map fixtureToFixtureDataWithResult
                 |> List.sortBy(fun (fd, _) -> fd.kickoff)

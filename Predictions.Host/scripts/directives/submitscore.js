@@ -20,7 +20,8 @@ angular.module('frontendApp')
 	        restrict: 'E',
 	        scope: {
 	            row: '=',
-	            postUrl: '@'
+	            postUrl: '@',
+                minMode: '='
 	        },
 	        link: function postLink(scope, element, attrs) {
 

@@ -8,8 +8,10 @@
 
 <div ng-repeat-end></div>
 
-<div ng-if="model.rows" class="panel panel-default">
-    <div class="form panel-body">
-        <button type="submit" class="btn btn-primary" ng-disabled="anyEditableRows() == false || submittingAll" ng-click="submitAll()">Submit All</button>
+<div ng-if="model.rows" class="fixed-bottom">
+    <div class="panel">
+        <div class="panel-body">
+            <button type="submit" class="btn btn-primary" ng-disabled="anyEditableRows() == false || submittingAll" ng-click="submitAll()">Submit All</button>
+        </div>
     </div>
 </div>

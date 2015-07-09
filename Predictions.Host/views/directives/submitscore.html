@@ -1,8 +1,8 @@
-<div class="panel panel-default {{focused}}">
+<div class="submit-score panel panel-default {{focused}} {{ minMode ? 'min-mode' : 'max-mode' }}">
 
     <div class=" form panel-body">
 
-        <div class="form-group">
+        <div class="form-group fixture-date">
             <span class="label label-default">GW#{{ row.fixture.gameWeekNumber }}</span>
             <span class="label label-default">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
         </div>
@@ -35,6 +35,8 @@
                     <span class="glyphicon glyphicon-edit"></span>
                 </button>
 
+                <a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>
+
             </form>
 
             <form ng-switch-when="create" name="createScoreForm">
@@ -60,6 +62,8 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" ng-init="setCreateScoreForm(createScoreForm);" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
+
+                <a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>
 
             </form>
 
@@ -90,6 +94,7 @@
                 </button>
                 <button type="submit" class="btn btn-primary" ng-init="setEditScoreForm(editScoreForm)" ng-disabled="editScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
+                <a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>
             </form>
 
         </div>

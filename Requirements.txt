@@ -22,17 +22,18 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // inplay -> this week
-// league admin?
+// league admin
 // delete league?
 // share league with facebook/twitter
+// capture email
 // google analytics
 // tidy up buttons
-// fixture page submit score
 // nlog to log entries
 // log sql query duration
 // azure hosting
 // consolidate team names
 
+// fixture page submit score
 // fixture page form guide
 // fixture page previous results of fixture (footballdata)
 // leave league
