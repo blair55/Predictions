@@ -71,6 +71,7 @@
     <Content Include="apple-touch-icon.png" />
     <Content Include="favicon.ico" />
     <Content Include="images\yeoman.png" />
+    <Content Include="login.html" />
     <Content Include="index.html" />
     <Content Include="robots.txt" />
     <Content Include="scripts\app.js" />

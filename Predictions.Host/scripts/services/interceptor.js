@@ -8,7 +8,7 @@
  * Factory in the frontendApp.
  */
 angular.module('frontendApp')
-    .factory('interceptor', function ($q, $location, notify) {
+    .factory('interceptor', function ($q, $location, $window, notify) {
         return {
             //'request': function(config) {
             //    return config;
@@ -30,9 +30,10 @@ angular.module('frontendApp')
             //  },
             'responseError': function(rejection) {
                 // do something on error
-
                 if (rejection.status === 401) {
-                    $location.path('/login');
+                    var hash = $window.location.hash.substr(1);
+                    var path = '/login.html?redirect=' + hash;
+                    $window.location.href = path;
                 }
                 else {
                     var msg = rejection.statusText + " - " + rejection.data;

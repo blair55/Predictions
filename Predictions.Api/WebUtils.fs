@@ -104,10 +104,13 @@ module WebUtils =
         | Failure appError -> getErrorResponseFromAppError appError
 
     type ChallengeResult(loginProvider:string, request:HttpRequestMessage) =
+        let getQueryParamFromReferrerUri (uri:Uri) (param:string) =
+            if uri <> null then uri.ParseQueryString().Get(param) else ""
         interface IHttpActionResult with
             member this.ExecuteAsync(cancellationToken) =
                 let authProperties = new AuthenticationProperties()
-                authProperties.RedirectUri <- "/account/callback"
+                let referrer = getQueryParamFromReferrerUri request.Headers.Referrer "redirect"
+                authProperties.RedirectUri <- "/account/callback?redirect=" + referrer
                 request.GetOwinContext().Authentication.Challenge(authProperties, loginProvider)
                 let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)
                 response.RequestMessage <- request

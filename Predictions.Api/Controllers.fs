@@ -37,12 +37,14 @@ type AccountController() =
         this.Redirect(this.BaseUri)
 
     [<HttpGet>][<Route("callback")>]
-    member this.GetCallback() =
+    member this.GetCallback([<FromUri>]redirect:string) =
         let loginInfo = this.AuthManager.GetExternalLoginInfo()
         if (box loginInfo <> null) then
             let signInUser = register loginInfo
             this.SignInManager.SignIn(signInUser, false, true)
-        this.Redirect(this.BaseUri)
+            let redirectUri = new Uri(this.BaseUri.ToString() + "#" + redirect)
+            this.Redirect(redirectUri)
+        else this.Redirect(this.BaseUri)
 
 [<Authorize>]
 [<RoutePrefix("api")>]
