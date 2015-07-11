@@ -95,7 +95,4 @@ let getJoinLeagueCommands() =
 let jlcmds = getJoinLeagueCommands()
 //jlcmds |> List.iter joinLeagueInDb
 
-open FSharp.Data
-open System
-
 

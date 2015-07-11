@@ -44,7 +44,7 @@ module Domain =
     let getExternalPlayerId (ExternalPlayerId expid) = expid
     let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
 
-    let currentSeason = SnYr "2015/16"
+    let currentSeason = SnYr "prem-2015/16"
     let monthFormat = "MMMM yyyy"
     let globalLeaguePageSize = 30
     let maxPlayersPerLeague = 100
@@ -425,6 +425,3 @@ module FixtureSourcing =
             let away = tds.[5].InnerText()
             date, home, away)
         |> Seq.toList
-
-
-

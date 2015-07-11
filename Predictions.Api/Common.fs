@@ -86,4 +86,3 @@ open System.Threading.Tasks
 
     type PlSignInManager(userManager, authenticationManager) =
         inherit SignInManager<PlUser, string>(userManager, authenticationManager)
-            

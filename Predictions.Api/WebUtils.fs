@@ -23,12 +23,6 @@ module WebUtils =
     
     let cookieName = "auth-token"
 
-//    let getCookieValue (request:HttpRequestMessage) key =
-//        let cookie = request.Headers.GetCookies(key) |> Seq.toList |> getFirst
-//        match cookie with
-//        | Some c -> Success c.[key].Value
-//        | None -> NotLoggedIn "No cookie found" |> Failure
-
     let getCookieValue _ _ = Success ""
 
     let createCookie name (value:string) expiry =
@@ -47,11 +41,6 @@ module WebUtils =
         let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
         res.Headers.Location <- new Uri(url)
         res
-
-//    let logPlayerIn request (player:Player) =
-//        let july1025 = new DateTime(2015, 7, 1)
-//        let cookie = createCookie cookieName player.authToken july1025
-//        getRedirectToResponseWithCookie request cookie
 
     let logPlayerOut (request:HttpRequestMessage) =
         let yesterday = DateTime.Now.AddDays(-1.0)
@@ -116,12 +105,10 @@ module WebUtils =
                 response.RequestMessage <- request
                 Task.FromResult(response)
 
-//    let buildPlUser (loginInfo:ExternalLoginInfo) =
-//        new PlUser(loginInfo.ExternalIdentity.GetUserId(), loginInfo.Login.LoginProvider, loginInfo.ExternalIdentity.GetUserName())
-
     let register (loginInfo:ExternalLoginInfo) =
         let externalId = loginInfo.ExternalIdentity.GetUserId() |> ExternalPlayerId
         let provider = loginInfo.Login.LoginProvider |> ExternalLoginProvider
         let userName = loginInfo.ExternalIdentity.GetUserName() |> PlayerName
         let registeredPlayer = registerPlayerWithUserInfo externalId provider userName
-        new PlUser(registeredPlayer.id|>getPlayerId|>str, provider, registeredPlayer.name|>getPlayerName)
+        let userId = registeredPlayer.id|>getPlayerId|>str
+        new PlUser(userId, provider, registeredPlayer.name|>getPlayerName)

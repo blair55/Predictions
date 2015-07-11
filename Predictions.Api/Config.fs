@@ -39,8 +39,8 @@ type Config() =
     static member BuildApp(app:IAppBuilder) =
     
         let userManager() = new PlUserManager(new PlUserStore())
-        app.CreatePerOwinContext<PlSignInManager>(
-            fun _ (c:IOwinContext) -> new PlSignInManager(userManager(), c.Authentication)) |> ignore
+        app.CreatePerOwinContext<PlUserManager>(fun _ (c:IOwinContext) -> userManager()) |> ignore
+        app.CreatePerOwinContext<PlSignInManager>(fun _ (c:IOwinContext) -> new PlSignInManager(userManager(), c.Authentication)) |> ignore
         
         app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie)
 

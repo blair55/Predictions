@@ -42,8 +42,8 @@ type AccountController() =
         if (box loginInfo <> null) then
             let signInUser = register loginInfo
             this.SignInManager.SignIn(signInUser, false, true)
-            let redirectUri = new Uri(this.BaseUri.ToString() + "#" + redirect)
-            this.Redirect(redirectUri)
+            let uri = sprintf "%s#%s" (str this.BaseUri) redirect
+            this.Redirect(new Uri(uri))
         else this.Redirect(this.BaseUri)
 
 [<Authorize>]
