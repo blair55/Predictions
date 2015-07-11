@@ -56,7 +56,7 @@ module Domain =
          | OpenFixture of FixtureData
          | ClosedFixture of (FixtureData * Result option)
     type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId }
-    type Player = { id:PlId; name:PlayerName; predictions:Prediction list }
+    type Player = { id:PlId; name:PlayerName; predictions:Prediction list; isAdmin:bool }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
     type Outcome = HomeWin | AwayWin | Draw

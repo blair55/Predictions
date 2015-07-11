@@ -1,14 +1,6 @@
 namespace Predictions.Api
 
 open System
-open System.Net
-open System.Net.Http
-open System.Web
-open System.Web.Http
-open System.Web.Routing
-open System.Web.Http.Cors
-open System.Net.Http.Headers
-open Newtonsoft.Json
 open Predictions.Api.Domain
 open Predictions.Api.FormGuide
 open Predictions.Api.Common
@@ -18,7 +10,7 @@ open Predictions.Api.LeagueTableCalculation
 [<AutoOpen>]
 module Services =
     
-    let getPlayerViewModel (p:Player) = { PlayerViewModel.id=getPlayerId p.id|>str; name=p.name|>getPlayerName; isAdmin=true } 
+    let getPlayerViewModel (p:Player) = { PlayerViewModel.id=getPlayerId p.id|>str; name=p.name|>getPlayerName; isAdmin=p.isAdmin } 
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let toFixtureViewModel (fd:FixtureData) (gw:GameWeek) =
@@ -445,7 +437,7 @@ module Services =
             updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
             player
         | _ -> 
-            let player = { Player.id=newPlId(); name=userName; predictions=[] }
+            let player = { Player.id=newPlId(); name=userName; predictions=[]; isAdmin=false }
             registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; }
             player
 

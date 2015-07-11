@@ -66,18 +66,14 @@ type HomeController() =
         let id = this.AuthManager.User.Claims
                  |> Seq.find(fun c -> c.Type = idtype)
                  |> (fun c -> c.Value)
-        { PlayerViewModel.id=id; name=name; isAdmin=true }
+        { PlayerViewModel.id=id; name=name; isAdmin=false }
 
     member this.Host() = this.Request.RequestUri.GetLeftPart(UriPartial.Authority)
 
     [<Route("whoami")>]
     member this.GetWhoAmI() =
         () |> (switch this.GetPlayerViewModel >> resultToHttp)
-
-    [<Route("logout")>]
-    member this.GetLogOut() =
-        base.Request |> logPlayerOut
-
+        
     [<Route("leagues")>]
     member this.GetLeagues() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
@@ -207,15 +203,13 @@ type HomeController() =
     [<Route("inplay")>]
     member this.GetInPlay() =
         () |> (switch getInPlay >> resultToHttp)
-                     
 
+[<Authorize>]
+[<CustomAuthorize>]
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
-//
-//    [<HttpPost>][<Route("gameweek")>]
-//    member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
-//        gameWeek |> (trySaveGameWeekPostModel >> resultToHttp)
+
 
     [<Route("getgameweekswithclosedfixtures")>]
     member this.GetGameWeeksWithClosedFixtures() =

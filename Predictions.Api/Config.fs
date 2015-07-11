@@ -17,14 +17,33 @@ open System.Web
 open System.Web.Http
 open System.Web.Routing
 open System.Web.Http.Filters
+open System.Web.Http.Controllers
+
+open Predictions.Api.Domain
+open Predictions.Api.Data
 
 type ErrorFilter() =
     inherit ExceptionFilterAttribute()
-
     override this.OnException(context:HttpActionExecutedContext) =
         let response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
         response.Content <- new StringContent(context.Exception.Message)
         context.Response <- response
+
+type CustomAuthorizeAttribute() =
+    inherit AuthorizationFilterAttribute()
+
+    override this.OnAuthorization(actionContext:HttpActionContext) =
+        let authManager = actionContext.Request.GetOwinContext().Authentication
+        let idtype = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        let plid = authManager.User.Claims
+                    |> Seq.find(fun c -> c.Type = idtype)
+                    |> (fun c -> c.Value)
+                    |> sToGuid|>PlId
+        let unauthResponse() = 
+            actionContext.Response <- actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized)
+        match tryFindPlayerByPlayerId plid with
+        | Some p -> if p.isAdmin then () else unauthResponse()
+        | None -> unauthResponse()
 
 type Config() =
 

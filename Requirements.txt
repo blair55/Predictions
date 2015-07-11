@@ -23,7 +23,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 // tidy up buttons material css?
 // capture email
-// restrict admin features
 // delete league?
 // inplay -> this week
 // nlog to log entries
@@ -34,6 +33,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // google analytics & robots
 // general share links
 
+// restrict admin features
 // consolidate team names
 // add gameweek
 // block ui while loading

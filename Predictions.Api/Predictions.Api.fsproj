@@ -51,11 +51,11 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Common.fs" />
-    <Compile Include="Config.fs" />
     <Compile Include="Domain.fs" />
     <Compile Include="Data.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="Services.fs" />
+    <Compile Include="Config.fs" />
     <Compile Include="WebUtils.fs" />
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />

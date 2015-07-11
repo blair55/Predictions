@@ -21,34 +21,34 @@ open Microsoft.AspNet.Identity.Owin
 [<AutoOpen>]
 module WebUtils =
     
-    let cookieName = "auth-token"
+//    let cookieName = "auth-token"
 
-    let getCookieValue _ _ = Success ""
+//    let getCookieValue _ _ = Success ""
+//
+//    let createCookie name (value:string) expiry =
+//        let cookie = new CookieHeaderValue(name, value)
+//        let nd d = new Nullable<DateTimeOffset>(d)
+//        cookie.Expires <- new DateTimeOffset(expiry) |> nd
+//        cookie.Path <- "/"
+//        cookie
+//       
+//    let getRedirectToResponseWithCookie (request:HttpRequestMessage) cookie =
+//        let res = new HttpResponseMessage(HttpStatusCode.Redirect)
+//        res.Headers.AddCookies([cookie])
+//        let components = match request.IsLocal() with
+//                         | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
+//                         | false -> UriComponents.Scheme ||| UriComponents.Host
+//        let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
+//        res.Headers.Location <- new Uri(url)
+//        res
 
-    let createCookie name (value:string) expiry =
-        let cookie = new CookieHeaderValue(name, value)
-        let nd d = new Nullable<DateTimeOffset>(d)
-        cookie.Expires <- new DateTimeOffset(expiry) |> nd
-        cookie.Path <- "/"
-        cookie
-       
-    let getRedirectToResponseWithCookie (request:HttpRequestMessage) cookie =
-        let res = new HttpResponseMessage(HttpStatusCode.Redirect)
-        res.Headers.AddCookies([cookie])
-        let components = match request.IsLocal() with
-                         | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
-                         | false -> UriComponents.Scheme ||| UriComponents.Host
-        let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
-        res.Headers.Location <- new Uri(url)
-        res
-
-    let logPlayerOut (request:HttpRequestMessage) =
-        let yesterday = DateTime.Now.AddDays(-1.0)
-        let cookie = createCookie cookieName "" yesterday
-        getRedirectToResponseWithCookie request cookie
+//    let logPlayerOut (request:HttpRequestMessage) =
+//        let yesterday = DateTime.Now.AddDays(-1.0)
+//        let cookie = createCookie cookieName "" yesterday
+//        getRedirectToResponseWithCookie request cookie
         
-    let getLoggedInPlayerAuthToken r =
-        getCookieValue r cookieName
+//    let getLoggedInPlayerAuthToken r =
+//        getCookieValue r ""
         
 //    let getLoggedInPlayerAuthToken (r:HttpRequestMessage) =
 //        let id = r.GetOwinContext().Authentication.GetExternalIdentity("ApplicationCookie")
@@ -110,5 +110,6 @@ module WebUtils =
         let provider = loginInfo.Login.LoginProvider |> ExternalLoginProvider
         let userName = loginInfo.ExternalIdentity.GetUserName() |> PlayerName
         let registeredPlayer = registerPlayerWithUserInfo externalId provider userName
-        let userId = registeredPlayer.id|>getPlayerId|>str
-        new PlUser(userId, provider, registeredPlayer.name|>getPlayerName)
+        let userId = registeredPlayer.id |> getPlayerId |> str
+        let playerName = registeredPlayer.name |> getPlayerName
+        new PlUser(userId, provider, playerName, registeredPlayer.isAdmin)

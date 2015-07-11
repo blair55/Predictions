@@ -21,7 +21,7 @@ module Data =
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
     type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string }
     let registerPlayerInDb (cmd:RegisterPlayerCommand) =
-        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName) values (@id, @externalId, @externalProvider, @Name)"
+        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName, IsAdmin) values (@id, @externalId, @externalProvider, @Name, 0)"
             { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider }
 
     type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
@@ -129,15 +129,15 @@ module Data =
         result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toList
 
     type FindPlayerByPlayerIdQueryArgs = { playerId:Guid }
-    type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string }
+    type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string; isAdmin:bool }
     let queryResultToPlayer (player:PlayersTableQueryResult) predictions =
-        { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=predictions }
+        { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=predictions; isAdmin=player.isAdmin }
     type [<CLIMutable>] PredictionsTableQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
     let queryResultToPrediction (p:PredictionsTableQueryResult) =
         { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore) }
     let tryFindPlayerByPlayerId playerId =
         let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
-        let sql = @"select playerId, playerName from players where playerId = @playerId
+        let sql = @"select playerId, playerName, isAdmin from players where playerId = @playerId
                     select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions where playerId = @playerId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
@@ -154,7 +154,7 @@ module Data =
     type FindPlayerByExternalIdQueryArgs = { externalId:string; externalProvider:string }
     let tryFindPlayerByExternalId externalPlayerId externalLoginProvider =
         let args = { FindPlayerByExternalIdQueryArgs.externalId=externalPlayerId|>getExternalPlayerId; externalProvider=externalLoginProvider|>getExternalLoginProvider }
-        let sql = @"select playerId, playerName from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider"
+        let sql = @"select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider"
         use conn = newConn()
         let result = conn.Query<PlayersTableQueryResult>(sql, args) |> Seq.toList
         if result.IsEmpty then None
@@ -164,14 +164,13 @@ module Data =
 
     type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
     type [<CLIMutable>] FindLeagueByLeagueIdQueryResult = { leagueId:Guid; leagueName:string }
-    type [<CLIMutable>] FindPlayersByLeagueIdQueryResult = { playerId:Guid; playerName:string }
     type [<CLIMutable>] FindPredictionsByLeagueIdQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
         let sql = @"select lgs.LeagueId, lgs.LeagueName
                     from Leagues lgs
                     where lgs.LeagueId = @leagueId
-                    select pls.PlayerId, pls.PlayerName
+                    select pls.PlayerId, pls.PlayerName, pls.IsAdmin
                     from Players pls
                     join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
                     where lpb.LeagueId = @leagueId
@@ -185,7 +184,7 @@ module Data =
         let leagueResult = multi.Read<FindLeagueByLeagueIdQueryResult>() |> Seq.toList
         if leagueResult.IsEmpty then None
         else
-            let playersResult = multi.Read<FindPlayersByLeagueIdQueryResult>()
+            let playersResult = multi.Read<PlayersTableQueryResult>()
             let predictionsResult = multi.Read<FindPredictionsByLeagueIdQueryResult>()
             let predictions =
                 predictionsResult
@@ -193,7 +192,7 @@ module Data =
                 |> Seq.toList
             let players =
                 playersResult
-                |> Seq.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=predictions|>List.filter(fun pr -> pr.playerId=(p.playerId|>PlId)) })
+                |> Seq.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=predictions|>List.filter(fun pr -> pr.playerId=(p.playerId|>PlId)); isAdmin=p.isAdmin })
                 |> Seq.toList
             let league = leagueResult |> List.head
             Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players }
@@ -231,7 +230,7 @@ module Data =
         |> Seq.toList
 
     let getAllPlayers() =
-        let sql = @"select playerId, playerName from players
+        let sql = @"select playerId, playerName, isAdmin from players
                     select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql)
