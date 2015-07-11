@@ -402,23 +402,23 @@ module Services =
            >> bind (switch createResult)
            >> bind makeSureFixtureExists
            >> bind (switch saveResult))
+//
+//    let rec tryCreateSaveFixtureCommandsFromPostModels (viewModels:FixturePostModel list) cmds =
+//        match viewModels with
+//        | h::t -> let result = tryToCreateKoFromSbm h.home h.away h.kickOff
+//                  match result with
+//                  | Success ko ->
+//                      let saveFixtureCommand = { SaveFixtureCommand.id=newFxId(); home=h.home; away=h.away; kickoff=ko }
+//                      tryCreateSaveFixtureCommandsFromPostModels t (saveFixtureCommand::cmds)
+//                  | Failure msg -> Failure msg
+//        | [] -> Success cmds
 
-    let rec tryCreateSaveFixtureCommandsFromPostModels (viewModels:FixturePostModel list) cmds =
-        match viewModels with
-        | h::t -> let result = tryToCreateKoFromSbm h.home h.away h.kickOff
-                  match result with
-                  | Success ko ->
-                      let saveFixtureCommand = { SaveFixtureCommand.id=newFxId(); home=h.home; away=h.away; kickoff=ko }
-                      tryCreateSaveFixtureCommandsFromPostModels t (saveFixtureCommand::cmds)
-                  | Failure msg -> Failure msg
-        | [] -> Success cmds
-
-    let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
-        let createFixtures viewModels = tryCreateSaveFixtureCommandsFromPostModels viewModels []
-        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=season().id; saveFixtureCommands=fixtures; description="" }
-        gwpm.fixtures |> (createFixtures
-                      >> bind (switch createGameWeek)
-                      >> bind (switch saveGameWeek))
+//    let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
+//        let createFixtures viewModels = tryCreateSaveFixtureCommandsFromPostModels viewModels []
+//        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=season().id; saveFixtureCommands=fixtures; description="" }
+//        gwpm.fixtures |> (createFixtures
+//                      >> bind (switch createGameWeek)
+//                      >> bind (switch saveGameWeek))
 
     let trySavePrediction (ppm:PredictionPostModel) (player:Player) =
         let gws = gameWeeks()
@@ -494,3 +494,50 @@ module Services =
         getPastGameWeeksWithWinner gws allPlayers
         |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
         |> List.maxBy(fun r -> r.gameWeekNo)
+
+
+    open FixtureSourcing
+
+    let getImportNextGameWeekView() =
+        let gws = gameWeeks()
+        let importGwNo = gws |> getlatestGameWeekNo |> (fun gwno -> gwno+1)
+        getNewGwFixtures importGwNo
+        |> List.map(fun (d, h, a) -> {FixtureViewModel.fxId=""; home=h; away=a; kickoff=d; gameWeekNumber=importGwNo; isOpen=false})
+        |> fun fxs -> { ImportNewGameWeekViewModel.rows=fxs; gwno=importGwNo }
+
+    let submitImportNextGameWeek() =
+        let gws = gameWeeks()
+        let importGwNo = gws |> getlatestGameWeekNo |> (fun gwno -> gwno+1)
+        let teams =
+            gws
+            |> getFixturesForGameWeeks
+            |> List.map(fixtureToFixtureData)
+            |> List.collect(fun fd -> [fd.home, fd.away])
+            |> List.unzip
+            |> fun (h,a) -> h@a
+
+        let allKicksOffsAreInFuture fxs =
+            match fxs |> List.forall(fun (d, _, _) -> d > DateTime.Now) with
+            | true -> fxs |> Success
+            | false -> Invalid "not all fixtures are in the future" |> Failure
+        
+        let allTeamsExist fxs =
+            let rec teamExistsRec = function
+            | h::t -> let exists = teams |> List.exists(fun t -> t = h)
+                      if exists then teamExistsRec t
+                      else sprintf "%s does not exist" h |> Invalid |> Failure
+            | [] -> Success fxs
+            fxs
+            |> List.map(fun(_, h, a) -> [h;a])
+            |> List.collect(fun x -> x)
+            |> teamExistsRec
+        
+        let saveGw fxs =
+            let fxcmds = fxs |> List.map(fun (d,h,a) -> { SaveFixtureCommand.id=newFxId(); home=h; away=a; kickoff=d })
+            { SaveGameWeekCommand.id=newGwId(); seasonYear=currentSeason; description=""; saveFixtureCommands=fxcmds }
+            |> saveGameWeek
+
+        importGwNo |> (switch (getNewGwFixtures)
+                   >> bind allKicksOffsAreInFuture
+        //           >> bind allTeamsExist
+                   >> bind (switch saveGw))

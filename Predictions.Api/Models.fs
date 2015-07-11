@@ -104,6 +104,9 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type InPlayViewModel = { rows:InPlayRowViewModel list; }
     
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type ImportNewGameWeekViewModel = { rows:FixtureViewModel list; gwno:int }
+    
 [<AutoOpen>]
 module HomePageModels =
 

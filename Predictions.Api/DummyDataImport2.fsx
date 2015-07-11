@@ -8,7 +8,7 @@ open Predictions.Api.Data
 #load @"DummyNames.fs"
 open DummynamesModule
 
-#r @"C:\Users\Nick\lab\Predictions\packages\FSharp.Data.2.0.15\lib\net40\FSharp.Data.dll"
+#r @"C:\Users\Nick\lab\Predictions\packages\FSharp.Data.2.2.3\lib\net40\FSharp.Data.dll"
 open FSharp.Data
 
 
@@ -67,7 +67,7 @@ let getRegisterPlayerCommands() =
     |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider})
     
 let rpcmds = getRegisterPlayerCommands()
-rpcmds |> List.iter registerPlayerInDb
+//rpcmds |> List.iter registerPlayerInDb
 
 let playerIds = rpcmds |> List.map(fun p -> p.player.id)
 let fixtureIds =
@@ -85,7 +85,7 @@ let getSavePredictionCommandList (pids) (fids) =
     |> List.collect(fun cmd -> cmd)
 
 let prcmds = getSavePredictionCommandList playerIds fixtureIds
-prcmds |> List.iter savePrediction
+//prcmds |> List.iter savePrediction
 
 let getJoinLeagueCommands() =
     let lgid = "87e4cb66-8b74-44f0-9361-cb2e967955d7" |> sToGuid |> LgId
@@ -93,6 +93,9 @@ let getJoinLeagueCommands() =
     |> List.map(fun pid -> { JoinLeagueCommand.playerId=pid; leagueId=lgid })
 
 let jlcmds = getJoinLeagueCommands()
-jlcmds |> List.iter joinLeagueInDb
+//jlcmds |> List.iter joinLeagueInDb
+
+open FSharp.Data
+open System
 
 

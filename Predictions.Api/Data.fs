@@ -64,15 +64,17 @@ module Data =
             { SavePredictionCommandArgs.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
 
     type SaveFixtureCommand = { id:FxId; home:Team; away:Team; kickoff:KickOff }
-    type SaveGameWeekCommand = { id:GwId; seasonId:SnId; description:string; saveFixtureCommands:SaveFixtureCommand list }
-    type SaveGameWeekCommandArgs = { id:Guid; seasonId:Guid; description:string; }
+    type SaveGameWeekCommand = { id:GwId; seasonYear:SnYr; description:string; saveFixtureCommands:SaveFixtureCommand list }
+    type SaveGameWeekCommandArgs = { id:Guid; seasonYear:string; description:string; }
     type SaveFixtureCommandArgs = { id:Guid; gameWeekId:Guid; ko:DateTime; home:string; away:string }
     let saveGameWeek (cmd:SaveGameWeekCommand) =
         nonQuery @"
+        declare @seasonId uniqueidentifier
+        select @seasonId = seasonId from seasons where SeasonYear = @SeasonYear
         declare @nextGameWeek int
         select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
         insert into GameWeeks(GameWeekId, SeasonId, GameWeekNumber, GameWeekDescription) values (@Id, @SeasonId, @nextGameWeek, @description)"
-                { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonId=cmd.seasonId|>getSnId; description=cmd.description }
+                { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonYear=cmd.seasonYear|>getSnYr; description=cmd.description }
         let saveFixture (fd:SaveFixtureCommand) =
             nonQuery @"insert into Fixtures(FixtureId, GameWeekId, KickOff, HomeTeamName, AwayTeamName) values (@Id, @GameWeekId, @ko, @Home, @Away)"
                 { SaveFixtureCommandArgs.id=fd.id|>getFxId; gameWeekId=cmd.id|>getGwId; ko=fd.kickoff; home=fd.home; away=fd.away }

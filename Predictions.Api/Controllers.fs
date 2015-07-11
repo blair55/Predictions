@@ -212,10 +212,10 @@ type HomeController() =
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
-
-    [<HttpPost>][<Route("gameweek")>]
-    member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
-        gameWeek |> (trySaveGameWeekPostModel >> resultToHttp)
+//
+//    [<HttpPost>][<Route("gameweek")>]
+//    member this.CreateGameWeek (gameWeek:GameWeekPostModel) =
+//        gameWeek |> (trySaveGameWeekPostModel >> resultToHttp)
 
     [<Route("getgameweekswithclosedfixtures")>]
     member this.GetGameWeeksWithClosedFixtures() =
@@ -230,3 +230,11 @@ type AdminController() =
     member this.AddResult (result:ResultPostModel) =
         let saveResult() = trySaveResultPostModel result
         () |> (saveResult >> resultToHttp)
+        
+    [<Route("gameweek")>]
+    member this.GetImportNextGameWeek() =
+        () |> (switch getImportNextGameWeekView >> resultToHttp)
+
+    [<HttpPost>][<Route("gameweek")>]
+    member this.ImportNextGameWeek() =
+        () |> (submitImportNextGameWeek >> resultToHttp)
