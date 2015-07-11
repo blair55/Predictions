@@ -61,7 +61,7 @@ open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
 open System.Threading.Tasks
 
-    type PlUser(id, provider, username, isAdmin) =
+    type PlUser(id, provider, username) =
         let mutable _username = username
         interface IUser with
             member this.Id with get() = id

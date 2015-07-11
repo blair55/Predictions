@@ -73,6 +73,7 @@ type Config() =
 //        app.UseTwitterAuthentication(twitterOptions) |> ignore
 
         let facebookOptions = new Facebook.FacebookAuthenticationOptions()
+        facebookOptions.Scope.Add("email")
         facebookOptions.AppId <- "701632913289116"
         facebookOptions.AppSecret <- ConfigurationManager.AppSettings.["FacebookAppSecret"]
         app.UseFacebookAuthentication(facebookOptions) |> ignore

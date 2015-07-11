@@ -22,17 +22,17 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // tidy up buttons material css?
-// capture email
 // delete league?
 // inplay -> this week
 // nlog to log entries
 // log sql query duration
 // no graph before gw3
 // vidi printer background
-// make twitter acct & facebook page?
 // google analytics & robots
-// general share links
 
+// make twitter acct & facebook page
+// capture email
+// general share links
 // restrict admin features
 // consolidate team names
 // add gameweek

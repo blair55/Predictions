@@ -109,7 +109,7 @@ module WebUtils =
         let externalId = loginInfo.ExternalIdentity.GetUserId() |> ExternalPlayerId
         let provider = loginInfo.Login.LoginProvider |> ExternalLoginProvider
         let userName = loginInfo.ExternalIdentity.GetUserName() |> PlayerName
-        let registeredPlayer = registerPlayerWithUserInfo externalId provider userName
+        let registeredPlayer = registerPlayerWithUserInfo externalId provider userName loginInfo.Email
         let userId = registeredPlayer.id |> getPlayerId |> str
         let playerName = registeredPlayer.name |> getPlayerName
-        new PlUser(userId, provider, playerName, registeredPlayer.isAdmin)
+        new PlUser(userId, provider, playerName)

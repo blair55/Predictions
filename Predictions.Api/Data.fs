@@ -18,11 +18,11 @@ module Data =
         use conn = newConn()
         conn.Execute(sql, args) |> ignore
 
-    type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider }
-    type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string }
+    type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
+    type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string; email:string }
     let registerPlayerInDb (cmd:RegisterPlayerCommand) =
-        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName, IsAdmin) values (@id, @externalId, @externalProvider, @Name, 0)"
-            { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider }
+        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName, IsAdmin, Email) values (@id, @externalId, @externalProvider, @Name, 0, @email)"
+            { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider; email=cmd.email }
 
     type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
     type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string; adminId:Guid }
@@ -72,7 +72,8 @@ module Data =
         declare @seasonId uniqueidentifier
         select @seasonId = seasonId from seasons where SeasonYear = @SeasonYear
         declare @nextGameWeek int
-        select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
+        --select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
+        select @nextGameWeek = 1
         insert into GameWeeks(GameWeekId, SeasonId, GameWeekNumber, GameWeekDescription) values (@Id, @SeasonId, @nextGameWeek, @description)"
                 { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonYear=cmd.seasonYear|>getSnYr; description=cmd.description }
         let saveFixture (fd:SaveFixtureCommand) =

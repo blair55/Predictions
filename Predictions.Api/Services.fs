@@ -265,7 +265,9 @@ module Services =
                    |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
         { InPlayViewModel.rows = rows }
 
-    let getlatestGameWeekNo gws = gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
+    let getlatestGameWeekNo gws =
+        if gws |> List.isEmpty then 0
+        else gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
 
     let leagueToViewModel (league:League) = 
         let gws = gameWeeksWithResults()
@@ -431,14 +433,14 @@ module Services =
         joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         getLeagueView (getLgId lgid)
 
-    let registerPlayerWithUserInfo externalId provider userName =
-        match getPlayerByExternalLogin (externalId,provider) with
+    let registerPlayerWithUserInfo externalId provider userName email =
+        match getPlayerByExternalLogin (externalId, provider) with
         | Success player ->
             updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
             player
         | _ -> 
             let player = { Player.id=newPlId(); name=userName; predictions=[]; isAdmin=false }
-            registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; }
+            registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; email=email }
             player
 
     let getLoggedInPlayer plId = 
