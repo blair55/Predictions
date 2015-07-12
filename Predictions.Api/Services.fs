@@ -271,7 +271,7 @@ module Services =
         else gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
 
     let leagueToViewModel (league:League) = 
-        let gws = gameWeeksWithResults()
+        let gws = gameWeeks()
         let leagueTable = getLeagueTableRows league gws
         let rows = leagueTable |> List.map(leagueTableRowToViewModel)
         let latestGameWeekNo = gws |> getlatestGameWeekNo
