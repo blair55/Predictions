@@ -12,7 +12,6 @@ open System.Threading
 open System.Threading.Tasks
 open Newtonsoft.Json
 open Predictions.Api.Domain
-//open Predictions.Api.Data
 open Predictions.Api.Common
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
@@ -21,39 +20,6 @@ open Microsoft.AspNet.Identity.Owin
 [<AutoOpen>]
 module WebUtils =
     
-//    let cookieName = "auth-token"
-
-//    let getCookieValue _ _ = Success ""
-//
-//    let createCookie name (value:string) expiry =
-//        let cookie = new CookieHeaderValue(name, value)
-//        let nd d = new Nullable<DateTimeOffset>(d)
-//        cookie.Expires <- new DateTimeOffset(expiry) |> nd
-//        cookie.Path <- "/"
-//        cookie
-//       
-//    let getRedirectToResponseWithCookie (request:HttpRequestMessage) cookie =
-//        let res = new HttpResponseMessage(HttpStatusCode.Redirect)
-//        res.Headers.AddCookies([cookie])
-//        let components = match request.IsLocal() with
-//                         | true -> UriComponents.Scheme ||| UriComponents.HostAndPort
-//                         | false -> UriComponents.Scheme ||| UriComponents.Host
-//        let url = request.RequestUri.GetComponents(components, UriFormat.Unescaped)
-//        res.Headers.Location <- new Uri(url)
-//        res
-
-//    let logPlayerOut (request:HttpRequestMessage) =
-//        let yesterday = DateTime.Now.AddDays(-1.0)
-//        let cookie = createCookie cookieName "" yesterday
-//        getRedirectToResponseWithCookie request cookie
-        
-//    let getLoggedInPlayerAuthToken r =
-//        getCookieValue r ""
-        
-//    let getLoggedInPlayerAuthToken (r:HttpRequestMessage) =
-//        let id = r.GetOwinContext().Authentication.GetExternalIdentity("ApplicationCookie")
-//        if id = null then NotLoggedIn "No cookie found" |> Failure else Success (id.GetUserId())
-
     let getOkResponseWithBody (body:'T) =
         let response = new HttpResponseMessage(HttpStatusCode.OK)
         response.Content <- new ObjectContent<'T>(body, new Formatting.JsonMediaTypeFormatter())
@@ -63,16 +29,6 @@ module WebUtils =
         let response = new HttpResponseMessage(status)
         response.Content <- new StringContent(msg)
         response
-
-    let checkPlayerIsAdmin (player:Player) =
-        match Admin with
-        | Admin -> Success ()
-        | _ -> Forbidden "player not admin" |> Failure 
-//
-//    let makeSurePlayerIsAdmin req =
-//        req |> (getLoggedInPlayerAuthToken
-//            >> bind getPlayerFromAuthToken
-//            >> bind checkPlayerIsAdmin)
 
     let getErrorResponseFromAppError appError =
         match appError with

@@ -108,7 +108,6 @@ type HomeController() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((leaveLeague player) >> resultToHttp)
 
-
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
     member this.GetPlayer (playerId:Guid, leagueId:Guid) =
         (playerId, leagueId) |> (getGameWeeksPointsForPlayerIdAndLeagueId >> resultToHttp)
@@ -129,7 +128,6 @@ type HomeController() =
     [<Route("playerprofilegraph/{playerId:Guid}")>]
     member this.GetPlayerProfileGraph (playerId:Guid) =
         (playerId) |> (getPlayerProfileGraph >> resultToHttp)
-
 
     [<Route("openfixtures")>]
     member this.GetOpenFixtures() =

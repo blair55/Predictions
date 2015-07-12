@@ -18,5 +18,4 @@ namespace Predictions.Sql
             return result.Successful ? 0 : 1;
         }
     }
-
 }

@@ -1,10 +1,16 @@
 <h4>Leagues</h4>
 
-<div ng-if="model && !model.rows" class="table table-striped">
-    <p>You have not joined any leagues! <a class="" ng-href="#createleague">Create a League</a></p>
+<div ng-if="model && model.rows.length == 0">
+    <div class="alert alert-info">
+        <span class="glyphicon glyphicon-info-sign"></span>
+        You have not joined any leagues yet
+    </div>
+    <div class="well">
+        <a class="btn btn-primary" ng-href="#createleague">Create your own League</a>  
+    </div>
 </div>
 
-<div ng-if="model.rows">
+<div ng-if="model && model.rows.length > 0">
     <table class="table table-striped">
         <thead>
             <tr>
