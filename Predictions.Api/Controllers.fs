@@ -108,6 +108,11 @@ type HomeController() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((leaveLeague player) >> resultToHttp)
 
+    [<HttpPost>][<Route("leaguedelete/{leagueId:Guid}")>]
+    member this.DeleteLeague (leagueId:Guid) =
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        leagueId |> ((deleteLeague player) >> resultToHttp)
+
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
     member this.GetPlayer (playerId:Guid, leagueId:Guid) =
         (playerId, leagueId) |> (getGameWeeksPointsForPlayerIdAndLeagueId >> resultToHttp)

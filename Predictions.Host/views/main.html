@@ -24,9 +24,9 @@
         <a href="#/globalleague/{{global.playerLeaguePage}}">Global League Table</a>
     </div>
 </div>
-<div class="panel panel-default">
-    <div class="panel-body">
-        <div ng-if="lastgw.hasResult">
+<div ng-if="lastgw.hasResult">
+    <div class="panel panel-default">
+        <div class="panel-body">
             <p>Last Week's Winner was <strong>{{ lastgw.winner.name }}</strong></p>
             <a href="#/playergameweek/{{lastgw.winner.id}}/{{lastgw.gameWeekNo}}">Game Week #{{lastgw.gameWeekNo}}</a>
         </div>

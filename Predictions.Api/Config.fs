@@ -26,7 +26,8 @@ type ErrorFilter() =
     inherit ExceptionFilterAttribute()
     override this.OnException(context:HttpActionExecutedContext) =
         let response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
-        response.Content <- new StringContent(context.Exception.Message)
+        //response.Content <- new StringContent(context.Exception.Message)
+        response.Content <- new StringContent("Something went wrong!")
         context.Response <- response
 
 type CustomAuthorizeAttribute() =

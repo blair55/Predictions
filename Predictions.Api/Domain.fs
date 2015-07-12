@@ -62,7 +62,7 @@ module Domain =
     type Outcome = HomeWin | AwayWin | Draw
     type Bracket = CorrectScore | CorrectOutcome | Incorrect
 
-    type League = { id:LgId; name:LeagueName; players:Player list}
+    type League = { id:LgId; name:LeagueName; players:Player list; adminId:PlId }
 
     type AppError =
         | NotLoggedIn of string

@@ -27,7 +27,7 @@ module Data =
     type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
     type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string; adminId:Guid }
     let saveLeagueInDb (cmd:SaveLeagueCommand) = 
-        nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName, LeagueAdminPlayerId) values (@id, @shareableId, @name, @adminId)"
+        nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName, LeagueAdminId, LeagueIsDeleted) values (@id, @shareableId, @name, @adminId, 0)"
             { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId; adminId=cmd.admin.id|>getPlayerId }
 
     type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
@@ -41,6 +41,12 @@ module Data =
     let leaveLeagueInDb (cmd:LeaveLeagueCommand) = 
         nonQuery @"delete from LeaguePlayerBridge where LeagueId = @leagueId and PlayerId = @playerId"
             { LeaveLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
+
+    type DeleteLeagueCommand = { leagueId:LgId; }
+    type DeleteLeagueCommandArgs = { leagueId:Guid; }
+    let deleteLeagueInDb (cmd:DeleteLeagueCommand) = 
+        nonQuery @"update Leagues set LeagueIsDeleted = 1 where LeagueId = @leagueId"
+            { DeleteLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId }
 
     type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
     type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
@@ -72,8 +78,7 @@ module Data =
         declare @seasonId uniqueidentifier
         select @seasonId = seasonId from seasons where SeasonYear = @SeasonYear
         declare @nextGameWeek int
-        --select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
-        select @nextGameWeek = 1
+        select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
         insert into GameWeeks(GameWeekId, SeasonId, GameWeekNumber, GameWeekDescription) values (@Id, @SeasonId, @nextGameWeek, @description)"
                 { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonYear=cmd.seasonYear|>getSnYr; description=cmd.description }
         let saveFixture (fd:SaveFixtureCommand) =
@@ -124,7 +129,11 @@ module Data =
     type [<CLIMutable>] LeagueIdsPlayerIsInQueryResult = { leagueId:Guid }
     let getLeagueIdsThatPlayerIsIn (player:Player) =
         let args = { LeagueIdsPlayerIsInQueryArgs.playerId=player.id|>getPlayerId }
-        let sql = @"select leagueId from leaguePlayerBridge where playerId = @playerId"
+        let sql = @"select lgs.leagueId
+                    from leagues lgs
+                    join leaguePlayerBridge lpb on lgs.leagueId = lpb.leagueId
+                    where lpb.playerId = @playerId
+                    and lgs.LeagueIsDeleted = 0"
         use conn = newConn()
         let result = conn.Query<LeagueIdsPlayerIsInQueryResult>(sql, args)
         result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toList
@@ -164,13 +173,14 @@ module Data =
             Some (queryResultToPlayer player [])
 
     type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
-    type [<CLIMutable>] FindLeagueByLeagueIdQueryResult = { leagueId:Guid; leagueName:string }
+    type [<CLIMutable>] LeaguesTableQueryResult = { leagueId:Guid; leagueName:string; leagueAdminId:Guid }
     type [<CLIMutable>] FindPredictionsByLeagueIdQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
-        let sql = @"select lgs.LeagueId, lgs.LeagueName
+        let sql = @"select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId
                     from Leagues lgs
                     where lgs.LeagueId = @leagueId
+                    and lgs.LeagueIsDeleted = 0
                     select pls.PlayerId, pls.PlayerName, pls.IsAdmin
                     from Players pls
                     join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
@@ -182,7 +192,7 @@ module Data =
                     where lpb.LeagueId = @leagueId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
-        let leagueResult = multi.Read<FindLeagueByLeagueIdQueryResult>() |> Seq.toList
+        let leagueResult = multi.Read<LeaguesTableQueryResult>() |> Seq.toList
         if leagueResult.IsEmpty then None
         else
             let playersResult = multi.Read<PlayersTableQueryResult>()
@@ -196,18 +206,18 @@ module Data =
                 |> Seq.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=predictions|>List.filter(fun pr -> pr.playerId=(p.playerId|>PlId)); isAdmin=p.isAdmin })
                 |> Seq.toList
             let league = leagueResult |> List.head
-            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players }
+            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players; adminId=league.leagueAdminId|>PlId }
             
     type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
     let tryFindLeagueByShareableId shareableLeagueId =
         let args = { FindLeagueByShareableLeagueIdQueryArgs.shareableLeagueId=shareableLeagueId }
-        let sql = @"select LeagueId, LeagueName from Leagues where LeagueShareableId = @shareableLeagueId"
+        let sql = @"select LeagueId, LeagueName, lgs.LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and lgs.LeagueIsDeleted = 0"
         use conn = newConn()
-        let result = conn.Query<FindLeagueByLeagueIdQueryResult>(sql, args) |> Seq.toList
+        let result = conn.Query<LeaguesTableQueryResult>(sql, args) |> Seq.toList
         if result.IsEmpty then None
         else
             let league = result |> List.head
-            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=[] }
+            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=[]; adminId=league.leagueAdminId|>PlId }
     
     type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
     let getAllPredictionsForFixture (fxid:FxId) =

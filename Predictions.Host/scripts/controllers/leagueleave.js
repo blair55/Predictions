@@ -20,7 +20,7 @@ angular.module('frontendApp')
           var postUrl = '/api/leagueleave/' + $scope.model.id;
           $http.post(postUrl).success(function () {
               notify.success("League left successfully");
-              $location.path('/#');
+              $location.path('leagues');
           });
       };
   });

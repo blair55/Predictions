@@ -115,6 +115,10 @@ angular
                 templateUrl: 'views/leagueleave.html',
                 controller: 'LeagueleaveCtrl'
             })
+            .when('/leaguedelete/:leagueId', {
+              templateUrl: 'views/leaguedelete.html',
+              controller: 'LeaguedeleteCtrl'
+            })
             .otherwise({
                 redirectTo: '/'
             });

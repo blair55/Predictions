@@ -107,6 +107,7 @@
     <Content Include="views\historybymonthwithmonth.html" />
     <Content Include="views\inplay.html" />
     <Content Include="views\league.html" />
+    <Content Include="views\leaguedelete.html" />
     <Content Include="views\leagueinvite.html" />
     <Content Include="views\leaguejoin.html" />
     <Content Include="views\leagueleave.html" />

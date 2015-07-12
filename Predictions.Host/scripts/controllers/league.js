@@ -12,8 +12,9 @@ angular.module('frontendApp')
         var url = '/api/league/' + $routeParams.leagueId;
         $http.get(url).success(function(data) {
             $scope.model = data;
-        });
-        auth.withPlayer(function (player) {
-            $scope.loggedInPlayer = player;
+            auth.withPlayer(function (player) {
+                $scope.loggedInPlayer = player;
+                $scope.isLoggedInPlayerLeagueAdmin = player.id == data.adminId;
+            });
         });
     });

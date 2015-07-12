@@ -21,14 +21,15 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-// tidy up buttons material css?
 // delete league?
+// tidy up buttons material css?
 // inplay -> this week
 // nlog to log entries
 // log sql query duration
 // no graph before gw3
 // vidi printer background
 // google analytics & robots
+// fixture email alerts
 
 // make twitter acct & facebook page
 // capture email

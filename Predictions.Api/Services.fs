@@ -11,6 +11,7 @@ open Predictions.Api.LeagueTableCalculation
 module Services =
     
     let getPlayerViewModel (p:Player) = { PlayerViewModel.id=getPlayerId p.id|>str; name=p.name|>getPlayerName; isAdmin=p.isAdmin } 
+    let noPlayerViewModel() = { PlayerViewModel.id=""; name=""; isAdmin=false }
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
     let toFixtureViewModel (fd:FixtureData) (gw:GameWeek) =
@@ -274,7 +275,7 @@ module Services =
         let leagueTable = getLeagueTableRows league gws
         let rows = leagueTable |> List.map(leagueTableRowToViewModel)
         let latestGameWeekNo = gws |> getlatestGameWeekNo
-        { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName; rows=rows; latestGameWeekNo=latestGameWeekNo }
+        { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName; rows=rows; latestGameWeekNo=latestGameWeekNo; adminId=league.adminId|>getPlayerId|>str }
 
     let getLeagueView leagueId =
         LgId leagueId |> (getLeague >> bind (switch leagueToViewModel))
@@ -304,9 +305,25 @@ module Services =
     
     let leaveLeague (player:Player) leagueId =
         let lgid = leagueId|>LgId
+        let makeSurePlayerIsNotLeagueAdmin (league:League) =
+            if league.adminId <> player.id then league |> Success
+            else Forbidden "League Admin cannot leave league " |> Failure
         let leaveLge league = leaveLeagueInDb { LeaveLeagueCommand.leagueId=lgid; playerId=player.id }
-        lgid |> (getLeague >> bind (switch leaveLge))
+        lgid |> (getLeague
+                >> bind (makeSurePlayerIsNotLeagueAdmin)
+                >> bind (switch leaveLge))
 
+    let deleteLeague (player:Player) leagueId =
+        let lgid = leagueId|>LgId
+        let makeSurePlayerIsLeagueAdmin (league:League) =
+            if league.adminId = player.id then league |> Success
+            else Forbidden "Current player is not league admin" |> Failure
+        let deleteLge (league:League) = { DeleteLeagueCommand.leagueId = league.id } |> deleteLeagueInDb
+        lgid |> (getLeague
+                >> bind (makeSurePlayerIsLeagueAdmin)
+                >> bind (switch deleteLge)
+                >> bind (switch noPlayerViewModel))
+    
     let getPastMonthsWithWinnerView leagueId =
         let getHistoryByMonthViewModel (league:League) =
             let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
@@ -396,23 +413,6 @@ module Services =
            >> bind (switch createResult)
            >> bind makeSureFixtureExists
            >> bind (switch saveResult))
-//
-//    let rec tryCreateSaveFixtureCommandsFromPostModels (viewModels:FixturePostModel list) cmds =
-//        match viewModels with
-//        | h::t -> let result = tryToCreateKoFromSbm h.home h.away h.kickOff
-//                  match result with
-//                  | Success ko ->
-//                      let saveFixtureCommand = { SaveFixtureCommand.id=newFxId(); home=h.home; away=h.away; kickoff=ko }
-//                      tryCreateSaveFixtureCommandsFromPostModels t (saveFixtureCommand::cmds)
-//                  | Failure msg -> Failure msg
-//        | [] -> Success cmds
-
-//    let trySaveGameWeekPostModel (gwpm:GameWeekPostModel) =
-//        let createFixtures viewModels = tryCreateSaveFixtureCommandsFromPostModels viewModels []
-//        let createGameWeek fixtures = { SaveGameWeekCommand.id=newGwId(); seasonId=season().id; saveFixtureCommands=fixtures; description="" }
-//        gwpm.fixtures |> (createFixtures
-//                      >> bind (switch createGameWeek)
-//                      >> bind (switch saveGameWeek))
 
     let trySavePrediction (ppm:PredictionPostModel) (player:Player) =
         let gws = gameWeeks()
@@ -453,7 +453,7 @@ module Services =
 
     let getGlobalTableRows gws =
         let allPlayers = getAllPlayers()
-        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers }
+        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers; adminId=newPlId() }
         getLeagueTableRows globalLeague gws
         
     let getleaguePositionforplayer player =
@@ -480,14 +480,16 @@ module Services =
             |> Seq.map(leagueTableRowToViewModel)
             |> Seq.toList
         let latestGameWeekNo = gws |> getlatestGameWeekNo
-        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo }
+        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo; adminId="" }
     
     let getGlobalLastGameWeekAndWinner() = 
         let gws = gameWeeksWithResults()
         let allPlayers = getAllPlayers()
-        getPastGameWeeksWithWinner gws allPlayers
-        |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
-        |> List.maxBy(fun r -> r.gameWeekNo)
+        let allWinners =
+            getPastGameWeeksWithWinner gws allPlayers
+            |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
+        if allWinners |> List.isEmpty then { PastGameWeekRowViewModel.gameWeekNo=0; winner=noPlayerViewModel(); points=0; hasResult=false}
+        else allWinners |> List.maxBy(fun r -> r.gameWeekNo)
 
 
     open FixtureSourcing
@@ -533,5 +535,5 @@ module Services =
 
         importGwNo |> (switch (getNewGwFixtures)
                    >> bind allKicksOffsAreInFuture
-        //           >> bind allTeamsExist
+                   >> bind allTeamsExist
                    >> bind (switch saveGw))

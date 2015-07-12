@@ -61,7 +61,7 @@
     <EmbeddedResource Include="Scripts\003_Insert_Season_2015-16.sql" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\002_Insert_FixtureData.sql" />
+    <EmbeddedResource Include="Scripts\002_Insert_HistoricFixtureData.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

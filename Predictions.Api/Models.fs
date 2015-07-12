@@ -138,7 +138,7 @@ module LeagueModels =
     type CreateLeaguePostModel = { name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list; latestGameWeekNo:int }
+    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list; latestGameWeekNo:int; adminId:string }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueInviteViewModel = { id:string; name:string; inviteLink:string; }

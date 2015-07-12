@@ -1,14 +1,36 @@
 <h4>
     <a ng-href="#/league/{{model.id}}">{{model.name}}</a>
 </h4>
-<p>
-    Including results for GW#{{model.latestGameWeekNo}}
-    <a ng-href="#/matrix/{{model.id}}/{{model.latestGameWeekNo}}">Lastest Matrix</a>
-</p>
-<a ng-href="#/leagueinvite/{{model.id}}">Invite To Join</a>
-<a ng-href="#/leagueleave/{{model.id}}">Leave League</a>
-<a ng-href="#/history/{{model.id}}/gameweek">Previous Weeks</a>
-<a ng-href="#/history/{{model.id}}/month">Previous Months</a>
+<div>
+
+    <div class="dropdown pull-right">
+        <button class="btn btn-xs btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-option-horizontal"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li ng-if="isLoggedInPlayerLeagueAdmin">
+                <a ng-href="#/leagueinvite/{{model.id}}">Invite To Join</a>
+            </li>
+            <li ng-if="isLoggedInPlayerLeagueAdmin">
+                <a ng-href="#/leaguedelete/{{model.id}}">Delete League</a>
+            </li>
+            <li ng-if="!isLoggedInPlayerLeagueAdmin">
+                <a ng-href="#/leagueleave/{{model.id}}">Leave League</a>
+            </li>
+            <li>
+                <a ng-href="#/history/{{model.id}}/gameweek">Previous Weeks</a>
+            </li>
+            <li>
+                <a ng-href="#/history/{{model.id}}/month">Previous Months</a>
+            </li>
+        </ul>
+    </div>
+
+    <p class="">
+        Including results for GW#{{model.latestGameWeekNo}}
+        <a ng-href="#/matrix/{{model.id}}/{{model.latestGameWeekNo}}">Lastest Matrix</a>
+    </p>
+</div>
 
 <table class="table table-striped">
     <thead>

@@ -4,7 +4,7 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .diff-none{color:#969696;margin-left:-2px;}
 .diff-down{color:#a94442;margin-left:-2px;}
 
-.input-group,.label,.btn{ text-transform: uppercase;}
+.input-group,.label,.btn,a{ text-transform: uppercase;}
 
 .submit-score .team-label {width:50%;text-align:left;position:relative;}
 .submit-score.focused .form-guide li {opacity:1;}
