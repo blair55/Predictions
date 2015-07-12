@@ -11,7 +11,7 @@ angular.module('frontendApp')
       return {
           //templateUrl: 'views/directives/previousmeetingrow.html',
           template:
-              '<td><span class="label label-default">{{ row.kickoff | date:"dd MMM yyyy" }}</span></td>' +
+              '<td><span class="label label-default">{{ row.kickoff | date:"MMM yyyy" }}</span></td>' +
               '<td>' +
                   '<span class="team-name">{{row.homeTeamName}}</span>' +
               '</td>' +

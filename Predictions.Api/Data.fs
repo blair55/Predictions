@@ -233,8 +233,10 @@ module Data =
     let getFixturePreviousMeetingsData home away =
         let args = { GetFixturePreviousMeetingsArgs.homeTeamName=home; awayTeamName=away }
         let sql = @"SELECT kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore FROM Fixtures
-                    where (hometeamname = @homeTeamName and awayteamname = @awayTeamName)
-                    or (awayteamname = @homeTeamName and hometeamname = @awayTeamName)"
+                    where hometeamscore is not null
+                    and awayteamscore is not null
+                    and ((hometeamname = @homeTeamName and awayteamname = @awayTeamName)
+                          or (awayteamname = @homeTeamName and hometeamname = @awayTeamName))"
         use conn = newConn()
         conn.Query<GetFixturePreviousMeetingsQueryResult>(sql, args)
         |> Seq.map(fun r -> (r.kickoff, r.homeTeamName, r.awayTeamName, r.homeTeamScore, r.awayTeamScore))
