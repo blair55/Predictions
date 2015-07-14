@@ -11,7 +11,7 @@ namespace Predictions.Sql
         {
             var result = DeployChanges.To
                 .SqlDatabase(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString)
-                .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                .WithScriptsFromFileSystem("Scripts")
                 .LogToConsole()
                 .Build()
                 .PerformUpgrade();
