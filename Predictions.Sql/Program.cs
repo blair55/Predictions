@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Reflection;
 using DbUp;
 
@@ -14,7 +15,8 @@ namespace Predictions.Sql
                 .LogToConsole()
                 .Build()
                 .PerformUpgrade();
-
+            
+            Console.ReadKey();
             return result.Successful ? 0 : 1;
         }
     }

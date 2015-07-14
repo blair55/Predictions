@@ -11,8 +11,8 @@ open Predictions.Api.Domain
 
 module Data =
     
-//    let connString = ConfigurationManager.AppSettings.["DefaultConnection"]
-    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
+    let connString = ConfigurationManager.AppSettings.["DefaultConnection"]
+//    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
     let newConn() = new SqlConnection(connString)
     let nonQuery sql args =
         use conn = newConn()
@@ -211,7 +211,7 @@ module Data =
     type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
     let tryFindLeagueByShareableId shareableLeagueId =
         let args = { FindLeagueByShareableLeagueIdQueryArgs.shareableLeagueId=shareableLeagueId }
-        let sql = @"select LeagueId, LeagueName, lgs.LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and lgs.LeagueIsDeleted = 0"
+        let sql = @"select LeagueId, LeagueName, LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and LeagueIsDeleted = 0"
         use conn = newConn()
         let result = conn.Query<LeaguesTableQueryResult>(sql, args) |> Seq.toList
         if result.IsEmpty then None

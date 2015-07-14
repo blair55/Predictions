@@ -21,6 +21,9 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
+// follow & feedback btns
+// test dates on apphb db
+// test facebook app
 // inplay -> this week
 // left nav
 // nlog to log entries

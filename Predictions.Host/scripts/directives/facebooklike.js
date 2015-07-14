@@ -30,7 +30,7 @@ angular.module('frontendApp')
                             return;
                         } else {
                             setTimeout(function() {
-                                element.html('<div class="fb-like"' + (!!scope.fbLike ? ' data-href="' + scope.fbLike + '"' : '') + ' data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>');
+                                element.html('<div class="fb-like"' + (!!scope.fbLike ? ' data-href="' + scope.fbLike + '"' : '') + ' data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>');
                                 $window.FB.XFBML.parse(element.parent()[0]);
                             }, 100);
                         }

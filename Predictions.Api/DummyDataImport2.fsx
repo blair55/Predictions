@@ -31,40 +31,48 @@ let getTwoDifferentRndTeams (teams:string list) =
     (teams.[homeTeamIndex], teams.[awayTeamIndex])
 
 
-let getSaveGameWeekCommandList() =
-    let generateSaveFixtureList() =
-        [ for i in 1..10 ->
-            let randomTeams = getTwoDifferentRndTeams teamsList
-            { SaveFixtureCommand.id=newFxId(); home=fst randomTeams; away=snd randomTeams; kickoff=ko } ]
-    [ for i in 1..6 -> { SaveGameWeekCommand.id=newGwId(); seasonId=seasonId; description=""; saveFixtureCommands=generateSaveFixtureList() } ]
+//let getSaveGameWeekCommandList() =
+//    let generateSaveFixtureList() =
+//        [ for i in 1..10 ->
+//            let randomTeams = getTwoDifferentRndTeams teamsList
+//            { SaveFixtureCommand.id=newFxId(); home=fst randomTeams; away=snd randomTeams; kickoff=ko } ]
+//    [ for i in 1..6 -> { SaveGameWeekCommand.id=newGwId(); seasonId=seasonId; description=""; saveFixtureCommands=generateSaveFixtureList() } ]
 
 let getRndScore() =
     let getRndGoals() = rnd.Next(0, 4)
     getRndGoals(), getRndGoals()
 
-let getSaveResultCommandList (gwCmds:SaveGameWeekCommand list) =
-    gwCmds
-    |> List.collect(fun cmd -> cmd.saveFixtureCommands)
-    |> List.map(fun f -> { SaveResultCommand.fixtureId=f.id; score=getRndScore() })
+//let getSaveResultCommandList (gwCmds:SaveGameWeekCommand list) =
+//    gwCmds
+//    |> List.collect(fun cmd -> cmd.saveFixtureCommands)
+//    |> List.map(fun f -> { SaveResultCommand.fixtureId=f.id; score=getRndScore() })
+
 
 
 // save gameweeks & results
 
-let gwcmds = getSaveGameWeekCommandList();;
+//let gwcmds = getSaveGameWeekCommandList();;
 //gwcmds |> List.iter saveGameWeek;;
-let rescmds = gwcmds |> getSaveResultCommandList;;
-//rescmds |> List.iter saveResult;;
+//let rescmds = gwcmds |> getSaveResultCommandList;;
+
+let rescmds = 
+    (buildSeason currentSeason).gameWeeks
+    |> List.collect(fun gw -> gw.fixtures)
+    |> List.map fixtureToFixtureData
+    |> List.map(fun f -> { SaveResultCommand.fixtureId=f.id; score=getRndScore() })
+
+rescmds |> List.iter saveResult;;
 
 
 //let playersList = [ for p in [ "Adam"; "Antony"; "Blair"; "Dan"; "Dave"; "Lewis"; "Jones"; "Pete"; "Walsh"; "Woolley";  ] ->
 let lotsofDummyNames = (dummynames)
 let playersList = [ for p in lotsofDummyNames ->
-                    { Player.id=newPlId(); name=p|>PlayerName; predictions=[] } ]
+                    { Player.id=newPlId(); name=p|>PlayerName; predictions=[]; isAdmin=false } ]
 let getRandomExpId() = Guid.NewGuid() |> str |> ExternalPlayerId
 
 let getRegisterPlayerCommands() =
     playersList
-    |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider})
+    |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider; email="" })
     
 let rpcmds = getRegisterPlayerCommands()
 //rpcmds |> List.iter registerPlayerInDb
@@ -88,8 +96,8 @@ let prcmds = getSavePredictionCommandList playerIds fixtureIds
 //prcmds |> List.iter savePrediction
 
 let getJoinLeagueCommands() =
-    let lgid = "87e4cb66-8b74-44f0-9361-cb2e967955d7" |> sToGuid |> LgId
-    playerIds
+    let lgid = "7835C07F-9617-4924-BFDE-E0DE3167F633" |> sToGuid |> LgId
+    playerIds |> Seq.truncate 20 |> Seq.toList
     |> List.map(fun pid -> { JoinLeagueCommand.playerId=pid; leagueId=lgid })
 
 let jlcmds = getJoinLeagueCommands()

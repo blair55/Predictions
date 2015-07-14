@@ -75,7 +75,7 @@ type Config() =
 
         let facebookOptions = new Facebook.FacebookAuthenticationOptions()
         facebookOptions.Scope.Add("email")
-        facebookOptions.AppId <- "701632913289116"
+        facebookOptions.AppId <- ConfigurationManager.AppSettings.["FacebookAppId"]
         facebookOptions.AppSecret <- ConfigurationManager.AppSettings.["FacebookAppSecret"]
         app.UseFacebookAuthentication(facebookOptions) |> ignore
 

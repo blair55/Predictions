@@ -1,55 +1,76 @@
-﻿<!doctype html>
+﻿<!DOCTYPE HTML>
+<!--
+	Fractal by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Predictions League</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css" />
-        <link rel="stylesheet" href="bower_components/ngtoast/dist/ngToast.css" />
-        <link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css" />
-        <link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.css" />
-        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
-        <link rel="stylesheet" href="bower_components/bootstrap-social/bootstrap-social.css" />
-        <link rel="stylesheet" href="styles/main.css">
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-    
-        <div class="wrapper">
-            <div class="">
-                <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-include src="'views/nav.html'">
-                    <div class="navbar-header">
-                        <a class="navbar-brand" href="#">Predictions League</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav side-nav"></ul>
-                    </div>
-                </div>
-            </div>
-            <div class="page-wrapper">
-                <div class="container-fluid">
-                    <div id="space-scroll" class="jumbotron">
-                        <p>Welcome to the 2015/16</p>
-                        <h1>Predictions League!</h1>
-                    </div>
-                    <form action="/account/login" method="POST">
-                        <!--<button type="submit" name="provider" value="Twitter" class="btn btn-block btn-social btn-twitter btn-lg">
-                                <i class="fa fa-twitter"></i>
-                                Login in with Twitter
-                            </button>-->
-                        <button type="submit" name="provider" value="Facebook" class="btn btn-block btn-social btn-facebook btn-lg">
-                            <i class="fa fa-facebook"></i>
-                            Login in with Facebook
-                        </button>
+	<head>
+		<title>Predictions League</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+	</head>
+	<body id="top">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="content">
+					<h1><a href="#">Predictions League</a></h1>
+				    <p>Fantasy football for match results!</p>
+
+                    <form action="/account/login" method="POST" id="loginform">
+                        <ul class="actions">
+                            <li>
+                                <input type="hidden" name="provider" value="Facebook" />
+                                <a class="button special icon fa-facebook-official" onclick="document.getElementById('loginform').submit()">Login</a>
+                            </li>
+                            <li><a href="#one" class="button icon fa-chevron-down scrolly">Learn More</a></li>
+                        </ul>
                     </form>
-                </div>
-            </div>
-        </div>
-    
-    </body>
+				</div>
+				<div class="image phone"><div class="inner"><img src="images/field.jpg" alt="" /></div></div>
+			</header>
+
+		<!-- One -->
+			<section id="one" class="wrapper style2 special">
+				<h2>Create your own leagues and compete against your mates</h2>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="wrapper">
+				<div class="inner alt">
+					<section class="special">
+						<ul class="icons labeled">
+							<li><span class="icon fa-futbol-o"><span class="label">Create unlimited leagues</span></span></li>
+							<li><span class="icon fa-futbol-o"><span class="label">Fixture history &amp; form guide</span></span></li>
+							<li><span class="icon fa-futbol-o"><span class="label">League position tracking</span></span></li>
+							<li><span class="icon fa-futbol-o"><span class="label">Global league rankings</span></span></li>
+							<li><span class="icon fa-futbol-o"><span class="label">Completely free</span></span></li>
+						</ul>
+					</section>
+				</div>
+			</section>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<ul class="icons">
+					<li><a target="new" href="https://www.facebook.com/predictionsleagueuk" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+					<li><a target="new" href="https://twitter.com/predictionslge" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+				</ul>
+				<p class="copyright">&copy; Predictions League. Credits: <a href="http://html5up.net">HTML5 UP</a></p>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
 </html>
