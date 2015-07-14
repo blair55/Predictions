@@ -11,7 +11,7 @@ open Predictions.Api.Domain
 
 module Data =
     
-    let connString = ConfigurationManager.AppSettings.["DefaultConnection"]
+    let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
 //    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
     let newConn() = new SqlConnection(connString)
     let nonQuery sql args =
