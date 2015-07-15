@@ -206,7 +206,8 @@ type HomeController() =
 
     [<Route("inplay")>]
     member this.GetInPlay() =
-        () |> (switch getInPlay >> resultToHttp)
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player.id |> getPlayerId |> (getInPlay >> resultToHttp)
 
 [<Authorize>]
 [<CustomAuthorize>]

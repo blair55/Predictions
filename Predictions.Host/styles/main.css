@@ -64,6 +64,7 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     }
 }
 
+.btn-social-icon{ display: inline-block !important;}
 
 .fixed-bottom{position:fixed;z-index: 1030;bottom:0;left: 0;margin-bottom:0;width: 100%;box-shadow: #999 0px 0 3px;}
 .fixed-bottom div.panel{ margin-bottom: 0;border-radius: 0;border-width: 1px 0 0;}

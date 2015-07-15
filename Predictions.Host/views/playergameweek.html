@@ -33,7 +33,7 @@
                 </div>
                 <div ng-if="!row.fixture.isOpen">
                     <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
-                    <span ng-if="!row.resultSubmitted"><i>result not yet submitted</i></span>
+                    <span ng-if="!row.resultSubmitted"><i>waiting for result</i></span>
                 </div>
             </td>
             <td class="numeric-cell">{{row.points}}</td>

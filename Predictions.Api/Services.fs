@@ -257,18 +257,20 @@ module Services =
         getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) player
         |> List.length
 
-    let getInPlay() =
-        let rows = gameWeeksWithClosedFixtures()
-                   |> getFixturesInPlay
-                   |> List.map(fun (gw, fs) -> fs |> List.map(fun f -> toFixtureViewModel (f|>fixtureToFixtureData) gw))
-                   |> List.collect(fun fvm -> fvm)
-                   |> List.sortBy(fun fvm -> fvm.kickoff)
-                   |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
-        { InPlayViewModel.rows = rows }
-
     let getlatestGameWeekNo gws =
         if gws |> List.isEmpty then 0
         else gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
+
+    let getInPlay playerId =
+//        let rows = gameWeeksWithClosedFixtures()
+//                   |> getFixturesInPlay
+//                   |> List.map(fun (gw, fs) -> fs |> List.map(fun f -> toFixtureViewModel (f|>fixtureToFixtureData) gw))
+//                   |> List.collect(fun fvm -> fvm)
+//                   |> List.sortBy(fun fvm -> fvm.kickoff)
+//                   |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
+//        { InPlayViewModel.rows = rows }
+        let latestGwNo = gameWeeks() |> getlatestGameWeekNo
+        playerId |> getPlayerGameWeekByPlayerIdAndGameWeekNo latestGwNo
 
     let leagueToViewModel (league:League) = 
         let gws = gameWeeks()

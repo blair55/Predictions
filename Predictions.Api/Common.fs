@@ -114,7 +114,7 @@ module Logging =
     let info (msg:string) = log.Info(msg)
     let warn (msg:string) = log.Warn(msg)
     let errorNx (msg:string) = log.Error(msg)
-    let error (ex:Exception) = log.Error(ex.Message, ex, [])
+    let error (ex:Exception) = log.Error(ex, ex.Message)
 
 module GMTDateTime =
     let Now() = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "GMT Standard Time")
