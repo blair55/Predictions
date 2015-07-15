@@ -12,7 +12,7 @@ angular.module('frontendApp')
             template: '<div ng-switch="guide">' +
                     '<span ng-switch-when="w" class="label label-success">W</span>' +
                     '<span ng-switch-when="l" class="label label-danger">L</span>' +
-                    '<span ng-switch-when="d" class="label label-default">D</span>' +
+                    '<span ng-switch-when="d" class="label label-primary">D</span>' +
                 '</div>',
             restrict: 'E',
             scope: {

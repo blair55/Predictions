@@ -22,7 +22,6 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // icon fonts?
-// wide buttons
 // created datetimes in tables
 // follow & feedback btns
 // test dates - output server time
@@ -35,6 +34,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // hosting subscription
 // reset db password
 
+// wide buttons
 // nullable email update scripts
 // nlog to log entries - config token
 // test facebook app

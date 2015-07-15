@@ -5,8 +5,8 @@
 </h4>
 
 <p>
-    <span class="label label-default">GW#{{model.fixture.gameWeekNumber}}</span>
-    <span class="label label-default">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+    <span class="label label-primary">GW#{{model.fixture.gameWeekNumber}}</span>
+    <span class="label label-primary">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
 </p>
 
 <p ng-if="!model.resultSubmitted">
@@ -36,7 +36,7 @@
     <table class="table">
         <tr ng-repeat="row in formGuide.homeRows">
             <td>
-                <span class="label label-default">GW#{{row.fixture.gameWeekNumber}}</span>
+                <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
             <td>
                 <span class="team-name">{{row.fixture.home}}</span>
@@ -65,7 +65,7 @@
     <table class="table">
         <tr ng-repeat="row in formGuide.awayRows">
             <td>
-                <span class="label label-default">GW#{{row.fixture.gameWeekNumber}}</span>
+                <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
             <td>
                 <span class="team-name">{{row.fixture.home}}</span>

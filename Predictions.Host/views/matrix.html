@@ -15,14 +15,14 @@
                         <span class="fixture-head-team">{{col.fixture.away}}</span>
                     </a>
                     <div ng-if="col.fixture.isOpen">
-                        <span class="label label-default">{{ col.fixture.kickoff | date:'MMM dd' }}</span>
+                        <span class="label label-primary">{{ col.fixture.kickoff | date:'MMM dd' }}</span>
                     </div>
                     <div ng-if="!col.fixture.isOpen">
                         <div ng-if="!col.isSubmitted">
-                            <span class="label label-default">-</span>
+                            <span class="label label-primary">-</span>
                         </div>
                         <div ng-if="col.isSubmitted">
-                            <span class="label label-default">{{col.score.home}} - {{col.score.away}}</span>
+                            <span class="label label-primary">{{col.score.home}} - {{col.score.away}}</span>
                         </div>
                     </div>
                 </div>
