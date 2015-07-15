@@ -24,12 +24,14 @@ compare outcome variation each week to see which game weeks are more/less predic
 // left nav
 // hosting subscription
 // add gameweek msbuild
+// pluralize gw/mnth winners
 // icon fonts?
 // reset db password
 // follow & feedback btns
 // no graph before gw3
 // fixture email alerts
 
+// log app error (rop)
 // grunt copy assets
 // google analytics & robots
 // inplay -> this week

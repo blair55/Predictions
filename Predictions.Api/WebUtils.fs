@@ -26,6 +26,7 @@ module WebUtils =
         response
     
     let errorResponse status msg =
+        Logging.warn msg
         let response = new HttpResponseMessage(status)
         response.Content <- new StringContent(msg)
         response

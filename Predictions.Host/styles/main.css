@@ -35,7 +35,12 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .submit-score.min-mode .fixture-date,
 .submit-score.min-mode .more-link{ display: none;}
 
-.more-link{ text-transform: lowercase;}
+.more-link {
+    text-transform: uppercase;
+    float: right;
+    font-size: 0.84em;
+    line-height: 2em;
+}
 
 .team-name{ text-transform: uppercase;}
 .datetimepicker{width:auto;}

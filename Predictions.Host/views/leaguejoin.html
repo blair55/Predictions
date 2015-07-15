@@ -1,6 +1,9 @@
-<h4>Join League</h4>
-
-<form>
-    <p>Are you sure you want to join {{model.name}}?</p>
-    <button ng-click="submit()" class="btn btn-primary">Join League</button>
-</form>
+<div ng-if="model">
+    <h4>Join League</h4>
+    <form>
+        <p>Are you sure you want to join <b>{{model.name}}</b>?</p>
+        <div class="well">
+            <button ng-click="submit()" class="btn btn-primary">Join League</button>
+        </div>
+    </form>
+</div>

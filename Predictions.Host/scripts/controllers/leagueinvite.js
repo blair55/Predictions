@@ -16,9 +16,10 @@ angular.module('frontendApp')
             $scope.model.encodedShareText = encodeURIComponent("Join my Predctions League!");
         });
         $scope.share = function() {
-        FB.ui({
-            method: 'share',
-            href:  $scope.model.inviteLink
-        });
-    }
-});
+            FB.ui({
+                method: 'share',
+                caption: 'Join my Predictions League!',
+                href: $scope.model.inviteLink
+            });
+        }
+    });

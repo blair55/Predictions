@@ -7,10 +7,10 @@
     Invite others with the link below. Anyone with the link can join the league.
 </div>
 
-<form class="">
+<form>
     <div class="form-group">
         <label for="invitelink">Copy & Paste</label>
-        <input type="text" class="form-control" id="invitelink" ng-model="model.inviteLink" readonly autofocus onclick="this.select();" />
+        <input type="text" class="form-control" id="invitelink" ng-model="model.inviteLink" readonly autofocus />
     </div>
 </form>
 <label for="invitelink">Share</label>
@@ -19,8 +19,7 @@
         <button ng-click="share()" class="btn btn-social-icon btn-facebook btn-lg">
             <i class="fa fa-facebook"></i>
         </button>
-        <a ng-href="https://twitter.com/intent/tweet?url={{model.encodedInviteLink}}&text={{model.encodedShareText}}"
-           target="new" class="btn btn-social-icon btn-twitter btn-lg">
+        <a ng-href="https://twitter.com/intent/tweet?url={{model.encodedInviteLink}}&text={{model.encodedShareText}}" target="new" class="btn btn-social-icon btn-twitter btn-lg">
             <i class="fa fa-twitter"></i>
         </a>
         <a href="https://plus.google.com/share?url={{model.encodedInviteLink}}" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;" class="btn btn-social-icon btn-google-plus btn-lg">
