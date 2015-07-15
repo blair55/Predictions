@@ -23,7 +23,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 // left nav
 // grunt copy assets
-// google analytics & robots
 // hosting subscription
 // icon fonts?
 // reset db password
@@ -31,6 +30,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // no graph before gw3
 // fixture email alerts
 
+// google analytics & robots
 // inplay -> this week
 // created datetimes in tables
 // predictions tbl index on plrid

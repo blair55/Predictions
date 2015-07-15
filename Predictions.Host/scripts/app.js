@@ -116,8 +116,8 @@ angular
                 controller: 'LeagueleaveCtrl'
             })
             .when('/leaguedelete/:leagueId', {
-              templateUrl: 'views/leaguedelete.html',
-              controller: 'LeaguedeleteCtrl'
+                templateUrl: 'views/leaguedelete.html',
+                controller: 'LeaguedeleteCtrl'
             })
             .otherwise({
                 redirectTo: '/'
@@ -131,4 +131,6 @@ angular
     })
     .config(function(cfpLoadingBarProvider) {
         cfpLoadingBarProvider.includeSpinner = false;
+    }).run(function(googleanalytics) {
+        googleanalytics.init();
     });
