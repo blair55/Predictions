@@ -145,7 +145,8 @@ module.exports = function (grunt) {
               '<%= yeoman.dist %>/images',
               '<%= yeoman.dist %>/scripts',
               '<%= yeoman.dist %>/styles',
-              '<%= yeoman.dist %>/views'
+              '<%= yeoman.dist %>/views',
+              '<%= yeoman.dist %>/assets'
             ],
             //dist: {
             //    files: [{
@@ -328,7 +329,8 @@ module.exports = function (grunt) {
                       '*.html',
                       'views/{,*/}*.html',
                       'images/{,*/}*.{webp}',
-                      'fonts/*'
+                      'fonts/*',
+                      'assets/*'
                     ]
                 }, {
                     expand: true,
@@ -346,6 +348,12 @@ module.exports = function (grunt) {
                     cwd: '<%= yeoman.app %>/bower_components/font-awesome',
                     src: ['fonts/*.*'],
                     dest: '<%= yeoman.dist %>'
+                }, {
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= yeoman.app %>/assets',
+                    src: ['**'],
+                    dest: '<%= yeoman.dist %>/assets'
                 }]
             },
             styles: {

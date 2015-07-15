@@ -22,14 +22,15 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // left nav
-// grunt copy assets
 // hosting subscription
+// add gameweek msbuild
 // icon fonts?
 // reset db password
 // follow & feedback btns
 // no graph before gw3
 // fixture email alerts
 
+// grunt copy assets
 // google analytics & robots
 // inplay -> this week
 // created datetimes in tables
