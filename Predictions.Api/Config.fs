@@ -27,6 +27,7 @@ type ErrorFilter() =
     override this.OnException(context:HttpActionExecutedContext) =
         let response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
         //response.Content <- new StringContent(context.Exception.Message)
+        Logging.error(context.Exception)
         response.Content <- new StringContent("Something went wrong!")
         context.Response <- response
 

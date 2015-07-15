@@ -87,3 +87,45 @@ open System.Threading.Tasks
 
     type PlSignInManager(userManager, authenticationManager) =
         inherit SignInManager<PlUser, string>(userManager, authenticationManager)
+
+
+open NLog
+open NLog.Config
+open NLog.Targets
+open NLog.Layouts
+open System.Configuration
+
+module Logging =
+
+        let private layout = "${longdate} | ${level:uppercase=True} | ${message} ${exception:format=Type,StackTrace:innerFormat=Message,Type,StackTrace:maxInnerExceptionLevel=1} "
+
+//        private static void ConfigureConsoleTarget(LoggingConfiguration configuration)
+//        {
+//            var consoleTarget = new ConsoleTarget { Layout = Layout };
+//            var consoleRule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
+//            configuration.AddTarget("console", consoleTarget);
+//            configuration.LoggingRules.Add(consoleRule);
+//        }
+//
+        let configuration = new LoggingConfiguration()
+        //let token = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
+        let token = "ecb263d0-5fae-45b8-807a-ca72f60d0d3f"
+        let logEntriesTarget = new LogentriesTarget()
+        logEntriesTarget.Token <- token
+        logEntriesTarget.Layout <- Layout.FromString(layout)
+        let logEntriesRule = new LoggingRule("*", LogLevel.Info, logEntriesTarget)
+        configuration.AddTarget("logentries", logEntriesTarget)
+        configuration.LoggingRules.Add(logEntriesRule)
+
+//        ConfigureConsoleTarget(configuration);
+        LogManager.Configuration <- configuration
+        LogManager.Configuration.Reload() |> ignore
+        LogManager.ReconfigExistingLoggers()
+        let log = LogManager.GetCurrentClassLogger()
+
+        let debug (msg:string) = log.Debug(msg)
+        let info (msg:string) = log.Info(msg)
+        let warn (msg:string) = log.Warn(msg)
+        let errorNx (msg:string) = log.Error(msg)
+        let error (ex:Exception) = log.Error(ex.Message, ex, [])
+
