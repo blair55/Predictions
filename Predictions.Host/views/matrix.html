@@ -11,7 +11,7 @@
             <th ng-repeat="col in model.columns">
                 <div>
                     <a ng-href="#/fixture/{{col.fixture.fxId}}">
-                        <span class="fixture-head-team">{{col.fixture.home}}</span>
+                        <span class="fixture-head-team">{{col.fixture.home}}</span><br />
                         <span class="fixture-head-team">{{col.fixture.away}}</span>
                     </a>
                     <div ng-if="col.fixture.isOpen">

@@ -3627,8 +3627,10 @@
 /* Header */
 
 	#header {
-		background-color: #4696e5;
-		color: #d0e4f8;
+		/*background-color: #4696e5;*/
+		background-color: #222;
+		/*color: #d0e4f8;*/
+		color: #ddd;
 		padding: 4.5em 0 2.5em 0 ;
 		-moz-align-items: center;
 		-webkit-align-items: center;
@@ -3683,7 +3685,8 @@
 			#header .button.special {
 				box-shadow: none;
 				background-color: #ffffff;
-				color: #4696e5 !important;
+				/*color: #4696e5 !important;*/
+				color: #222 !important;
 			}
 
 		#header label {

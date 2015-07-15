@@ -32,9 +32,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">
-                    <span class="glyphicon glyphicon-edit"></span>
-                </button>
+                <button type="submit" class="btn btn-default" ng-click="enterEditMode(row)">Edit</button>
 
             </form>
 
@@ -60,7 +58,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" ng-init="setCreateScoreForm(createScoreForm);" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
+                <button type="submit" class="btn btn-default" ng-init="setCreateScoreForm(createScoreForm);" ng-disabled="createScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
             </form>
 
@@ -85,11 +83,16 @@
                         <input type="number" class="form-control" ng-model="row.existingScore.away" required ng-focus="focus()" ng-blur="blur()" />
                     </div>
                 </div>
+                
+                <div class="row">
+                    <div class="col-xs-6">
+                        <button type="submit" class="btn btn-default" ng-click="enterReadOnlyMode(row)">Cancel</button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="submit" class="btn btn-default" ng-init="setEditScoreForm(editScoreForm)" ng-disabled="editScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
+                    </div>
+                </div>
 
-                <button type="submit" class="btn btn-default" ng-click="enterReadOnlyMode(row)">
-                    <span class="glyphicon glyphicon-remove"></span>
-                </button>
-                <button type="submit" class="btn btn-primary" ng-init="setEditScoreForm(editScoreForm)" ng-disabled="editScoreForm.$invalid || inSubmission" ng-click="row.submit(row)">Submit</button>
 
             </form>
 

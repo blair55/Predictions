@@ -513,7 +513,7 @@ module Services =
             |> fun (h,a) -> h@a
 
         let allKicksOffsAreInFuture fxs =
-            match fxs |> List.forall(fun (d, _, _) -> d > DateTime.Now) with
+            match fxs |> List.forall(fun (d, _, _) -> d > GMTDateTime.Now()) with
             | true -> fxs |> Success
             | false -> Invalid "not all fixtures are in the future" |> Failure
         

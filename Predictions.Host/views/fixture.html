@@ -83,7 +83,7 @@
     </table>
 </div>
 
-<div class="panel panel-default" style="margin-bottom: 163px;">
+<div class="panel panel-default">
     <div class="panel-heading">
         Fixture History
     </div>
@@ -95,6 +95,6 @@
 </div>
 
 
-<div ng-if="model.fixture.isOpen" class="fixed-bottom">
+<div ng-if="model.fixture.isOpen">
     <submitscore row="model.openFixturesViewModelRow" post-url="/api/prediction" min-mode="true"></submitscore>
 </div>

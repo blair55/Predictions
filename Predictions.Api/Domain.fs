@@ -75,7 +75,7 @@ module Domain =
         ()
 
     let fixtureDataToFixture fd r =
-        match fd.kickoff > DateTime.Now with
+        match fd.kickoff > GMTDateTime.Now() with
         | true -> OpenFixture fd
         | false -> ClosedFixture (fd, r)
 
@@ -310,10 +310,10 @@ module Domain =
     
     //let createPrediction fixtureId score = { Prediction.id=newPrId(); score=score; fixtureId=fixtureId;  }
 
-    let checkFixtureIsOpen (f, p) =
-        match f with
-        | OpenFixture fd -> Success (fd, p)
-        | ClosedFixture _ -> invalid "cannot add prediction to fixture with ko in past"
+//    let checkFixtureIsOpen (f, p) =
+//        match f with
+//        | OpenFixture fd -> Success (fd, p)
+//        | ClosedFixture _ -> invalid "cannot add prediction to fixture with ko in past"
 
 //    let checkPlayerHasNoSubmittedPredictionsForFixture ((fd:FixtureData), (pr:Prediction)) =
 //        let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
@@ -326,13 +326,13 @@ module Domain =
 
     let tryToCreateScoreFromSbm home away =
         if home >= 0 && away >= 0 then Success(home, away) else invalid "cannot submit negative score"
-
-    let tryToCreateKoFromSbm home away (ko:string) =
-        let (isKoValid, kickoff) = DateTime.TryParse(ko)
-        if isKoValid=false then invalid "fixture kickoff time is invalid"
-        else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
-        else if home = away then invalid "fixture home and away team cannot be the same"
-        else Success kickoff
+//
+//    let tryToCreateKoFromSbm home away (ko:string) =
+//        let (isKoValid, kickoff) = DateTime.TryParse(ko)
+//        if isKoValid=false then invalid "fixture kickoff time is invalid"
+//        else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
+//        else if home = away then invalid "fixture home and away team cannot be the same"
+//        else Success kickoff
 
     let getShareableLeagueId (leagueId:LgId) =
         (str <| getLgId leagueId).Substring(0, 8)
@@ -415,14 +415,15 @@ module FixtureSourcing =
     let getNewGwFixtures no =
         let url = sprintf "http://fantasy.premierleague.com/fixtures/%i" no
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
-//        HtmlDocument.descendants.Descendants ["tr"]
-//        |> Seq.map(fun tr -> 
-//            let tds = tr.Descendants ["td"] |> Seq.toList
-//            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-//            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
-//            let date = Convert.ToDateTime(dateS)
-//            let home = tds.[1].InnerText()
-//            let away = tds.[5].InnerText()
-//            date, home, away)
-//        |> Seq.toList
-        []
+        let results = HtmlDocument.Parse(gwhtml)
+        results.Descendants ["tr"]
+        |> Seq.map(fun tr -> 
+            let tds = tr.Descendants ["td"] |> Seq.toList
+            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
+            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
+            let date = Convert.ToDateTime(dateS)
+            let home = tds.[1].InnerText()
+            let away = tds.[5].InnerText()
+            date, home, away)
+        |> Seq.toList
+//        []
