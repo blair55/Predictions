@@ -467,7 +467,7 @@ module Services =
         { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
 
     let getGlobalLeagueTablePage player page =
-        let gws = gameWeeksWithResults()
+        let gws = gameWeeks()
         let globalTableRows = getGlobalTableRows gws
         let amountToTake =
             let totalPages = (globalTableRows.Length/globalLeaguePageSize)
