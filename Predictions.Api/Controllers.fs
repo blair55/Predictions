@@ -209,6 +209,10 @@ type HomeController() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         player.id |> getPlayerId |> (getInPlay >> resultToHttp)
 
+    [<Route("getfixtureneighbours/{fxId:Guid}")>]
+    member this.GetFixtureNeighbours(fxId:Guid) =
+        FxId fxId |> (getFixtureNeighbours >> resultToHttp)
+
 [<Authorize>]
 [<CustomAuthorize>]
 [<RoutePrefix("api/admin")>]

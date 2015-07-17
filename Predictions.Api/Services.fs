@@ -234,6 +234,25 @@ module Services =
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
 
+    let getFixtureNeighbours fxid =
+        let gws = gameWeeks()
+        let fds = getFixtureDatasForGameWeeks gws
+        let max = fds.Length - 1
+        let getResult (fixture:Fixture) =
+            let fd = fixtureToFixtureData fixture
+            let i = fds |> Seq.findIndex(fun f -> f.id = fd.id)
+            let iToFvm index =
+                let fd = fds.[index]
+                let gw = gws |> Seq.find(fun gw -> gw.id = fd.gwId)
+                toFixtureViewModel fd gw
+            let getEmptyFvm() = { FixtureViewModel.away=""; home=""; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
+            match i with
+            | 0 -> { FixtureNeighboursViewModel.prev=getEmptyFvm(); next=i|>iToFvm; hasPrev=false; hasNext=true; }
+            | _ when i = max -> { FixtureNeighboursViewModel.prev=i|>iToFvm; next=getEmptyFvm(); hasPrev=true; hasNext=false; }
+            | _ -> { FixtureNeighboursViewModel.prev=i|>iToFvm; next=i|>iToFvm; hasPrev=true; hasNext=true; }
+        fxid |> ((makeSureFixtureExists gws)
+            >> bind (switch getResult))
+
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()
                    |> getGameWeeksWithClosedFixtures
