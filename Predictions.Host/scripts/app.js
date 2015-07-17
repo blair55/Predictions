@@ -18,7 +18,6 @@ angular
         'ngTouch',
         'LocalStorageModule',
         'ui.bootstrap',
-        'ui.bootstrap.datetimepicker',
         'ngToast',
         'chart.js',
         'ordinal',

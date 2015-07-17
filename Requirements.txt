@@ -21,13 +21,11 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-// left nav
 // hosting subscription
 // add gameweek msbuild
 // reset db password
 // pluralize gw/mnth winners
 // short team names
-// remove btrp dtp
 // next fixture navigate
 // icon fonts?
 // follow & feedback btns
@@ -35,6 +33,8 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fixture email alerts
 // show player predictions on in-play
 
+// remove btrp dtp
+// left nav
 // log app error (rop)
 // grunt copy assets
 // google analytics & robots
