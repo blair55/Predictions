@@ -118,14 +118,6 @@ module Domain =
         |> List.map(fun (gw, f) -> gw, f, fixtureToFixtureData f)
         |> List.tryFind(fun (gw, f, fd) -> fd.id = fxid)
 
-//    let tryFindPredictionWithFixture (gws:GameWeek list) prid =
-//        gws
-//        |> List.collect(fun gw -> gw.fixtures)
-//        |> List.map(fixtureToFixtureData)
-//        |> List.map(fun fd -> fd, fd.predictions)
-//        |> List.collect(fun (fd, predictions) -> predictions |> List.map(fun p -> fd, p))
-//        |> List.tryFind(fun (_, p) -> p.id = prid)
-
     let getMonthForGameWeek (gw:GameWeek) =
         gw.fixtures
         |> List.map(fixtureToFixtureData)
@@ -313,32 +305,9 @@ module Domain =
     // cannot view fixture with ko in future
 
     let invalid msg = Invalid msg |> Failure
-    
-    //let createPrediction fixtureId score = { Prediction.id=newPrId(); score=score; fixtureId=fixtureId;  }
-
-//    let checkFixtureIsOpen (f, p) =
-//        match f with
-//        | OpenFixture fd -> Success (fd, p)
-//        | ClosedFixture _ -> invalid "cannot add prediction to fixture with ko in past"
-
-//    let checkPlayerHasNoSubmittedPredictionsForFixture ((fd:FixtureData), (pr:Prediction)) =
-//        let hasAlreadySubmitted = fd.predictions |> List.exists(fun p -> p.player = pr.player)
-//        if hasAlreadySubmitted then invalid "cannot submit more than one prediction for fixture" else Success (fd, pr)
-
-//    let tryViewFixture f =
-//        match f with
-//        | OpenFixture _ -> invalid "cannot view fixture with ko in future"
-//        | ClosedFixture(fd, r) -> Success(fd, r)
 
     let tryToCreateScoreFromSbm home away =
         if home >= 0 && away >= 0 then Success(home, away) else invalid "cannot submit negative score"
-//
-//    let tryToCreateKoFromSbm home away (ko:string) =
-//        let (isKoValid, kickoff) = DateTime.TryParse(ko)
-//        if isKoValid=false then invalid "fixture kickoff time is invalid"
-//        else if kickoff < DateTime.Now then invalid "fixture kickoff cannot be in the past"
-//        else if home = away then invalid "fixture home and away team cannot be the same"
-//        else Success kickoff
 
     let getShareableLeagueId (leagueId:LgId) =
         (str <| getLgId leagueId).Substring(0, 8)
@@ -421,17 +390,17 @@ module FixtureSourcing =
     let getNewGwFixtures no =
         let url = sprintf "http://fantasy.premierleague.com/fixtures/%i" no
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
-        let results = HtmlDocument.Parse(gwhtml)
-        results.Descendants ["tr"]
-        |> Seq.map(fun tr -> 
-            let tds = tr.Descendants ["td"] |> Seq.toList
-            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
-            let date = Convert.ToDateTime(dateS)
-            let home = tds.[1].InnerText()
-            let away = tds.[5].InnerText()
-            date, home, away)
-        |> Seq.toList
-//        []
+//        let results = HtmlDocument.Parse(gwhtml)
+//        results.Descendants ["tr"]
+//        |> Seq.map(fun tr -> 
+//            let tds = tr.Descendants ["td"] |> Seq.toList
+//            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
+//            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
+//            let date = Convert.ToDateTime(dateS)
+//            let home = tds.[1].InnerText()
+//            let away = tds.[5].InnerText()
+//            date, home, away)
+//        |> Seq.toList
+        []
 
 
