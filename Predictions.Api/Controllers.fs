@@ -40,7 +40,7 @@ type AccountController() =
     member this.GetCallback([<FromUri>]redirect:string) =
         let loginInfo = this.AuthManager.GetExternalLoginInfo()
         if (box loginInfo <> null) then
-            Logging.info(loginInfo.DefaultUserName + " logged in")
+            Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
             let signInUser = register loginInfo
             this.SignInManager.SignIn(signInUser, false, true)
             let uri = sprintf "%s#%s" (str this.BaseUri) redirect
