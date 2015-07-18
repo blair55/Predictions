@@ -71,13 +71,14 @@ let playersList = [ for p in lotsofDummyNames ->
 let getRandomExpId() = Guid.NewGuid() |> str |> ExternalPlayerId
 
 let getRegisterPlayerCommands() =
-    playersList
+    playersList |> Seq.truncate 30 |> Seq.toList
     |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider; email="" })
     
 let rpcmds = getRegisterPlayerCommands()
-//rpcmds |> List.iter registerPlayerInDb
+rpcmds |> List.iter registerPlayerInDb
 
-let playerIds = rpcmds |> List.map(fun p -> p.player.id)
+//let playerIds = rpcmds |> List.map(fun p -> p.player.id)
+let playerIds = getAllPlayers() |> List.map(fun p -> p.id)
 let fixtureIds =
     (buildSeason currentSeason).gameWeeks
     |> List.collect(fun gw -> gw.fixtures)
@@ -93,14 +94,14 @@ let getSavePredictionCommandList (pids) (fids) =
     |> List.collect(fun cmd -> cmd)
 
 let prcmds = getSavePredictionCommandList playerIds fixtureIds
-//prcmds |> List.iter savePrediction
+prcmds |> List.iter savePrediction
 
 let getJoinLeagueCommands() =
-    let lgid = "7835C07F-9617-4924-BFDE-E0DE3167F633" |> sToGuid |> LgId
+    let lgid = "1E7E8BDF-DD2C-4B10-B7BA-DE8E44C99FA9" |> sToGuid |> LgId
     playerIds |> Seq.truncate 20 |> Seq.toList
     |> List.map(fun pid -> { JoinLeagueCommand.playerId=pid; leagueId=lgid })
 
 let jlcmds = getJoinLeagueCommands()
-//jlcmds |> List.iter joinLeagueInDb
+jlcmds |> List.iter joinLeagueInDb
 
 

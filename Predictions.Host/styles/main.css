@@ -118,6 +118,41 @@ h4{margin-top:0;}
     padding-left: 0;
 }
 
+.navmenu {
+    background-image: url("/assets/css/images/overlay.png"), url("/assets/css/images/pattern-size1.svg");
+}
+
+.navmenu #social {
+    position:absolute;bottom:10px;left:10px;
+}
+.navmenu #social p,
+.navmenu #social ul,
+.navmenu #social li{
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+.navmenu #social p {
+    color: #555;
+}
+.navmenu #social a {
+    color: #555;
+    font-size: 32px;
+    display: inline-block;
+    padding: 2px 10px 2px 5px;
+}
+.navmenu #social a:hover {
+    color: #777;
+}
+
+.divider {
+    height: 1px;
+    margin: 9px 0;
+    padding: 0 !important;
+    overflow: hidden;
+    background-color: #111;
+}
+
 .table.matrix > thead > tr > th {
     font-weight: normal;
     text-align: center;
@@ -145,5 +180,20 @@ h4{margin-top:0;}
 table.table-no-top-border > tbody > tr:first-child > td {
     border-top: 0;
 }
-
-
+.graph-placeholder {
+    display: block;
+}
+.graph-placeholder p {
+    text-align: center;
+    font-weight: bold;
+    color: #555555;
+    margin-top: 50px;
+}
+.graph-placeholder.player-profile-graph {
+    height: 143px;
+    background: url(/images/PlayerPointsGraph.png) top center no-repeat
+}
+.graph-placeholder.league-position-graph {
+    height: 147px;
+    background: url(/images/LeaguePositionGraph.png) top center no-repeat
+}

@@ -421,17 +421,17 @@ module FixtureSourcing =
     let getNewGwFixtures no =
         let url = sprintf "http://fantasy.premierleague.com/fixtures/%i" no
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
-//        let results = HtmlDocument.Parse(gwhtml)
-//        results.Descendants ["tr"]
-//        |> Seq.map(fun tr -> 
-//            let tds = tr.Descendants ["td"] |> Seq.toList
-//            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-//            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
-//            let date = Convert.ToDateTime(dateS)
-//            let home = tds.[1].InnerText()
-//            let away = tds.[5].InnerText()
-//            date, home, away)
-//        |> Seq.toList
-        []
+        let results = HtmlDocument.Parse(gwhtml)
+        results.Descendants ["tr"]
+        |> Seq.map(fun tr -> 
+            let tds = tr.Descendants ["td"] |> Seq.toList
+            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
+            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
+            let date = Convert.ToDateTime(dateS)
+            let home = tds.[1].InnerText()
+            let away = tds.[5].InnerText()
+            date, home, away)
+        |> Seq.toList
+//        []
 
 

@@ -1,4 +1,4 @@
-<div ng-controller="NavCtrl" class="navmenu-inverse">
+<div ng-controller="NavCtrl">
     <a class="navmenu-brand hidden-xs" href="#/">Predictions League</a>
     <ul class="nav navmenu-nav">
         <li>
@@ -35,6 +35,7 @@
                 My Profile
             </a>
         </li>
+        <li role="separator" class="divider"></li>
         <li>
             <a href="/account/logout">
                 <span class="glyphicon glyphicon-log-out"></span>
@@ -42,6 +43,19 @@
             </a>
         </li>
     </ul>
+    <footer id="social">
+        <ul>
+            <li>
+                <a target="new" href="https://www.facebook.com/predictionsleagueuk">
+                    <i class="fa fa-facebook"></i>
+                </a>
+                <a target="new" href="https://twitter.com/predictionslge">
+                    <i class="fa fa-twitter"></i>
+                </a>
+            </li>
+        </ul>
+        <p class="copyright">&copy; Predictions League</p>
+    </footer>
 </div>
 <script>
     $(function () {

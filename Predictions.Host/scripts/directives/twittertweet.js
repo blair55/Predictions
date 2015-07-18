@@ -7,13 +7,13 @@
  * # twittertweet
  */
 angular.module('frontendApp')
-    .directive('tweet', [
+    .directive('twittertweet', [
         '$window', '$location',
         function($window, $location) {
             return {
                 restrict: 'A',
                 scope: {
-                    tweet: '=',
+                    twittertweet: '=',
                     tweetUrl: '='
                 },
                 link: function(scope, element, attrs) {
@@ -21,9 +21,9 @@ angular.module('frontendApp')
                     var watchAdded = false;
 
                     function renderTweetButton() {
-                        if (!scope.tweet && !watchAdded) {
+                        if (!scope.twittertweet && !watchAdded) {
                             watchAdded = true;
-                            var unbindWatch = scope.$watch('tweet', function(newValue, oldValue) {
+                            var unbindWatch = scope.$watch('twittertweet', function(newValue, oldValue) {
                                 if (newValue) {
                                     renderTweetButton();
                                     unbindWatch();
@@ -32,7 +32,7 @@ angular.module('frontendApp')
                             return;
                         } else {
                             setTimeout(function() {
-                                element.html('<a href="https://twitter.com/share" class="twitter-share-button" data-text="' + scope.tweet + '" data-url="' + (scope.tweetUrl || $location.absUrl()) + '">Tweet</a>');
+                                element.html('<a href="https://twitter.com/share" class="twitter-share-button" data-text="' + scope.twittertweet + '" data-url="' + (scope.tweetUrl || $location.absUrl()) + '">Tweet</a>');
                                 $window.twttr.widgets.load(element.parent()[0]);
                             }, 100);
                         }

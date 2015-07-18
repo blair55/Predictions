@@ -85,11 +85,12 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Fixture History
-        <div class="pull-right">
-            <label for="showAll" class="text-muted" style="font-weight: normal">All Fixtures</label>
-            <input id="showAll" type="checkbox" ng-model="previousMeetings.showAll" ng-click="rebindFixtureHistory()" />
+        <div class="checkbox pull-right" style="margin-top:0">
+            <label class="text-muted" style="font-weight: normal">
+                <input type="checkbox" ng-model="previousMeetings.showAll" ng-click="rebindFixtureHistory()"> All Fixtures
+            </label>
         </div>
+        Fixture History
     </div>
     <table class="table table-no-top-border">
         <tbody>

@@ -7,12 +7,12 @@
  * # facebooklike
  */
 angular.module('frontendApp')
-    .directive('fbLike', [
+    .directive('facebooklike', [
         '$window', function($window) {
             return {
                 restrict: 'A',
                 scope: {
-                    fbLike: '=?'
+                    facebooklike: '=?'
                 },
                 link: function(scope, element, attrs) {
                     renderLikeButton();
@@ -21,7 +21,7 @@ angular.module('frontendApp')
                     function renderLikeButton() {
                         if (!!attrs.fbLike && !scope.fbLike && !watchAdded) {
                             watchAdded = true;
-                            var unbindWatch = scope.$watch('fbLike', function(newValue, oldValue) {
+                            var unbindWatch = scope.$watch('facebooklike', function (newValue, oldValue) {
                                 if (newValue) {
                                     renderLikeButton();
                                     unbindWatch();

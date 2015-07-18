@@ -100,6 +100,8 @@
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="images\field.jpg" />
+    <Content Include="images\LeaguePositionGraph.png" />
+    <Content Include="images\PlayerPointsGraph.png" />
     <Content Include="images\yeoman.png" />
     <Content Include="index.html" />
     <Content Include="largetile.png" />
