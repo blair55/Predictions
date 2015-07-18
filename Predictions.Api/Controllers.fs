@@ -48,6 +48,7 @@ type AccountController() =
         else this.Redirect(this.BaseUri)
 
 [<Authorize>]
+[<LogRoute>]
 [<RoutePrefix("api")>]
 type HomeController() =
     inherit ApiController()
@@ -218,7 +219,6 @@ type HomeController() =
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()
-
 
     [<Route("getgameweekswithclosedfixtures")>]
     member this.GetGameWeeksWithClosedFixtures() =

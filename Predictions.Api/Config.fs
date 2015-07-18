@@ -46,6 +46,15 @@ type CustomAuthorizeAttribute() =
         | Some p -> if p.isAdmin then () else unauthResponse()
         | None -> unauthResponse()
 
+type LogRouteAttribute() =
+    inherit ActionFilterAttribute()
+    
+    override this.OnActionExecuting(actionContext:HttpActionContext) =
+        let authManager = actionContext.Request.GetOwinContext().Authentication
+        let path = actionContext.Request.RequestUri.PathAndQuery
+        let user = authManager.User.Identity.GetUserName()
+        Logging.info(sprintf "path=%s user=%s" path user)
+
 type Config() =
 
     static member private RegisterWebApi(config: HttpConfiguration) =
