@@ -11,14 +11,12 @@ angular.module('frontendApp')
       return {
           //templateUrl: 'views/directives/previousmeetingrow.html',
           template:
-              '<td><span class="label label-primary">{{ row.kickoff | date:"MMM yyyy" }}</span></td>' +
-              '<td>' +
+              '<td class="cell-15"><span class="label label-primary">{{ row.kickoff | date:"MMM yyyy" }}</span></td>' +
+              '<td class="cell-35 text-right">' +
                   '<span class="team-name">{{row.homeTeamName}}</span>' +
               '</td>' +
-              '<td>{{row.homeTeamScore}}</td>' +
-              '<td>-</td>' +
-              '<td>{{row.awayTeamScore}}</td>' +
-              '<td>' +
+              '<td class="cell-15 text-center">{{row.homeTeamScore}} - {{row.awayTeamScore}}</td>' +
+              '<td class="cell-35">' +
                   '<span class="team-name">{{row.awayTeamName}}</span>' +
               '</td>',
           restrict: 'EA',

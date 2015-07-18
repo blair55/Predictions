@@ -43,7 +43,6 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 }
 
 .team-name{ text-transform: uppercase;}
-.datetimepicker{width:auto;}
 
 .movement{width:5%; text-align:center;}
 .numeric-cell{text-align:right;}
@@ -53,6 +52,8 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .cell-15{width:15%;}
 .cell-20{width:20%;}
 .cell-25{width:25%;}
+.cell-30{width:30%;}
+.cell-35{width:35%;}
 
 .block-ui-message-container{ display: none;}
 
@@ -60,7 +61,6 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     width: 100%;
     display: block;
 }
-
 
 @media (min-width: 768px) {
     .btn {

@@ -141,13 +141,17 @@ module Services =
                       >> bind getLeagueAndCarryPlayer
                       >> bind (switch getResult))
 
-    let getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo playerId =
+    let getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo revealPlayerScoresEvenIfFixtureIsOpen playerId =
         let getResult player =
             let gw = gameWeeks() |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
             let rowToViewModel (fd, (r:Result option), (p:Prediction option), pts) =
+                let fixture = fixtureDataToFixture fd r
                 let getVmPred (pred:Prediction option) =
                     match pred with
-                    | Some p -> { ScoreViewModel.home=fst p.score;away=snd p.score }
+                    | Some p -> if revealPlayerScoresEvenIfFixtureIsOpen then p.score|>toScoreViewModel else
+                                match fixture with
+                                | OpenFixture _ -> noScoreViewModel
+                                | ClosedFixture _ -> p.score|>toScoreViewModel
                     | None -> noScoreViewModel
                 let getVmResult (result:Result option) =
                     match result with
@@ -216,7 +220,7 @@ module Services =
                         |> List.rev
             let thisFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.home)
             let reverseFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.away)
-            { FixturePreviousMeetingsQueryResultViewModel.rows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
+            { FixturePreviousMeetingsQueryResultViewModel.allRows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
     
@@ -247,9 +251,9 @@ module Services =
                 toFixtureViewModel fd gw
             let getEmptyFvm() = { FixtureViewModel.away=""; home=""; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
             match i with
-            | 0 -> { FixtureNeighboursViewModel.prev=getEmptyFvm(); next=i|>iToFvm; hasPrev=false; hasNext=true; }
-            | _ when i = max -> { FixtureNeighboursViewModel.prev=i|>iToFvm; next=getEmptyFvm(); hasPrev=true; hasNext=false; }
-            | _ -> { FixtureNeighboursViewModel.prev=i|>iToFvm; next=i|>iToFvm; hasPrev=true; hasNext=true; }
+            | 0 -> { FixtureNeighboursViewModel.prev=getEmptyFvm(); next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
+            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=getEmptyFvm(); hasPrev=true; hasNext=false; }
+            | _ -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=i+1|>iToFvm; hasPrev=true; hasNext=true; }
         fxid |> ((makeSureFixtureExists gws)
             >> bind (switch getResult))
 
@@ -281,15 +285,8 @@ module Services =
         else gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
 
     let getInPlay playerId =
-//        let rows = gameWeeksWithClosedFixtures()
-//                   |> getFixturesInPlay
-//                   |> List.map(fun (gw, fs) -> fs |> List.map(fun f -> toFixtureViewModel (f|>fixtureToFixtureData) gw))
-//                   |> List.collect(fun fvm -> fvm)
-//                   |> List.sortBy(fun fvm -> fvm.kickoff)
-//                   |> List.map(fun fvm -> { InPlayRowViewModel.fixture=fvm })
-//        { InPlayViewModel.rows = rows }
         let latestGwNo = gameWeeks() |> getlatestGameWeekNo
-        playerId |> getPlayerGameWeekByPlayerIdAndGameWeekNo latestGwNo
+        playerId |> getPlayerGameWeekByPlayerIdAndGameWeekNo latestGwNo true
 
     let leagueToViewModel (league:League) = 
         let gws = gameWeeks()

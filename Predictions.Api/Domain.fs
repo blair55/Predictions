@@ -100,6 +100,7 @@ module Domain =
         gws
         |> List.collect(fun gw -> gw.fixtures)
         |> List.map(fixtureToFixtureData)
+        |> List.sortBy(fun fd -> fd.kickoff)
 
     let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek list) =
         gws |> List.filter(fun gw -> gw.fixtures |> List.exists(isFixtureClosedAndHaveResult))

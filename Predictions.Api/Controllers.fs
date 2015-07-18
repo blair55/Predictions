@@ -124,7 +124,7 @@ type HomeController() =
 
     [<Route("playergameweek/{playerId:Guid}/{gameWeekNo:int}")>]
     member this.GetPlayerGameWeek (playerId) (gameWeekNo:int) =
-        let getPoints = getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo
+        let getPoints = getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo false
         playerId |> (getPoints >> resultToHttp)
 
     [<Route("playerprofile/{playerId:Guid}")>]

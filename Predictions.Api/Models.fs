@@ -89,7 +89,7 @@ module ViewModels =
     type FixturePreviousMeetingsQueryResultViewModel = {
         thisFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list;
         reverseFixtureRows:FixturePreviousMeetingsQueryResultViewModelRow list; 
-        rows:FixturePreviousMeetingsQueryResultViewModelRow list; }
+        allRows:FixturePreviousMeetingsQueryResultViewModelRow list; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeeksWithClosedFixturesRowViewModel = { gwno:int; closedFixtureCount:int }

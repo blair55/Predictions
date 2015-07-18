@@ -21,18 +21,21 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
+// pluralize gw/mnth winners
 // hosting subscription
 // add gameweek msbuild
 // reset db password
-// pluralize gw/mnth winners
 // short team names
-// next fixture navigate
 // icon fonts?
 // follow & feedback btns
 // no graph before gw3
 // fixture email alerts
-// show player predictions on in-play
 
+// check predictions for open predictions are not returned to client on gwfixture page
+// show player predictions on in-play
+// all fixture toggle
+// hide main page while loading
+// fixture navigate neighbours
 // remove btrp dtp
 // left nav
 // log app error (rop)
