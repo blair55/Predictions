@@ -13,7 +13,7 @@ angular.module('frontendApp')
         $http.get(url).success(function(data) {
             $scope.model = data;
             $scope.model.encodedInviteLink = encodeURIComponent(data.inviteLink);
-            $scope.model.encodedShareText = encodeURIComponent("Join my Predctions League!");
+            $scope.model.encodedShareText = encodeURIComponent("Join my Predictions League!");
         });
         $scope.share = function() {
             FB.ui({

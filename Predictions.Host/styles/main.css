@@ -199,3 +199,9 @@ table.table-no-top-border > tbody > tr:first-child > td {
     height: 147px;
     background: url(/images/LeaguePositionGraph.png) top center no-repeat
 }
+
+.fixture-form-guide .label {
+    display: inline-block;
+    width: 22px;
+    text-align: center;
+}

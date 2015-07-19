@@ -25,9 +25,9 @@ compare outcome variation each week to see which game weeks are more/less predic
 // pluralize gw/mnth winners
 // more logging
 // add gameweek msbuild
-// icon fonts?
 // fixture email alerts
 
+// icon fonts?
 // follow & feedback btns
 // no graph before gw3
 // reset db password

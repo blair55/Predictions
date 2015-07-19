@@ -35,19 +35,19 @@
     </div>
     <table class="table">
         <tr ng-repeat="row in formGuide.homeRows">
-            <td>
+            <td class="cell-20">
                 <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
-            <td>
+            <td class="cell-25 text-right">
                 <span class="team-name">{{row.fixture.home}}</span>
             </td>
-            <td>
+            <td class="cell-15 text-center">
                 {{row.result.home}} - {{row.result.away}}
             </td>
-            <td>
+            <td class="cell-25">
                 <span class="team-name">{{row.fixture.away}}</span>
             </td>
-            <td>
+            <td class="cell-15 text-right">
                 <fixtureformguide guide="row.outcome" />
             </td>
         </tr>
@@ -64,19 +64,19 @@
     </div>
     <table class="table">
         <tr ng-repeat="row in formGuide.awayRows">
-            <td>
+            <td class="cell-20">
                 <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
-            <td>
+            <td class="cell-25 text-right">
                 <span class="team-name">{{row.fixture.home}}</span>
             </td>
-            <td>
+            <td class="cell-15 text-center">
                 {{row.result.home}} - {{row.result.away}}
             </td>
-            <td>
+            <td class="cell-25">
                 <span class="team-name">{{row.fixture.away}}</span>
             </td>
-            <td>
+            <td class="cell-15 text-right">
                 <fixtureformguide guide="row.outcome" />
             </td>
         </tr>
