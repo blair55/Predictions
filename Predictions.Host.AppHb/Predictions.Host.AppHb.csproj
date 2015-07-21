@@ -101,8 +101,12 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="images\field.jpg" />
     <Content Include="images\LeaguePositionGraph.png" />
+    <Content Include="images\login\aggregatedresults.png" />
+    <Content Include="images\login\leagues.png" />
+    <Content Include="images\login\linegraph.png" />
+    <Content Include="images\login\matrix.png" />
+    <Content Include="images\login\predictionform.png" />
     <Content Include="images\PlayerPointsGraph.png" />
-    <Content Include="images\yeoman.png" />
     <Content Include="index.html" />
     <Content Include="largetile.png" />
     <Content Include="login.html" />
