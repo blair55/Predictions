@@ -60,6 +60,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\003_Insert_Season_2015-16.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\004_Create_DoubleDown_Table.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

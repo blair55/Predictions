@@ -21,7 +21,11 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
+// reverse fixture form sort
+// create league cta
+// boot player
 // aggregated predictions by league
+// responsive short team names
 // short team names - matrix page
 // pluralize gw/mnth winners
 // more logging

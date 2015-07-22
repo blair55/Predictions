@@ -28,20 +28,21 @@ module Services =
 
     let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) gameWeeks =
         let predictionOptionToScoreViewModel (pr:Prediction option) =
-            match pr with
-            | Some p -> toScoreViewModel p.score
-            | None -> noScoreViewModel
+            match pr with | Some p -> toScoreViewModel p.score | None -> noScoreViewModel
+        let getIsDoubleDown (pr:Prediction option) =
+            match pr with | Some p -> p.modifier = DoubleDown | None -> false
+        let getPredictionId (pr:Prediction option) =
+            match pr with | Some p -> p.id |> getPrId |> str | None -> ""
         let getFormGuide team =
-            (getTeamFormGuideOutcome gameWeeks team)
-            |> List.map(formGuideOutcomeToString)
-        {
-            OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
-            scoreSubmitted=pr.IsSome
-            newScore=None
-            existingScore=pr|>predictionOptionToScoreViewModel
-            homeFormGuide=getFormGuide fd.home
-            awayFormGuide=getFormGuide fd.away
-        }
+            (getTeamFormGuideOutcome gameWeeks team) |> List.map(formGuideOutcomeToString)
+        { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
+          scoreSubmitted=pr.IsSome
+          newScore=None
+          existingScore=pr|>predictionOptionToScoreViewModel
+          homeFormGuide=getFormGuide fd.home
+          awayFormGuide=getFormGuide fd.away
+          isDoubleDown=pr|>getIsDoubleDown
+          predictionId=pr|>getPredictionId }
 
     let getOpenFixturesForPlayer (player:Player) =
         let gws = gameWeeks()
@@ -272,7 +273,15 @@ module Services =
         let rows = gameWeeks()
                    |> List.filter(fun gw -> gw.number = gwno)
                    |> List.map(fun gw -> gw, getClosedFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) -> { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw); newScore=None; scoreSubmitted=r.IsSome; existingScore=r|>resultToScoreViewModel; homeFormGuide=[]; awayFormGuide=[] }))
+                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) ->
+                      { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
+                        newScore=None
+                        scoreSubmitted=r.IsSome
+                        existingScore=r|>resultToScoreViewModel
+                        homeFormGuide=[]
+                        awayFormGuide=[]
+                        isDoubleDown=false
+                        predictionId="" }))
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
@@ -399,10 +408,10 @@ module Services =
                     let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
                     let bracketClass =
                         match getBracketForPredictionComparedToResult prd r with
-                        | CorrectScore -> "cs" | CorrectOutcome -> "co" | Incorrect -> ""
+                        | CorrectScore _ -> "cs" | CorrectOutcome _ -> "co" | Incorrect -> ""
                     match fixtureDataToFixture fd r with
                     | OpenFixture fd -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=true; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
-                     | ClosedFixture (fd, r) ->
+                    | ClosedFixture (fd, r) ->
                         match prd with
                         | Some p -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=true; score=(p.score|>toScoreViewModel); bracketClass=bracketClass }
                         | None -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
@@ -438,7 +447,10 @@ module Services =
         let makeSureFixtureExists fxid = match (tryFindFixture gws fxid) with | Some f -> Success f | None -> NotFound "fixture does not exist" |> Failure
         let makeSureFixtureIsOpen (f:Fixture) = match f with | OpenFixture fd -> Success fd | ClosedFixture f -> Invalid "fixture is closed" |> Failure
         let createScore fd = match tryToCreateScoreFromSbm ppm.score.home ppm.score.away with | Success s -> Success(fd, s) | Failure msg -> Failure msg
-        let createPrediction (fd:FixtureData, s) = savePrediction { SavePredictionCommand.id=newPrId(); fixtureId=fd.id; playerId=player.id; score=s }
+        let createPrediction (fd:FixtureData, s) =
+            let prid = newPrId()
+            savePrediction { SavePredictionCommand.id=prid; fixtureId=fd.id; playerId=player.id; score=s }
+            { SubmittedPredictionResultModel.predictionId=prid|>getPrId }
         fxId |> (makeSureFixtureExists
                >> bind makeSureFixtureIsOpen
                >> bind createScore
@@ -461,11 +473,27 @@ module Services =
             registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; email=email }
             player
 
+    let doubleDown predictionId (player:Player) =
+        let prId = PrId predictionId
+        let gws = gameWeeks()
+        let makeSurePredictionBelongsToPlayer prid =
+            let prediction = player.predictions |> List.tryFind(fun p -> p.id = prid)
+            Forbidden "Prediction does not exist or does not belong to you!" |> optionToResult prediction
+        let makeSureGameWeekHasNotKickedOff (prediction:Prediction) =
+            let fxs = gws |> getFixtureDatasForGameWeeks
+            let fd = fxs |> List.find(fun fd -> fd.id = prediction.fixtureId)
+            let gw = gws |> List.find(fun gw -> gw.id = fd.gwId)
+            let allFixturesAreOpenInGw = gw.fixtures |> List.forall isFixtureOpen
+            if allFixturesAreOpenInGw then Success gw else Forbidden "Too late - the game week for this fixture has already kicked off!" |> Failure
+        let saveDoubleDown (gw:GameWeek) = { SaveDoubleDownCommand.playerId=player.id; gameWeekId=gw.id; predictionId=prId } |> saveDoubleDownInDb
+        prId |> (makeSurePredictionBelongsToPlayer
+             >> bind makeSureGameWeekHasNotKickedOff
+             >> bind (switch saveDoubleDown))
+
     let getLoggedInPlayer plId = 
         match getPlayer plId with
         | Success p -> p
         | _ -> failwith "no player found"
-
 
     // global league functions
 
@@ -474,10 +502,10 @@ module Services =
         let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers; adminId=newPlId() }
         getLeagueTableRows globalLeague gws
         
-    let getleaguePositionforplayer player =
+    let getleaguePositionforplayer (player:Player) =
         let gws = gameWeeksWithResults()
         let globalTableRows = getGlobalTableRows gws
-        let pos = globalTableRows |> Seq.find(fun r -> r.player = player) |> (fun r -> r.position)
+        let pos = globalTableRows |> Seq.find(fun r -> r.player.id = player.id) |> (fun r -> r.position)
         let total = globalTableRows.Length
         let page = (pos/globalLeaguePageSize)
         { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }

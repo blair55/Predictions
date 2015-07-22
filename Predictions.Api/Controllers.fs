@@ -146,14 +146,18 @@ type HomeController() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         player |> ((trySavePrediction prediction) >> resultToHttp)
 
+    [<HttpPost>][<Route("doubledown/{predictionId:Guid}")>]
+    member this.DoubleDown (predictionId:Guid) =
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> ((doubleDown predictionId) >> resultToHttp)
+
     [<Route("leaguehistory/{leagueId:Guid}/month")>]
     member this.GetHistoryByMonth(leagueId:Guid) =
         leagueId |> (getPastMonthsWithWinnerView >> resultToHttp)
 
     [<Route("leaguehistory/{leagueId:Guid}/month/{month}")>]
     member this.GetHistoryByMonth (leagueId:Guid, month) =
-        let getView = getMonthPointsView month
-        leagueId |> (getView >> resultToHttp)
+        leagueId |> ((getMonthPointsView month) >> resultToHttp)
 
     [<Route("leaguehistory/{leagueId:Guid}/gameweek")>]
     member this.GetPastGameWeeks(leagueId:Guid) =

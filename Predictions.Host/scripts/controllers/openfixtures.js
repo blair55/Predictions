@@ -8,38 +8,45 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-	.controller('OpenfixturesCtrl', function ($scope, $http) {
+    .controller('OpenfixturesCtrl', function($scope, $http) {
 
-	    $http.get('/api/openfixtures').success(function (data) {
-	        $scope.model = data;
-	    });
+        $http.get('/api/openfixtures').success(function(data) {
+            $scope.model = data;
+        });
 
-	    function submitRow(i) {
-	        var row = $scope.model.rows[i];
-	        row.submitWithCallBack(row, function () {
-	            if (i + 1 < $scope.model.rows.length) {
-	                submitRow(i + 1);
-	            } else {
-	                $scope.submittingAll = false;
-	            }
-	        });
-	    }
+        function submitRow(i) {
+            var row = $scope.model.rows[i];
+            row.submitWithCallBack(row, function() {
+                if (i + 1 < $scope.model.rows.length) {
+                    submitRow(i + 1);
+                } else {
+                    $scope.submittingAll = false;
+                }
+            });
+        }
 
-	    $scope.anyEditableRows = function () {
-	        if ($scope.model) {
-	            for (var i = 0; i < $scope.model.rows.length; i++) {
-	                var row = $scope.model.rows[i];
-	                if (row.isSubmittable(row)) {
-	                    return true;
-	                }
-	            }
-	        }
-	        return false;
-	    };
+        $scope.anyEditableRows = function() {
+            if ($scope.model) {
+                for (var i = 0; i < $scope.model.rows.length; i++) {
+                    var row = $scope.model.rows[i];
+                    if (row.isSubmittable(row)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
 
-	    $scope.submitAll = function () {
-	        $scope.submittingAll = true;
-	        submitRow(0);
-	    };
+        $scope.$on("doubleDownSet", function(event, args) {
+            for (var i = 0; i < $scope.model.rows.length; i++) {
+                var row = $scope.model.rows[i];
+                row.clearDoubleDownIfInGameWeek(row, args.gwno);
+            }
+        });
 
-	});
+        $scope.submitAll = function() {
+            $scope.submittingAll = true;
+            submitRow(0);
+        };
+
+    });

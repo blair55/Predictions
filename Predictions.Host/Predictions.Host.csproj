@@ -99,6 +99,7 @@
     <Content Include="scripts\controllers\player.js" />
     <Content Include="scripts\controllers\playergameweek.js" />
     <Content Include="scripts\controllers\playerprofile.js" />
+    <Content Include="scripts\directives\doubledownbutton.js" />
     <Content Include="scripts\directives\facebooklike.js" />
     <Content Include="scripts\directives\fixtureformguide.js" />
     <Content Include="scripts\directives\formguide.js" />

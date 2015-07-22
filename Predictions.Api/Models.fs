@@ -24,15 +24,17 @@ module ViewModels =
     type GameWeekDetailsViewModel = { gameWeekNo:int; player:PlayerViewModel; totalPoints:int; rows:GameWeekDetailsRowViewModel list }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type OpenFixturesViewModelRow = { fixture:FixtureViewModel; scoreSubmitted:bool; newScore:string option; existingScore:ScoreViewModel; homeFormGuide:string list; awayFormGuide:string list; }
+    type OpenFixturesViewModelRow = { fixture:FixtureViewModel; scoreSubmitted:bool; newScore:string option; existingScore:ScoreViewModel; homeFormGuide:string list; awayFormGuide:string list; isDoubleDown:bool; predictionId:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type OpenFixturesViewModel = { rows:OpenFixturesViewModelRow list }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ClosedFixturesForGameWeekViewModel = { gameWeekNo:int; rows:OpenFixturesViewModelRow list }
-
     
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type SubmittedPredictionResultModel = { predictionId:Guid }
+
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type MicroLeagueViewModel = { id:string; name:string; }
 

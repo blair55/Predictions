@@ -55,12 +55,13 @@ module Domain =
     type Fixture =
          | OpenFixture of FixtureData
          | ClosedFixture of (FixtureData * Result option)
-    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId }
+    type PredictionModifier = | DoubleDown | NoModifier
+    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId; modifier:PredictionModifier }
     type Player = { id:PlId; name:PlayerName; predictions:Prediction list; isAdmin:bool }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
     type Outcome = HomeWin | AwayWin | Draw
-    type Bracket = CorrectScore | CorrectOutcome | Incorrect
+    type Bracket = CorrectScore of PredictionModifier | CorrectOutcome of PredictionModifier | Incorrect
 
     type League = { id:LgId; name:LeagueName; players:Player list; adminId:PlId }
 
@@ -143,9 +144,13 @@ module Domain =
 
     // base calculations
 
+    let getModifierMultiplier = function
+        | DoubleDown -> 2
+        | NoModifier -> 1
+
     let getPointsForBracket = function
-        | CorrectScore -> 3
-        | CorrectOutcome -> 1
+        | CorrectScore m -> 3 * getModifierMultiplier m
+        | CorrectOutcome m -> 1 * getModifierMultiplier m
         | Incorrect -> 0
 
     let getResultOutcome score =
@@ -155,23 +160,21 @@ module Domain =
 
     let getBracketForPredictionComparedToResult (prediction:Prediction option) (result:Result option) =
         if prediction.IsNone || result.IsNone then Incorrect
-        else if prediction.Value.score = result.Value.score then CorrectScore
+        else if prediction.Value.score = result.Value.score then CorrectScore prediction.Value.modifier
         else
             let predictionOutcome = getResultOutcome prediction.Value.score
             let resultOutcome = getResultOutcome result.Value.score
-            if predictionOutcome = resultOutcome then CorrectOutcome
+            if predictionOutcome = resultOutcome then CorrectOutcome prediction.Value.modifier
             else Incorrect
 
     let tryFindPlayerPredictionForFixture (player:Player) (fd:FixtureData) =
         player.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
     
-    let onlyClosedFixtures f =
-        match f with
+    let onlyClosedFixtures = function
         | OpenFixture _ -> None
         | ClosedFixture fr -> fr|>ClosedFixture|>Some
         
-    let onlyOpenFixtures f =
-        match f with
+    let onlyOpenFixtures = function
         | OpenFixture fd -> fd|>OpenFixture|>Some
         | ClosedFixture _ -> None
 
@@ -181,10 +184,10 @@ module Domain =
                        |> List.map fixtureToFixtureDataWithResult
                        |> List.map(fun (fd, r) -> (tryFindPlayerPredictionForFixture player fd, r))
                        |> List.map(fun (p, r) -> getBracketForPredictionComparedToResult p r)
+        let countBracket bracketTest = brackets |> List.filter(bracketTest) |> List.length
+        let totalCorrectScores = (function | CorrectScore _ -> true | _ -> false) |> countBracket
+        let totalCorrectOutcomes = (function | CorrectOutcome _ -> true | _ -> false) |> countBracket
         let totalPoints = brackets |> List.sumBy(fun b -> getPointsForBracket b)
-        let countBracket l bracket = l |> List.filter(fun b -> b = bracket) |> List.length
-        let totalCorrectScores = CorrectScore |> (countBracket brackets)
-        let totalCorrectOutcomes = CorrectOutcome |> (countBracket brackets)
         player, totalCorrectScores, totalCorrectOutcomes, totalPoints
 
     let rec bumprank sumdelta acc a =
@@ -217,7 +220,6 @@ module Domain =
         |> List.map(fun gw -> gw, (getFixturesForGameWeeks [gw]))
         |> List.map(fun (gw, fixtures) -> gw, getLeagueTable allPlayers fixtures)
         |> List.map(fun (gwno, ltrList) -> gwno, ltrList |> List.tryFind(fun (_, p, _, _, _) -> p = player))
-
 
     let getPlayerProfilePointsForGameWeeks player gameWeeks =
         gameWeeks
@@ -390,17 +392,17 @@ module FixtureSourcing =
     let getNewGwFixtures no =
         let url = sprintf "http://fantasy.premierleague.com/fixtures/%i" no
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
-//        let results = HtmlDocument.Parse(gwhtml)
-//        results.Descendants ["tr"]
-//        |> Seq.map(fun tr -> 
-//            let tds = tr.Descendants ["td"] |> Seq.toList
-//            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-//            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
-//            let date = Convert.ToDateTime(dateS)
-//            let home = tds.[1].InnerText()
-//            let away = tds.[5].InnerText()
-//            date, home, away)
-//        |> Seq.toList
-        []
+        let results = HtmlDocument.Parse(gwhtml)
+        results.Descendants ["tr"]
+        |> Seq.map(fun tr -> 
+            let tds = tr.Descendants ["td"] |> Seq.toList
+            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
+            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
+            let date = Convert.ToDateTime(dateS)
+            let home = tds.[1].InnerText()
+            let away = tds.[5].InnerText()
+            date, home, away)
+        |> Seq.toList
+//        []
 
 

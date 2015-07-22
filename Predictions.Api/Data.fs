@@ -86,6 +86,15 @@ module Data =
                 { SaveFixtureCommandArgs.id=fd.id|>getFxId; gameWeekId=cmd.id|>getGwId; ko=fd.kickoff; home=fd.home; away=fd.away }
         cmd.saveFixtureCommands |> List.iter saveFixture
 
+    type SaveDoubleDownCommand = { playerId:PlId; gameWeekId:GwId; predictionId:PrId }
+    type SaveDoubleDownCommandArgs = { playerId:Guid; gameWeekId:Guid; predictionId:Guid }
+    let saveDoubleDownInDb (cmd:SaveDoubleDownCommand) =
+        nonQuery @"
+        IF EXISTS(SELECT * FROM DoubleDowns WHERE PlayerId = @PlayerId AND GameWeekId = @GameWeekId)
+        BEGIN UPDATE DoubleDowns SET PredictionId = @PredictionId WHERE PlayerId = @PlayerId AND GameWeekId = @GameWeekId END ELSE
+        BEGIN INSERT INTO DoubleDowns(PlayerId, GameWeekId, PredictionId) VALUES (@PlayerId, @GameWeekId, @PredictionId) END"
+            { SaveDoubleDownCommandArgs.playerId=cmd.playerId|>getPlayerId; gameWeekId=cmd.gameWeekId|>getGwId; predictionId=cmd.predictionId|>getPrId }
+
     type BuildSeasonQueryArgs = { seasonYear:string; }
     type [<CLIMutable>] BuildSeasonQueryResult = { seasonId:Guid; seasonYear:string }
     type [<CLIMutable>] BuildGameWeekQueryResult = { gameWeekId:Guid; seasonId:Guid; gameWeekNumber:int; gameWeekDescription:string }
@@ -142,13 +151,18 @@ module Data =
     type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string; isAdmin:bool }
     let queryResultToPlayer (player:PlayersTableQueryResult) predictions =
         { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=predictions; isAdmin=player.isAdmin }
-    type [<CLIMutable>] PredictionsTableQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
+    type [<CLIMutable>] PredictionsTableQueryResult = { predictionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int; doubleDown:int }
     let queryResultToPrediction (p:PredictionsTableQueryResult) =
-        { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore) }
+        let modifier = match p.doubleDown with | 1 -> DoubleDown | _ -> NoModifier
+        { Prediction.id=p.predictionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore); modifier=modifier }
     let tryFindPlayerByPlayerId playerId =
         let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
         let sql = @"select playerId, playerName, isAdmin from players where playerId = @playerId
-                    select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions where playerId = @playerId"
+                    select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, 
+                    case when dd.predictionid is null then 0 else 1 end as DoubleDown
+                    from predictions pds
+                    left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId
+                    where pds.playerId = @playerId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
         let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toList
@@ -174,21 +188,24 @@ module Data =
 
     type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
     type [<CLIMutable>] LeaguesTableQueryResult = { leagueId:Guid; leagueName:string; leagueAdminId:Guid }
-    type [<CLIMutable>] FindPredictionsByLeagueIdQueryResult = { preditionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int }
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
         let sql = @"select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId
                     from Leagues lgs
                     where lgs.LeagueId = @leagueId
                     and lgs.LeagueIsDeleted = 0
+
                     select pls.PlayerId, pls.PlayerName, pls.IsAdmin
                     from Players pls
                     join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
                     where lpb.LeagueId = @leagueId
-                    select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore
+                    
+                    select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, 
+                    case when dd.predictionid is null then 0 else 1 end as DoubleDown
                     from Predictions pds
                     join Players pls on pds.PlayerId = pls.PlayerId
                     join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
+                    left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId
                     where lpb.LeagueId = @leagueId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
@@ -196,10 +213,10 @@ module Data =
         if leagueResult.IsEmpty then None
         else
             let playersResult = multi.Read<PlayersTableQueryResult>()
-            let predictionsResult = multi.Read<FindPredictionsByLeagueIdQueryResult>()
+            let predictionsResult = multi.Read<PredictionsTableQueryResult>()
             let predictions =
                 predictionsResult
-                |> Seq.map(fun p -> { Prediction.id=p.preditionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore,p.awayTeamScore); })
+                |> Seq.map queryResultToPrediction
                 |> Seq.toList
             let players =
                 playersResult
@@ -222,7 +239,7 @@ module Data =
     type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
     let getAllPredictionsForFixture (fxid:FxId) =
         let args = { GetAllPredictionsForFixtureQueryArgs.fixtureId=fxid|>getFxId }
-        let sql = @"select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions where fixtureId = @fixtureId"
+        let sql = @"select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore, 0 as 'doubledown' from predictions where fixtureId = @fixtureId"
         use conn = newConn()
         conn.Query<PredictionsTableQueryResult>(sql, args)
         |> Seq.map queryResultToPrediction
@@ -244,7 +261,10 @@ module Data =
 
     let getAllPlayers() =
         let sql = @"select playerId, playerName, isAdmin from players
-                    select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore from predictions"
+                    select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, 
+                    case when dd.predictionid is null then 0 else 1 end as DoubleDown
+                    from predictions pds
+                    left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql)
         let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toList

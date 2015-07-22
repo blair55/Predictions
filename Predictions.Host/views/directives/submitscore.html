@@ -1,12 +1,23 @@
-<div class="submit-score panel panel-default {{focused}} {{ minMode ? 'min-mode' : 'max-mode' }}">
+<div class="submit-score panel {{focused}} {{ minMode ? 'min-mode' : 'max-mode' }} {{row.isDoubleDown ? 'panel-warning' : 'panel-default'}}">
 
     <div class=" form panel-body">
 
         <div class="form-group fixture-date">
             <span class="label label-primary">GW#{{ row.fixture.gameWeekNumber }}</span>
             <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-            <a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>
+            <!--<a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>-->
+
+            <div ng-switch="row.state" class="pull-right">
+                <div ng-switch-when="create" name="readonlyScoreForm"></div>
+                <div ng-switch-when="readonly" name="readonlyScoreForm">
+                    <doubledownbutton row="row"></doubledownbutton>
+                </div>
+                <div ng-switch-when="edit" name="readonlyScoreForm">
+                    <doubledownbutton row="row"></doubledownbutton>
+                </div>
+            </div>
         </div>
+
 
         <div ng-switch="row.state">
 

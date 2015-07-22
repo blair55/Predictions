@@ -53,18 +53,6 @@ angular.module('frontendApp')
 	                editScoreForm = form;
 	            }
 
-	            scope.row.isSubmittable = function (row) {
-	                switch (row.state) {
-	                    case state.create:
-	                        return createScoreForm && createScoreForm.$valid;
-	                    case state.edit:
-	                        return editScoreForm && editScoreForm.$valid;
-	                    case state.readonly:
-	                    default:
-	                        return false;
-	                }
-	            };
-
 	            scope.enterEditMode = function (row) {
 	                row.state = state.edit;
 	                row.existingScoreOriginal = angular.copy(row.existingScore);
@@ -76,6 +64,35 @@ angular.module('frontendApp')
 	            scope.enterReadOnlyMode = function (row) {
 	                row.state = state.readonly;
 	                row.existingScore = row.existingScoreOriginal;
+	            };
+
+	            scope.row.setAsDoubleDown = function(row) {
+	                var doubleDownUrl = "/api/doubledown/" + row.predictionId;
+	                $http.post(doubleDownUrl).success(function() {
+	                    notify.success("Set double down fixture");
+	                    scope.$emit("doubleDownSet", {
+	                        gwno: row.fixture.gameWeekNumber
+	                    });
+	                    row.isDoubleDown = true;
+	                });
+	            };
+
+	            scope.row.clearDoubleDownIfInGameWeek = function (row, gwno) {
+	                if (row.fixture.gameWeekNumber == gwno) {
+	                    row.isDoubleDown = false;
+	                }
+	            };
+
+	            scope.row.isSubmittable = function (row) {
+	                switch (row.state) {
+	                    case state.create:
+	                        return createScoreForm && createScoreForm.$valid;
+	                    case state.edit:
+	                        return editScoreForm && editScoreForm.$valid;
+	                    case state.readonly:
+	                    default:
+	                        return false;
+	                }
 	            };
 
 	            scope.row.submit = function (row) {
@@ -116,6 +133,7 @@ angular.module('frontendApp')
 	                    notify.success(msg);
 	                    scope.enterReadOnlyMode(row);
 	                    row.existingScore = row.newScore;
+	                    row.predictionId = data.predictionId;
 	                    scope.inSubmission = false;
 	                    cb();
 	                }).error(function (data, status, headers, config) {
@@ -133,8 +151,8 @@ angular.module('frontendApp')
 	                scope.inSubmission = true;
 	                $http.post(scope.postUrl, prediction).success(function (data) {
 	                    notify.success(msg);
-	                    row.existingScoreOriginal = row.existingScore;
 	                    scope.enterReadOnlyMode(row);
+	                    row.existingScoreOriginal = row.existingScore;
 	                    scope.inSubmission = false;
 	                    cb();
 	                }).error(function (data, status, headers, config) {
