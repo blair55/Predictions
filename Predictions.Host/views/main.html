@@ -33,6 +33,12 @@
             </div>
         </div>
     </div>
+    <div ng-if="leagues && leagues.rows.length == 0" class="panel panel-default">
+        <div class="panel-body">
+            <a class="btn btn-primary" ng-href="#createleague">Create your own League</a>
+        </div>
+    </div>
+
     <div style="margin-bottom: 10px">
         <div facebooklike></div>
     </div>

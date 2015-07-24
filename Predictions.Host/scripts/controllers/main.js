@@ -21,4 +21,7 @@ angular.module('frontendApp')
       $http.get('/api/getopenfixtureswithnopredictionsforplayercount').success(function (data) {
           $scope.openfixturecount = data;
       });
+      $http.get('/api/leagues').success(function (data) {
+          $scope.leagues = data;
+      });
   });
