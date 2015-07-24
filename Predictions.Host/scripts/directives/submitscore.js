@@ -34,8 +34,6 @@ angular.module('frontendApp')
 	                scope.focused = "";
 	            }
 
-                
-
 	            function decideInitialState() {
 	                scope.row.state = scope.row.scoreSubmitted ? state.readonly : state.create;
 	            }
@@ -151,8 +149,8 @@ angular.module('frontendApp')
 	                scope.inSubmission = true;
 	                $http.post(scope.postUrl, prediction).success(function (data) {
 	                    notify.success(msg);
-	                    scope.enterReadOnlyMode(row);
 	                    row.existingScoreOriginal = row.existingScore;
+	                    scope.enterReadOnlyMode(row);
 	                    scope.inSubmission = false;
 	                    cb();
 	                }).error(function (data, status, headers, config) {

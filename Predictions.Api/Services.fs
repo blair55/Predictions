@@ -25,12 +25,13 @@ module Services =
     let gameWeeksWithResults() = gameWeeks() |> getGameWeeksWithAnyClosedFixturesWithResults
 
     let formGuideOutcomeToString = function | Win -> "w" | Draw -> "d" | Lose -> "l"
+        
+    let getIsDoubleDown (pr:Prediction option) =
+        match pr with | Some p -> p.modifier = DoubleDown | None -> false
 
     let toOpenFixtureViewModelRow (gw:GameWeek, fd:FixtureData, pr:Prediction option) gameWeeks =
         let predictionOptionToScoreViewModel (pr:Prediction option) =
             match pr with | Some p -> toScoreViewModel p.score | None -> noScoreViewModel
-        let getIsDoubleDown (pr:Prediction option) =
-            match pr with | Some p -> p.modifier = DoubleDown | None -> false
         let getPredictionId (pr:Prediction option) =
             match pr with | Some p -> p.id |> getPrId |> str | None -> ""
         let getFormGuide team =
@@ -158,7 +159,12 @@ module Services =
                     match result with
                     | Some r -> { ScoreViewModel.home=fst r.score;away=snd r.score }
                     | None -> noScoreViewModel
-                { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts }
+                let getDoubleDown (pred:Prediction option) =
+                    if revealPlayerScoresEvenIfFixtureIsOpen then pred|>getIsDoubleDown else 
+                    match fixture with
+                    | OpenFixture _ -> false
+                    | ClosedFixture _ -> pred|>getIsDoubleDown
+                { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts; isDoubleDown=p|>getDoubleDown }
             let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
             { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
         PlId playerId |> (getPlayer >> bind (switch getResult))
@@ -409,12 +415,14 @@ module Services =
                     let bracketClass =
                         match getBracketForPredictionComparedToResult prd r with
                         | CorrectScore _ -> "cs" | CorrectOutcome _ -> "co" | Incorrect -> ""
+                    let buildModel (isOpen, isSubmitted, score, bracketClass, isDoubleDown) =
+                        { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=isOpen; isSubmitted=isSubmitted; score=score; bracketClass=bracketClass; isDoubleDown=isDoubleDown}
                     match fixtureDataToFixture fd r with
-                    | OpenFixture fd -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=true; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
+                    | OpenFixture fd -> buildModel (true,false,noScoreViewModel,bracketClass,false)
                     | ClosedFixture (fd, r) ->
                         match prd with
-                        | Some p -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=true; score=(p.score|>toScoreViewModel); bracketClass=bracketClass }
-                        | None -> { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=false; isSubmitted=false; score=noScoreViewModel; bracketClass=bracketClass }
+                        | Some p -> buildModel (false,true,(p.score|>toScoreViewModel),bracketClass,p.modifier=DoubleDown)
+                        | None -> buildModel (false,false,noScoreViewModel,bracketClass,false)
                 let predictions = fixtureDataWithResults |> List.map(getPredictionViewModel)
                 let (_, _, _, points) = getPlayerBracketProfile fixtures player
                 { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }

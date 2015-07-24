@@ -4,9 +4,9 @@
     <thead>
         <tr>
             <th>Fixture</th>
-            <th class="score-cell-heading">Prediction</th>
-            <th class="score-cell-heading">Result</th>
-            <th class="numeric-cell-heading">Pts.</th>
+            <th class="text-center score-cell-heading">Prediction</th>
+            <th class="text-center score-cell-heading">Result</th>
+            <th class="text-center numeric-cell-heading">Pts.</th>
         </tr>
     </thead>
     <tbody>
@@ -17,13 +17,13 @@
                     <span class="text-uppercase text-nowrap">{{row.fixture.away}}</span>
                 </a>
             </td>
-            <td>
-                <div>
-                    <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
-                    <span ng-if="!row.predictionSubmitted">-</span>
-                </div>
+            <td class="text-center {{row.isDoubleDown ? 'double-down-cell' : ''}}">
+                <span ng-if="row.predictionSubmitted">
+                    {{row.prediction.home}} - {{row.prediction.away}}
+                </span>
+                <span ng-if="!row.predictionSubmitted">-</span>
             </td>
-            <td>
+            <td class="text-center">
                 <div ng-if="row.fixture.isOpen">
                     <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
                 </div>

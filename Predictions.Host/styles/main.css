@@ -44,6 +44,36 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 
 .team-name{ text-transform: uppercase;}
 
+.double-down-selected {
+    border-color: #f0ad4e;
+    -webkit-box-shadow: 0 0 6px #f0ad4e;
+    -ms-box-shadow: 0 0 6px #f0ad4e;
+    box-shadow: 0 0 6px #f0ad4e;
+    transition: opacity .15s ease-in-out;
+    -moz-transition: opacity .15s ease-in-out;
+    -webkit-transition: opacity .15s ease-in-out;
+}
+
+.double-down-button {
+    cursor: pointer;
+    color: #f0ad4e;
+    border: solid 1px #f0ad4e;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.double-down-button.dd-disabled {
+    cursor: inherit;
+    -ms-opacity: 0.3;
+    opacity: 0.3;
+}
+
+.double-down-cell {
+    border: solid 1px #f0ad4e;
+    border-width: 0 0 2px 0;
+}
+
 .movement{width:5%; text-align:center;}
 .numeric-cell{text-align:right;}
 .numeric-cell-heading{width:5%; text-align:right;}

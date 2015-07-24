@@ -35,7 +35,7 @@
             <td>
                 <a ng-href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
             </td>
-            <td ng-repeat="prd in row.predictions" class="score-cell {{prd.bracketClass}}">
+            <td ng-repeat="prd in row.predictions" class="score-cell {{prd.bracketClass}} {{prd.isDoubleDown ? 'double-down-cell' : ''}}">
                 <div ng-if="!prd.isFixtureOpen">
                     <span ng-if="prd.isSubmitted">{{prd.score.home}} - {{prd.score.away}}</span>
                     <span ng-if="!prd.isSubmitted">-</span>
