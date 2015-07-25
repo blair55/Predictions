@@ -100,7 +100,7 @@
     <Content Include="scripts\controllers\playergameweek.js" />
     <Content Include="scripts\controllers\playerprofile.js" />
     <Content Include="scripts\directives\doubledownbutton.js" />
-    <Content Include="scripts\directives\doubledowndisabled.js" />
+    <Content Include="scripts\directives\doubledownlocked.js" />
     <Content Include="scripts\directives\facebooklike.js" />
     <Content Include="scripts\directives\fixtureformguide.js" />
     <Content Include="scripts\directives\formguide.js" />

@@ -36,6 +36,7 @@ module Services =
             match pr with | Some p -> p.id |> getPrId |> str | None -> ""
         let getFormGuide team =
             (getTeamFormGuideOutcome gameWeeks team) |> List.map(formGuideOutcomeToString)
+        let allFixturesAreOpenInGw = gw.fixtures |> List.forall isFixtureOpen
         { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
           scoreSubmitted=pr.IsSome
           newScore=None
@@ -43,7 +44,8 @@ module Services =
           homeFormGuide=getFormGuide fd.home
           awayFormGuide=getFormGuide fd.away
           isDoubleDown=pr|>getIsDoubleDown
-          predictionId=pr|>getPredictionId }
+          predictionId=pr|>getPredictionId
+          isGameWeekOpen=allFixturesAreOpenInGw }
 
     let getOpenFixturesForPlayer (player:Player) =
         let gws = gameWeeks()
@@ -287,7 +289,8 @@ module Services =
                         homeFormGuide=[]
                         awayFormGuide=[]
                         isDoubleDown=false
-                        predictionId="" }))
+                        predictionId=""
+                        isGameWeekOpen=false }))
                    |> List.collect(fun o -> o)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 

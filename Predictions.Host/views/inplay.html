@@ -25,7 +25,7 @@
             </td>
             <td class="text-center">
                 <div ng-if="row.fixture.isOpen">
-                    <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
+                    <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
                 </div>
                 <div ng-if="!row.fixture.isOpen">
                     <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>

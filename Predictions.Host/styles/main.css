@@ -35,12 +35,7 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .submit-score.min-mode .fixture-date,
 .submit-score.min-mode .more-link{ display: none;}
 
-.more-link {
-    text-transform: uppercase;
-    float: right;
-    font-size: 0.84em;
-    line-height: 2em;
-}
+.cursor-pointer{ cursor: pointer;}
 
 .team-name{ text-transform: uppercase;}
 
@@ -49,24 +44,45 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     -webkit-box-shadow: 0 0 6px #f0ad4e;
     -ms-box-shadow: 0 0 6px #f0ad4e;
     box-shadow: 0 0 6px #f0ad4e;
-    transition: opacity .15s ease-in-out;
-    -moz-transition: opacity .15s ease-in-out;
-    -webkit-transition: opacity .15s ease-in-out;
+    transition: all .15s ease-in;
+    -moz-transition: all .15s ease-in;
+    -webkit-transition: all .15s ease-in;
 }
 
-.double-down-button {
+.dd.dd-unselectable .dd-button{
+    color: #f0ad4e;
+    border: solid 1px #f0ad4e;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -ms-opacity: 0.45;
+    opacity: 0.45;
+    
+    transition: all .15s ease-in;
+    -moz-transition: all .15s ease-in;
+    -webkit-transition: all .15s ease-in;
+}
+
+.dd.dd-selectable .dd-button{
     cursor: pointer;
     color: #f0ad4e;
     border: solid 1px #f0ad4e;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+    
+    transition: all .15s ease-in;
+    -moz-transition: all .15s ease-in;
+    -webkit-transition: all .15s ease-in;
 }
 
-.double-down-button.dd-disabled {
-    cursor: inherit;
-    -ms-opacity: 0.3;
-    opacity: 0.3;
+.dd.dd-selected .dd-button{
+    background-color: #f0ad4e;
+    color: #fff;
+    
+    transition: all .15s ease-in;
+    -moz-transition: all .15s ease-in;
+    -webkit-transition: all .15s ease-in;
 }
 
 .double-down-cell {

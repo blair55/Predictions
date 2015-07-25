@@ -2,21 +2,22 @@
     <div class="form panel-body">
 
         <div class="form-group fixture-date">
-            <span class="label label-primary">GW#{{ row.fixture.gameWeekNumber }}</span>
-            <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-            <!--<a class="more-link" ng-href="#/fixture/{{row.fixture.fxId}}">More</a>-->
-
-            <div ng-switch="row.state" class="pull-right">
-                <div ng-switch-when="create" name="readonlyScoreForm">
-                    <doubledowndisabled></doubledowndisabled>
-                </div>
-                <div ng-switch-when="readonly" name="readonlyScoreForm">
-                    <doubledownbutton row="row"></doubledownbutton>
-                </div>
-                <div ng-switch-when="edit" name="readonlyScoreForm">
-                    <doubledownbutton row="row"></doubledownbutton>
-                </div>
+            <span class="label label-primary cursor-pointer" ng-click="navToFixture(row)">GW#{{ row.fixture.gameWeekNumber }}</span>
+            <span class="label label-primary cursor-pointer" ng-click="navToFixture(row)">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
+            
+            <!-- open unselectable /    gw:open .   dd:*     . s:create     -->
+            <!-- open selectable /      gw:open .   dd:false . s:read/edit  -->
+            <!-- open selected /        gw:open .   dd:true  . s:read/edit  -->
+            <!-- closed selected /      gw:closed . dd:true  . s:*          -->
+            <!-- closed invisible /     gw:closed . dd:false . s:*          -->
+            
+            <div ng-if="row.isGameWeekOpen" class="pull-right">
+                <doubledownbutton row="row"></doubledownbutton>
             </div>
+            <div ng-if="!row.isGameWeekOpen" class="pull-right">
+                <doubledownlocked row="row"></doubledownlocked>
+            </div>
+
         </div>
 
 

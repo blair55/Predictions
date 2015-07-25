@@ -40,7 +40,9 @@ angular.module('frontendApp')
         $scope.$on("doubleDownSet", function(event, args) {
             for (var i = 0; i < $scope.model.rows.length; i++) {
                 var row = $scope.model.rows[i];
-                row.clearDoubleDownIfInGameWeek(row, args.gwno);
+                if (row.fixture.gameWeekNumber == args.gwno) {
+                    row.clearDoubleDown(row);
+                }
             }
         });
 
