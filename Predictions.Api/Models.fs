@@ -21,7 +21,7 @@ module ViewModels =
     type FixtureViewModel = { home:Team; away:Team; fxId:string; kickoff:DateTime; gameWeekNumber:int; isOpen:bool; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; resultSubmitted:bool; result:ScoreViewModel; points:int; isDoubleDown:bool }
+    type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; resultSubmitted:bool; result:ScoreViewModel; points:int; isDoubleDown:bool; bracketClass:string; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeekDetailsViewModel = { gameWeekNo:int; player:PlayerViewModel; totalPoints:int; rows:GameWeekDetailsRowViewModel list }

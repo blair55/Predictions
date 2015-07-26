@@ -4,8 +4,7 @@
     <thead>
         <tr>
             <th>Fixture</th>
-            <th class="text-center score-cell-heading">Prediction</th>
-            <th class="text-center score-cell-heading">Result</th>
+            <th></th>
             <th class="text-center numeric-cell-heading">Pts.</th>
         </tr>
     </thead>
@@ -21,28 +20,25 @@
                         <teamname team="row.fixture.away"></teamname>
                     </span>
                 </a>
+                <div class="pull-right">
+                    <div ng-if="row.fixture.isOpen">
+                        <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
+                    </div>
+                    <div ng-if="!row.fixture.isOpen">
+                        <span class="label label-primary" ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
+                        <span class="label label-primary" ng-if="!row.resultSubmitted"><i class="glyphicon glyphicon-hourglass"></i></span>
+                    </div>
+                </div>
             </td>
-            <td class="text-center {{row.isDoubleDown ? 'double-down-cell' : ''}}">
-                <span ng-if="row.predictionSubmitted">
-                    {{row.prediction.home}} - {{row.prediction.away}}
-                </span>
+            <td class="text-center {{row.isDoubleDown ? 'double-down-cell' : ''}} {{row.bracketClass}}">
+                <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
                 <span ng-if="!row.predictionSubmitted">-</span>
-            </td>
-            <td class="text-center">
-                <div ng-if="row.fixture.isOpen">
-                    <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
-                </div>
-                <div ng-if="!row.fixture.isOpen">
-                    <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
-                    <span ng-if="!row.resultSubmitted"><i>waiting for result</i></span>
-                </div>
             </td>
             <td class="numeric-cell">{{row.points}}</td>
         </tr>
     </tbody>
     <tfoot>
         <tr>
-            <td></td>
             <td></td>
             <td></td>
             <td class="numeric-cell">

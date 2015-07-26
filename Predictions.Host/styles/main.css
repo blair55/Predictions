@@ -206,6 +206,12 @@ h4{margin-top:0;}
     background-color: #111;
 }
 
+.correct-score {
+    background-color: #bfe0bf !important;
+}
+.correct-outcome {
+    background-color: #dff0d8 !important;
+}
 .table.matrix > thead > tr > th {
     font-weight: normal;
     text-align: center;
@@ -219,12 +225,6 @@ h4{margin-top:0;}
 .table.matrix > tbody > tr > td.score-cell {
     text-align: center;
     font-size: smaller
-}
-.table.matrix > tbody > tr > td.score-cell.cs {
-    background-color: #bfe0bf;
-}
-.table.matrix > tbody > tr > td.score-cell.co {
-    background-color: #dff0d8;
 }
 .table.matrix .fixture-head-team {
     text-transform: uppercase;

@@ -148,6 +148,10 @@ module Services =
                       >> bind getLeagueAndCarryPlayer
                       >> bind (switch getResult))
 
+    let getBracketClass prd r =
+        match getBracketForPredictionComparedToResult prd r with
+        | CorrectScore _ -> "correct-score" | CorrectOutcome _ -> "correct-outcome" | Incorrect -> ""
+
     let getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo revealPlayerScoresEvenIfFixtureIsOpen playerId =
         let getResult player =
             let gw = gameWeeks() |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
@@ -169,7 +173,8 @@ module Services =
                     match fixture with
                     | OpenFixture _ -> false
                     | ClosedFixture _ -> pred|>getIsDoubleDown
-                { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts; isDoubleDown=p|>getDoubleDown }
+                let bracketClass = getBracketClass p r
+                { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts; isDoubleDown=p|>getDoubleDown; bracketClass=bracketClass }
             let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
             { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
         PlId playerId |> (getPlayer >> bind (switch getResult))
@@ -416,9 +421,7 @@ module Services =
             let playerToMatrixRow (player:Player) =
                 let getPredictionViewModel ((fd:FixtureData), r) =
                     let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
-                    let bracketClass =
-                        match getBracketForPredictionComparedToResult prd r with
-                        | CorrectScore _ -> "cs" | CorrectOutcome _ -> "co" | Incorrect -> ""
+                    let bracketClass = getBracketClass prd r
                     let buildModel (isOpen, isSubmitted, score, bracketClass, isDoubleDown) =
                         { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=isOpen; isSubmitted=isSubmitted; score=score; bracketClass=bracketClass; isDoubleDown=isDoubleDown}
                     match fixtureDataToFixture fd r with

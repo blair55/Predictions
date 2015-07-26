@@ -1,13 +1,12 @@
 <h4>
-    <a ng-href="#/playerprofile/{{model.player.id}}">{{model.player.name}}</a> / Game Week #{{model.gameWeekNo}}
+    <a ng-href="#/playerprofile/{{model.player.id}}">{{model.player.name}}</a> / GW#{{model.gameWeekNo}}
 </h4>
 <p>Total Points: {{model.totalPoints}}</p>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Fixture</th>
-            <th class="text-center score-cell-heading">Prediction</th>
-            <th class="text-center score-cell-heading">Result</th>
+            <th></th>
             <th class="text-center numeric-cell-heading">Pts.</th>
         </tr>
     </thead>
@@ -23,23 +22,23 @@
                         <teamname team="row.fixture.away"></teamname>
                     </span>
                 </a>
+                <div class="pull-right">
+                    <div ng-if="row.fixture.isOpen">
+                        <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
+                    </div>
+                    <div ng-if="!row.fixture.isOpen">
+                        <span class="label label-primary" ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
+                        <span class="label label-primary" ng-if="!row.resultSubmitted"><i class="glyphicon glyphicon-hourglass"></i></span>
+                    </div>
+                </div>
             </td>
-            <td class="text-center {{ !row.fixture.isOpen && row.isDoubleDown ? 'double-down-cell' : ''}}">
+            <td class="text-center {{ !row.fixture.isOpen && row.isDoubleDown ? 'double-down-cell' : ''}} {{row.bracketClass}}">
                 <div ng-if="!row.fixture.isOpen">
                     <span ng-if="row.predictionSubmitted">{{row.prediction.home}} - {{row.prediction.away}}</span>
-                    <span ng-if="!row.predictionSubmitted"><i>no prediction submitted</i></span>
+                    <span ng-if="!row.predictionSubmitted">-</span>
                 </div>
                 <div ng-if="row.fixture.isOpen">
                     <i>shown after ko</i>
-                </div>
-            </td>
-            <td class="text-center">
-                <div ng-if="row.fixture.isOpen">
-                    <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
-                </div>
-                <div ng-if="!row.fixture.isOpen">
-                    <span ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
-                    <span ng-if="!row.resultSubmitted"><i>waiting for result</i></span>
                 </div>
             </td>
             <td class="numeric-cell">{{row.points}}</td>
@@ -47,7 +46,6 @@
     </tbody>
     <tfoot>
         <tr>
-            <td></td>
             <td></td>
             <td></td>
             <td class="numeric-cell">

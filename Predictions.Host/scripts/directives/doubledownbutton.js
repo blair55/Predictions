@@ -34,7 +34,7 @@ angular.module('frontendApp')
                         if (!row.isDoubleDown) {
                             var doubleDownUrl = "/api/doubledown/" + row.predictionId;
                             $http.post(doubleDownUrl).success(function () {
-                                notify.success("Double Down on " + row.fixture.home + " v " + row.fixture.away);
+                                notify.success("Double Down on " + row.fixture.home.full + " v " + row.fixture.away.full);
                                 scope.$emit("doubleDownSet", {
                                     gwno: row.fixture.gameWeekNumber
                                 });

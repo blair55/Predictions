@@ -11,13 +11,7 @@
 <p>
     <span class="label label-primary">GW#{{model.fixture.gameWeekNumber}}</span>
     <span class="label label-primary">{{ model.fixture.kickoff | date:'EEE dd MMM HH:mm' }}</span>
-</p>
-
-<p ng-if="!model.resultSubmitted">
-    <i>Awaiting Result</i>
-</p>
-<p ng-if="model.resultSubmitted">
-    {{model.result.home}} - {{model.result.away}}
+    <span class="label label-primary" ng-if="model.resultSubmitted">{{model.result.home}} - {{model.result.away}}</span>
 </p>
 
 <div class="panel panel-default">
