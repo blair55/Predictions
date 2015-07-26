@@ -22,13 +22,15 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // faq
+// all fixtures check box -> icon/label
 // fixture confidence rating from dd
-// boot player from league
-// aggregated predictions by league
 // pluralize gw/mnth winners
+// aggregated predictions by league
+// boot player from league
 // fixture email alerts
 // more logging
 
+// page global league table
 // page player profile predictions
 // page league gw matrix
 // page league gw table

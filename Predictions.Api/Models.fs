@@ -116,9 +116,10 @@ module ViewModels =
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type NeighboursViewModel = { prev:string; next:string; }
-    //type FixtureNeighboursViewModel = { prev:FixtureViewModel; next:FixtureViewModel; hasNext:bool; hasPrev:bool }
     
-    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type GlobalLeagueViewModel = { neighbours:NeighboursViewModel; rows:LeagueTableRowViewModel list }
+
 [<AutoOpen>]
 module HomePageModels =
 

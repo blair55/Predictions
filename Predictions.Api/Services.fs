@@ -519,7 +519,8 @@ module Services =
             let fd = fxs |> List.find(fun fd -> fd.id = prediction.fixtureId)
             let gw = gws |> List.find(fun gw -> gw.id = fd.gwId)
             let allFixturesAreOpenInGw = gw.fixtures |> List.forall isFixtureOpen
-            if allFixturesAreOpenInGw then Success gw else Forbidden "Too late - the game week for this fixture has already kicked off!" |> Failure
+            if allFixturesAreOpenInGw then Success gw
+            else gw.number |> getGameWeekNo |> sprintf "Too late! GW%i has already kicked off" |> Forbidden |> Failure
         let saveDoubleDown (gw:GameWeek) = { SaveDoubleDownCommand.playerId=player.id; gameWeekId=gw.id; predictionId=prId } |> saveDoubleDownInDb
         prId |> (makeSurePredictionBelongsToPlayer
              >> bind makeSureGameWeekHasNotKickedOff
@@ -549,8 +550,8 @@ module Services =
     let getGlobalLeagueTablePage player page =
         let gws = gameWeeks()
         let globalTableRows = getGlobalTableRows gws
+        let totalPages = (globalTableRows.Length/globalLeaguePageSize)
         let amountToTake =
-            let totalPages = (globalTableRows.Length/globalLeaguePageSize)
             if totalPages = page then
                 let totalPossibleRows = ((totalPages + 1) * globalLeaguePageSize)
                 (globalLeaguePageSize - (totalPossibleRows - globalTableRows.Length))
@@ -561,8 +562,12 @@ module Services =
             |> Seq.take(amountToTake)
             |> Seq.map(leagueTableRowToViewModel)
             |> Seq.toList
-        let latestGameWeekNo = gws |> getlatestGameWeekNo
-        { LeagueViewModel.id=""; name=""; rows=rows; latestGameWeekNo=latestGameWeekNo; adminId="" }
+        let neighbours =
+            let allPages = [0..totalPages]
+            let findItem = (fun i -> i = page)
+            let getId = (fun i -> i |> str)
+            getNeighbours allPages getId findItem
+        { GlobalLeagueViewModel.rows=rows; neighbours=neighbours }
     
     let getGlobalLastGameWeekAndWinner() = 
         let gws = gameWeeksWithResults()

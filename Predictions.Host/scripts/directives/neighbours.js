@@ -10,7 +10,7 @@ angular.module('frontendApp')
     .directive('neighbours', function() {
         return {
             template:
-                '<div class="clearfix">' +
+                '<div class="clearfix" ng-if="neighbours">' +
                     '<div ng-if="neighbours.prev" class="pull-left">' +
                         '<a ng-href="{{url + neighbours.prev}}">&larr; Prev</a>' +
                     '</div>' +
