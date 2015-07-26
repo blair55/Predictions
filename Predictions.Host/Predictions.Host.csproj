@@ -107,6 +107,7 @@
     <Content Include="scripts\directives\loading.js" />
     <Content Include="scripts\directives\previousmeetingrow.js" />
     <Content Include="scripts\directives\submitscore.js" />
+    <Content Include="scripts\directives\teamname.js" />
     <Content Include="scripts\directives\twitterfollow.js" />
     <Content Include="scripts\directives\twittertweet.js" />
     <Content Include="scripts\services\auth.js" />

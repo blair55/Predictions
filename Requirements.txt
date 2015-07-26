@@ -21,6 +21,7 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
+// purge legacy/backup
 // responsive short team names
 // short team names - matrix page
 // fixture confidence rating from dd

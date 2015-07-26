@@ -403,7 +403,7 @@ module FixtureSourcing =
 
 module TeamNames =
     
-    let getShortTeamName (team) =
+    let getAbrvTeamName team =
         match team with
         | "Arsenal"        -> "ARS"
         | "Aston Villa"    -> "AVL"

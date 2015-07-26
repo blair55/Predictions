@@ -25,7 +25,7 @@ angular.module('frontendApp')
 
                 function getMessage(row, score) {
                     return [
-                        row.fixture.home, ' ', score.home, ' - ', score.away, ' ', row.fixture.away
+                        row.fixture.home.full, ' ', score.home, ' - ', score.away, ' ', row.fixture.away.full
                     ].join('');
                 }
 

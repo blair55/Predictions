@@ -6,6 +6,7 @@ open Predictions.Api.FormGuide
 open Predictions.Api.Common
 open Predictions.Api.Data
 open Predictions.Api.LeagueTableCalculation
+open Predictions.Api.TeamNames
 
 [<AutoOpen>]
 module Services =
@@ -14,9 +15,11 @@ module Services =
     let noPlayerViewModel() = { PlayerViewModel.id=""; name=""; isAdmin=false }
     let toScoreViewModel (s:Score) = { ScoreViewModel.home=(fst s); away=(snd s) }
     let noScoreViewModel = { ScoreViewModel.home=0; away=0 }
+    let getTeamViewModel teamName = { Team.full=teamName; abrv=teamName|>getAbrvTeamName }
+
     let toFixtureViewModel (fd:FixtureData) (gw:GameWeek) =
         let f = fixtureDataToFixture fd None
-        let createVm isOpen = { FixtureViewModel.home=fd.home; away=fd.away; fxId=(getFxId fd.id)|>str; kickoff=fd.kickoff; gameWeekNumber=(getGameWeekNo gw.number); isOpen=isOpen }
+        let createVm isOpen = { FixtureViewModel.home=fd.home|>getTeamViewModel; away=fd.away|>getTeamViewModel; fxId=(getFxId fd.id)|>str; kickoff=fd.kickoff; gameWeekNumber=(getGameWeekNo gw.number); isOpen=isOpen }
         f |> isFixtureOpen |> createVm
     
     let season() = buildSeason currentSeason
@@ -214,21 +217,18 @@ module Services =
              >> bind (switch fixtureToFixtureData)
              >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
-             
-    let abrvFixtureViewModel (vm:FixtureViewModel) =
-        { vm with home = vm.home.Substring(0,3); away = vm.away.Substring(0, 3) }
-
+        
     let getFixturePreviousMeetingsView fxid =
         let gws = gameWeeks()
         let getResult (fixture:Fixture) =
             let fd = fixtureToFixtureData fixture
             let rows = getFixturePreviousMeetingsData fd.home fd.away
                         |> List.map(fun (kickoff, homeTeamName, awayTeamName, homeTeamScore, awayTeamScore) ->
-                            { FixturePreviousMeetingsQueryResultViewModelRow.kickoff=kickoff; homeTeamName=homeTeamName; awayTeamName=awayTeamName; homeTeamScore=homeTeamScore; awayTeamScore=awayTeamScore } )
+                            { FixturePreviousMeetingsQueryResultViewModelRow.kickoff=kickoff; home=homeTeamName|>getTeamViewModel; away=awayTeamName|>getTeamViewModel; homeTeamScore=homeTeamScore; awayTeamScore=awayTeamScore } )
                         |> List.sortBy(fun r -> r.kickoff)
                         |> List.rev
-            let thisFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.home)
-            let reverseFixtureRows = rows |> List.filter(fun r -> r.homeTeamName=fd.away)
+            let thisFixtureRows = rows |> List.filter(fun r -> r.home.full=fd.home)
+            let reverseFixtureRows = rows |> List.filter(fun r -> r.home.full=fd.away)
             { FixturePreviousMeetingsQueryResultViewModel.allRows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
@@ -252,16 +252,17 @@ module Services =
         let fds = getFixtureDatasForGameWeeks gws
         let max = fds.Length - 1
         let getResult (fixture:Fixture) =
+            let emptyTeam = {Team.full="";abrv=""}
+            let emptyFixtureViewModel() = { FixtureViewModel.home=emptyTeam; away=emptyTeam; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
             let fd = fixtureToFixtureData fixture
             let i = fds |> Seq.findIndex(fun f -> f.id = fd.id)
             let iToFvm index =
                 let fd = fds.[index]
                 let gw = gws |> Seq.find(fun gw -> gw.id = fd.gwId)
                 toFixtureViewModel fd gw
-            let getEmptyFvm() = { FixtureViewModel.away=""; home=""; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
             match i with
-            | 0 -> { FixtureNeighboursViewModel.prev=getEmptyFvm(); next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
-            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=getEmptyFvm(); hasPrev=true; hasNext=false; }
+            | 0 -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel(); next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
+            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=emptyFixtureViewModel(); hasPrev=true; hasNext=false; }
             | _ -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=i+1|>iToFvm; hasPrev=true; hasNext=true; }
         fxid |> ((makeSureFixtureExists gws)
             >> bind (switch getResult))
@@ -404,7 +405,7 @@ module Services =
             let fixtureDataWithResults = fixtures |> List.map(fixtureToFixtureDataWithResult)
             let columns =
                 let toColumn (fd, result:Result option) =
-                     let vm = toFixtureViewModel fd gameWeek |> abrvFixtureViewModel
+                     let vm = toFixtureViewModel fd gameWeek
                      match result with
                      | Some r -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=true; score=r.score|>toScoreViewModel }
                      | None -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=false; score=noScoreViewModel }
@@ -556,8 +557,8 @@ module Services =
         let gws = gameWeeks()
         let importGwNo = gws |> getlatestGameWeekNo |> (fun gwno -> gwno+1)
         getNewGwFixtures importGwNo
-        |> List.map(fun (d, h, a) -> {FixtureViewModel.fxId=""; home=h; away=a; kickoff=d; gameWeekNumber=importGwNo; isOpen=false})
-        |> fun fxs -> { ImportNewGameWeekViewModel.rows=fxs; gwno=importGwNo }
+        |> List.map(fun (d, h, a) -> { ImportNewGameWeekViewModelRow.home=h; away=a; kickoff=d })
+        |> fun rows -> { ImportNewGameWeekViewModel.rows=rows; gwno=importGwNo }
 
     let submitImportNextGameWeek() =
         let gws = gameWeeks()

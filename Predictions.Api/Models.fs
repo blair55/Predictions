@@ -15,7 +15,10 @@ module ViewModels =
     type ScoreViewModel = { home:int; away:int; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixtureViewModel = { home:string; away:string; fxId:string; kickoff:DateTime; gameWeekNumber:int; isOpen:bool; }
+    type Team = { full:string; abrv:string; }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type FixtureViewModel = { home:Team; away:Team; fxId:string; kickoff:DateTime; gameWeekNumber:int; isOpen:bool; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type GameWeekDetailsRowViewModel = { fixture:FixtureViewModel; predictionSubmitted:bool; prediction:ScoreViewModel; resultSubmitted:bool; result:ScoreViewModel; points:int; isDoubleDown:bool }
@@ -79,7 +82,7 @@ module ViewModels =
     type FixturePredictionGraphData = { data:int list; labels:string list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixturePreviousMeetingsQueryResultViewModelRow = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
+    type FixturePreviousMeetingsQueryResultViewModelRow = { kickoff:DateTime; home:Team; away:Team; homeTeamScore:int; awayTeamScore:int; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixtureFormGuideViewModelRow = { fixture:FixtureViewModel; result:ScoreViewModel; outcome:string}
@@ -106,7 +109,10 @@ module ViewModels =
     type InPlayViewModel = { rows:InPlayRowViewModel list; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type ImportNewGameWeekViewModel = { rows:FixtureViewModel list; gwno:int }
+    type ImportNewGameWeekViewModelRow = { home:string; away:string; kickoff:DateTime }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type ImportNewGameWeekViewModel = { gwno:int; rows:ImportNewGameWeekViewModelRow list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixtureNeighboursViewModel = { prev:FixtureViewModel; next:FixtureViewModel; hasNext:bool; hasPrev:bool }

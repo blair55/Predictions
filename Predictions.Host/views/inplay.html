@@ -13,8 +13,13 @@
         <tr ng-repeat="row in model.rows">
             <td>
                 <a ng-href="#/fixture/{{row.fixture.fxId}}">
-                    <span class="text-uppercase text-nowrap">{{row.fixture.home}}</span> v
-                    <span class="text-uppercase text-nowrap">{{row.fixture.away}}</span>
+                    <span class="text-uppercase text-nowrap">
+                        <teamname team="row.fixture.home"></teamname>
+                    </span>
+                    <span>v</span>
+                    <span class="text-uppercase text-nowrap">
+                        <teamname team="row.fixture.away"></teamname>
+                    </span>
                 </a>
             </td>
             <td class="text-center {{row.isDoubleDown ? 'double-down-cell' : ''}}">

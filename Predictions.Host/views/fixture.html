@@ -1,7 +1,11 @@
-
 <h4>
-    <span class="team-name">{{model.fixture.home}}</span> v
-    <span class="team-name">{{model.fixture.away}}</span>
+    <span class="text-uppercase">
+        {{model.fixture.home.full}}
+    </span>
+    <span>v</span>
+    <span class="text-uppercase">
+        {{model.fixture.away.full}}
+    </span>
 </h4>
 
 <p>
@@ -27,7 +31,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        {{model.fixture.home}} Form
+        {{model.fixture.home.full}} Form
     </div>
     <div class="panel-body alert-info" ng-if="formGuide.homeRows.length == 0">
         <span class="glyphicon glyphicon-info-sign"></span>
@@ -35,17 +39,21 @@
     </div>
     <table class="table">
         <tr ng-repeat="row in formGuide.homeRows">
-            <td class="cell-20">
+            <td class="cell-15">
                 <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
             <td class="cell-25 text-right">
-                <span class="team-name">{{row.fixture.home}}</span>
+                <span class="text-uppercase">
+                    <teamname team="row.fixture.home"></teamname>
+                </span>
             </td>
-            <td class="cell-15 text-center">
+            <td class="cell-20 text-center">
                 {{row.result.home}} - {{row.result.away}}
             </td>
             <td class="cell-25">
-                <span class="team-name">{{row.fixture.away}}</span>
+                <span class="text-uppercase">
+                    <teamname team="row.fixture.away"></teamname>
+                </span>
             </td>
             <td class="cell-15 text-right">
                 <fixtureformguide guide="row.outcome" />
@@ -56,7 +64,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        {{model.fixture.away}} Form
+        {{model.fixture.away.full}} Form
     </div>
     <div class="panel-body bg-info alert-info" ng-if="formGuide.awayRows.length == 0">
         <span class="glyphicon glyphicon-info-sign"></span>
@@ -64,17 +72,21 @@
     </div>
     <table class="table">
         <tr ng-repeat="row in formGuide.awayRows">
-            <td class="cell-20">
+            <td class="cell-15">
                 <span class="label label-primary">GW#{{row.fixture.gameWeekNumber}}</span>
             </td>
             <td class="cell-25 text-right">
-                <span class="team-name">{{row.fixture.home}}</span>
+                <span class="text-uppercase">
+                    <teamname team="row.fixture.home"></teamname>
+                </span>
             </td>
-            <td class="cell-15 text-center">
+            <td class="cell-20 text-center">
                 {{row.result.home}} - {{row.result.away}}
             </td>
             <td class="cell-25">
-                <span class="team-name">{{row.fixture.away}}</span>
+                <span class="text-uppercase">
+                    <teamname team="row.fixture.away"></teamname>
+                </span>
             </td>
             <td class="cell-15 text-right">
                 <fixtureformguide guide="row.outcome" />

@@ -37,8 +37,6 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 
 .cursor-pointer{ cursor: pointer;}
 
-.team-name{ text-transform: uppercase;}
-
 .double-down-selected {
     border-color: #f0ad4e;
     -webkit-box-shadow: 0 0 6px #f0ad4e;
@@ -88,6 +86,14 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .double-down-cell {
     border: solid 1px #f0ad4e;
     border-width: 0 0 2px 0;
+}
+
+
+.team-name-full{ display: none;}
+.team-name-abrv{ display: inline;}
+@media (min-width: 480px) {
+    .team-name-full{ display: inline;}
+    .team-name-abrv{ display: none;}
 }
 
 .movement{width:5%; text-align:center;}
