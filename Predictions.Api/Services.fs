@@ -513,12 +513,13 @@ module Services =
         let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers; adminId=newPlId() }
         getLeagueTableRows globalLeague gws
         
-    let getleaguePositionforplayer (player:Player) =
-        let gws = gameWeeksWithResults()
+    let getGlobalLeaguePositionforplayer (player:Player) =
+        let gws = gameWeeks()
         let globalTableRows = getGlobalTableRows gws
-        let pos = globalTableRows |> Seq.find(fun r -> r.player.id = player.id) |> (fun r -> r.position)
+        let index = globalTableRows |> Seq.findIndex(fun r -> r.player.id = player.id)
+        let pos = globalTableRows.[index] |> (fun r -> r.position)
         let total = globalTableRows.Length
-        let page = (pos/globalLeaguePageSize)
+        let page = (index/globalLeaguePageSize)
         { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
 
     let getGlobalLeagueTablePage player page =

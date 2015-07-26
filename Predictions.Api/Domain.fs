@@ -72,9 +72,6 @@ module Domain =
         | NotFound of string
         | InternalError of string
 
-    let toShortTeamName =
-        ()
-
     let fixtureDataToFixture fd r =
         match fd.kickoff > GMTDateTime.Now() with
         | true -> OpenFixture fd
@@ -403,6 +400,29 @@ module FixtureSourcing =
             let away = tds.[5].InnerText()
             date, home, away)
         |> Seq.toList
-//        []
 
-
+module TeamNames =
+    
+    let getShortTeamName (team) =
+        match team with
+        | "Arsenal"        -> "ARS"
+        | "Aston Villa"    -> "AVL"
+        | "Bournemouth"    -> "BOU"
+        | "Chelsea"        -> "CHE"
+        | "Crystal Palace" -> "CRY"
+        | "Everton"        -> "EVE"
+        | "Leicester"      -> "LEI"
+        | "Liverpool"      -> "LIV"
+        | "Man City"       -> "MCI"
+        | "Man Utd"        -> "MUN"
+        | "Newcastle"      -> "NEW"
+        | "Norwich"        -> "NOR"
+        | "Southampton"    -> "SOU"
+        | "Spurs"          -> "TOT"
+        | "Stoke"          -> "STK"
+        | "Sunderland"     -> "SUN"
+        | "Swansea"        -> "SWA"
+        | "Watford"        -> "WAT"
+        | "West Brom"      -> "WBA"
+        | "West Ham"       -> "WHU"
+        | _ -> team.Substring(0, 3)

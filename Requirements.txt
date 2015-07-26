@@ -21,17 +21,21 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-// reverse fixture form sort
-// create league cta
-// boot player
-// aggregated predictions by league
 // responsive short team names
 // short team names - matrix page
+// fixture confidence rating from dd
+// reverse fixture form sort order
+// boot player from league
+// aggregated predictions by league
 // pluralize gw/mnth winners
 // more logging
-// add gameweek msbuild
 // fixture email alerts
 
+// global league bug?
+// hide ga localhost
+// make me admin
+// add gameweek msbuild
+// create league cta
 // double down
 // icon fonts?
 // follow & feedback btns
@@ -85,7 +89,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 ////// issues
 // organise service/domain layer
-// logging
 // datepicker size?
 // pie legend
 // 
@@ -97,7 +100,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 // 'horizontal' navigation
 // odds checker integration
 // head to head
-// 'captain' game double points
 // 
 
 ////// player stats
@@ -110,6 +112,8 @@ compare outcome variation each week to see which game weeks are more/less predic
 //
 
 ////// done
+// logging
+// 'captain' game double points
 // leagues / registration
 // form guide
 // position grouping
