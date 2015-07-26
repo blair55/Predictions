@@ -63,8 +63,6 @@
     <Compile Include="DummyNames.fs" />
     <None Include="DummyDataImport2.fsx" />
     <None Include="packages.config" />
-    <None Include="RealDataImport.fsx" />
-    <None Include="DummyDataImport.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Dapper">

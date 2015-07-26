@@ -258,7 +258,7 @@ module Services =
         let max = fds.Length - 1
         let getResult (fixture:Fixture) =
             let emptyTeam = {Team.full="";abrv=""}
-            let emptyFixtureViewModel() = { FixtureViewModel.home=emptyTeam; away=emptyTeam; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
+            let emptyFixtureViewModel = { FixtureViewModel.home=emptyTeam; away=emptyTeam; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
             let fd = fixtureToFixtureData fixture
             let i = fds |> Seq.findIndex(fun f -> f.id = fd.id)
             let iToFvm index =
@@ -266,8 +266,9 @@ module Services =
                 let gw = gws |> Seq.find(fun gw -> gw.id = fd.gwId)
                 toFixtureViewModel fd gw
             match i with
-            | 0 -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel(); next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
-            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=emptyFixtureViewModel(); hasPrev=true; hasNext=false; }
+            | 0 when i = max -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel; next=emptyFixtureViewModel; hasPrev=false; hasNext=false; }
+            | 0 -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel; next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
+            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=emptyFixtureViewModel; hasPrev=true; hasNext=false; }
             | _ -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=i+1|>iToFvm; hasPrev=true; hasNext=true; }
         fxid |> ((makeSureFixtureExists gws)
             >> bind (switch getResult))

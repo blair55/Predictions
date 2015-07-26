@@ -23,14 +23,14 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 // page player profile predictions
 // page league matrix/table
-// purge legacy/backup
 // fixture confidence rating from dd
 // boot player from league
 // aggregated predictions by league
 // pluralize gw/mnth winners
-// more logging
 // fixture email alerts
+// more logging
 
+// purge legacy/backup
 // gameweek/inplay highlight cells
 // reverse fixture form sort order
 // responsive short team names
