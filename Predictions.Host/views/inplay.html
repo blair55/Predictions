@@ -25,8 +25,8 @@
                         <span class="label label-primary">{{ row.fixture.kickoff | date:'EEE HH:mm' }}</span>
                     </div>
                     <div ng-if="!row.fixture.isOpen">
-                        <span class="label label-primary" ng-if="row.resultSubmitted">{{row.result.home}} - {{row.result.away}}</span>
-                        <span class="label label-primary" ng-if="!row.resultSubmitted"><i class="glyphicon glyphicon-hourglass"></i></span>
+                        <span ng-if="row.resultSubmitted" class="label label-primary">{{row.result.home}} - {{row.result.away}}</span>
+                        <span ng-if="!row.resultSubmitted">-</span>
                     </div>
                 </div>
             </td>

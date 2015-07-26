@@ -252,26 +252,45 @@ module Services =
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
 
+    let getNeighbours (col:List<'a>) getId findItem =
+        let i = col |> Seq.findIndex(findItem)
+        let iToVal index = col.[index] |> getId
+        let max = col.Length - 1
+        match i with
+        | 0 when i = max -> { NeighboursViewModel.prev=""; next=""; }
+        | 0 -> { NeighboursViewModel.prev=""; next=i+1|>iToVal; }
+        | _ when i = max -> { NeighboursViewModel.prev=i-1|>iToVal; next=""; }
+        | _ -> { NeighboursViewModel.prev=i-1|>iToVal; next=i+1|>iToVal; }
+
     let getFixtureNeighbours fxid =
         let gws = gameWeeks()
         let fds = getFixtureDatasForGameWeeks gws
-        let max = fds.Length - 1
-        let getResult (fixture:Fixture) =
-            let emptyTeam = {Team.full="";abrv=""}
-            let emptyFixtureViewModel = { FixtureViewModel.home=emptyTeam; away=emptyTeam; fxId=""; kickoff=DateTime.Now; gameWeekNumber=0; isOpen=false; }
-            let fd = fixtureToFixtureData fixture
-            let i = fds |> Seq.findIndex(fun f -> f.id = fd.id)
-            let iToFvm index =
-                let fd = fds.[index]
-                let gw = gws |> Seq.find(fun gw -> gw.id = fd.gwId)
-                toFixtureViewModel fd gw
-            match i with
-            | 0 when i = max -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel; next=emptyFixtureViewModel; hasPrev=false; hasNext=false; }
-            | 0 -> { FixtureNeighboursViewModel.prev=emptyFixtureViewModel; next=i+1|>iToFvm; hasPrev=false; hasNext=true; }
-            | _ when i = max -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=emptyFixtureViewModel; hasPrev=true; hasNext=false; }
-            | _ -> { FixtureNeighboursViewModel.prev=i-1|>iToFvm; next=i+1|>iToFvm; hasPrev=true; hasNext=true; }
+        let getResult (fixtureData:FixtureData) = 
+            let findItem = (fun (fd:FixtureData) -> fd.id = fixtureData.id)
+            let getId = (fun (fd:FixtureData) -> fd.id |> getFxId |> str)
+            getNeighbours fds getId findItem
         fxid |> ((makeSureFixtureExists gws)
+            >> bind (switch fixtureToFixtureData)
             >> bind (switch getResult))
+
+    let getGameWeekNeighbours gwno =
+        let gws = gameWeeks()
+        let getResult gwNo =
+            let findItem = (fun (gw:GameWeek) -> gw.number = gwNo)
+            let getId = (fun (gw:GameWeek) -> gw.number |> getGameWeekNo |> str)
+            getNeighbours gws getId findItem
+        GwNo gwno |> getResult
+
+    let getMonthNeighbours month =
+        let months =
+            gameWeeksWithResults()
+            |> List.map(getMonthForGameWeek)
+            |> Seq.distinct |> Seq.toList
+        let getResult m =
+            let findItem = (fun mth -> m = mth)
+            let getId = (fun mth -> mth |> str)
+            getNeighbours months getId findItem
+        month |> getResult
 
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()

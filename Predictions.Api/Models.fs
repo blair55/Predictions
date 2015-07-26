@@ -115,8 +115,9 @@ module ViewModels =
     type ImportNewGameWeekViewModel = { gwno:int; rows:ImportNewGameWeekViewModelRow list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type FixtureNeighboursViewModel = { prev:FixtureViewModel; next:FixtureViewModel; hasNext:bool; hasPrev:bool }
-
+    type NeighboursViewModel = { prev:string; next:string; }
+    //type FixtureNeighboursViewModel = { prev:FixtureViewModel; next:FixtureViewModel; hasNext:bool; hasPrev:bool }
+    
     
 [<AutoOpen>]
 module HomePageModels =

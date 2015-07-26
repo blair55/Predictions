@@ -21,8 +21,7 @@ league position vs gameweek line chart
 sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
-// page player profile predictions
-// page league matrix/table
+// faq
 // fixture confidence rating from dd
 // boot player from league
 // aggregated predictions by league
@@ -30,6 +29,11 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fixture email alerts
 // more logging
 
+// page player profile predictions
+// page league gw matrix
+// page league gw table
+// page league month table
+// highlight logged in player in history tables
 // purge legacy/backup
 // gameweek/inplay highlight cells
 // reverse fixture form sort order

@@ -18,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="row in model.rows">
+        <tr ng-repeat="row in model.rows" class="{{ row.player.id == loggedInPlayer.id ? 'info' : '' }}">
             <td class="numeric-cell">{{row.position}}</td>
             <td>
                 <a ng-href="#/player/{{row.player.id}}/{{model.league.id}}">{{row.player.name}}</a>
@@ -29,3 +29,5 @@
         </tr>
     </tbody>
 </table>
+
+<div neighbours="neighbours" url="#/history/{{model.league.id}}/gameweek/"></div>

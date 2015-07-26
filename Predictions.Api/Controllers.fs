@@ -218,6 +218,14 @@ type HomeController() =
     member this.GetFixtureNeighbours(fxId:Guid) =
         FxId fxId |> (getFixtureNeighbours >> resultToHttp)
 
+    [<Route("gameweekneighbours/{gwno:int}")>]
+    member this.GetGameWeekNeighbours(gwno:int) =
+        gwno |> (switch getGameWeekNeighbours >> resultToHttp)
+
+    [<Route("monthneighbours/{month}")>]
+    member this.GetMonthNeighbours(month:string) =
+        month |> (switch getMonthNeighbours >> resultToHttp)
+
 [<Authorize>]
 [<CustomAuthorize>]
 [<RoutePrefix("api/admin")>]

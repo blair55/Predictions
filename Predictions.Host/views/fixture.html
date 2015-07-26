@@ -109,11 +109,4 @@
     <submitscore row="model.openFixturesViewModelRow" post-url="/api/prediction"></submitscore>
 </div>
 
-<div class="clearfix">
-    <div ng-if="neighbours.hasPrev" class="pull-left">
-        <a ng-href="#/fixture/{{neighbours.prev.fxId}}">&larr; Prev</a>
-    </div>
-    <div ng-if="neighbours.hasNext" class="pull-right">
-        <a ng-href="#/fixture/{{neighbours.next.fxId}}">Next &rarr;</a>
-    </div>
-</div>
+<div neighbours="neighbours" url="#/fixture/"></div>

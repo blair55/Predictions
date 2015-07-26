@@ -122,7 +122,6 @@
     <Content Include="views\adminaddresults.html" />
     <Content Include="views\adminaddresultsforgameweek.html" />
     <Content Include="views\createleague.html" />
-    <Content Include="views\directives\loading.html" />
     <Content Include="views\directives\submitscore.html" />
     <Content Include="views\fixture.html" />
     <Content Include="views\globalleague.html" />

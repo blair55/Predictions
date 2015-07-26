@@ -104,7 +104,7 @@
     <Content Include="scripts\directives\facebooklike.js" />
     <Content Include="scripts\directives\fixtureformguide.js" />
     <Content Include="scripts\directives\formguide.js" />
-    <Content Include="scripts\directives\loading.js" />
+    <Content Include="scripts\directives\neighbours.js" />
     <Content Include="scripts\directives\previousmeetingrow.js" />
     <Content Include="scripts\directives\submitscore.js" />
     <Content Include="scripts\directives\teamname.js" />
@@ -132,7 +132,6 @@
     <Content Include="views\leaguejoin.html" />
     <Content Include="views\leagueleave.html" />
     <Content Include="views\leagues.html" />
-    <Content Include="views\directives\loading.html" />
     <Content Include="views\main.html" />
     <Content Include="views\matrix.html" />
     <Content Include="views\nav.html" />
