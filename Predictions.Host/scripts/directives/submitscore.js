@@ -123,6 +123,7 @@ angular.module('frontendApp')
                         row.existingScore = row.newScore;
                         row.predictionId = data.predictionId;
                         scope.inSubmission = false;
+                        scope.$broadcast("predictionSubmitted", { row: row });
                         cb();
                     }).error(function(data, status, headers, config) {
                         scope.inSubmission = false;

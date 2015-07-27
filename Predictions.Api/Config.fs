@@ -77,10 +77,10 @@ type Config() =
         cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ApplicationCookie
         app.UseCookieAuthentication(cookieOptions) |> ignore
 
-//        let twitterOptions = new Twitter.TwitterAuthenticationOptions()
-//        twitterOptions.ConsumerKey <- "Cs5EW6KIh7gLlmmMfEPWj13uV"
-//        twitterOptions.ConsumerSecret <- ConfigurationManager.AppSettings.["TwitterConsumerSecret"]
-//        app.UseTwitterAuthentication(twitterOptions) |> ignore
+        let twitterOptions = new Twitter.TwitterAuthenticationOptions()
+        twitterOptions.ConsumerKey <- ConfigurationManager.AppSettings.["TwitterConsumerKey"]
+        twitterOptions.ConsumerSecret <- ConfigurationManager.AppSettings.["TwitterConsumerSecret"]
+        app.UseTwitterAuthentication(twitterOptions) |> ignore
 
         let facebookOptions = new Facebook.FacebookAuthenticationOptions()
         facebookOptions.Scope.Add("email")

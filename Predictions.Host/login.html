@@ -17,23 +17,22 @@
 	<body id="top">
 
 		<!-- Header -->
-			<header id="header">
-				<div class="content">
-					<h1><a href="#">Predictions League</a></h1>
-				    <p>Fantasy football for match results!</p>
-
-                    <form action="/account/login" method="POST" id="loginform">
-                        <ul class="actions">
-                            <li>
-                                <input type="hidden" name="provider" value="Facebook" />
-                                <a class="button special icon fa-facebook-official" onclick="document.getElementById('loginform').submit()">Login</a>
-                            </li>
-                            <li><a href="#one" class="button icon fa-chevron-down scrolly">Learn More</a></li>
-                        </ul>
-                    </form>
-				</div>
-				<div class="image phone"><div class="inner"><img src="images/field.jpg" alt="" /></div></div>
-			</header>
+		<header id="header">
+			<div class="content">
+				<h1><a href="#">Predictions League</a></h1>
+				<p>Fantasy football for match results!</p>
+                <ul class="actions">
+                    <li>
+                        <a class="button special icon fa-facebook-official js-login-with-facebook">Login with Facebook</a>
+                    </li>
+                    <li>
+                        <a class="button special icon fa-twitter js-login-with-twitter">Login with Twitter</a>
+                    </li>
+                    <li><a href="#one" class="button icon fa-chevron-down scrolly">Learn More</a></li>
+                </ul>
+			</div>
+			<div class="image phone"><div class="inner"><img src="images/field.jpg" alt="" /></div></div>
+		</header>
 
 		<!-- One -->
         <section id="one" class="wrapper style2 special">
@@ -99,43 +98,59 @@
 
 	    <!-- Three -->
         <section id="three" class="wrapper style2 special">
-            <form action="/account/login" method="POST" id="loginform-foot">
-                <ul class="actions">
-                    <li>
-                        <input type="hidden" name="provider" value="Facebook" />
-                        <a class="button special icon fa-facebook-official" onclick="document.getElementById('loginform-foot').submit()">Login</a>
-                    </li>
-                    <li><a href="#" class="button">Learn More</a></li>
-                </ul>
-            </form>
+            <ul class="actions">
+                <li>
+                    <a class="button special icon fa-facebook-official js-login-with-facebook">Login with Facebook</a>
+                </li>
+                <li>
+                    <a class="button special icon fa-twitter js-login-with-twitter">Login with Twitter</a>
+                </li>
+                <li><a href="#" class="button">Learn More</a></li>
+            </ul>
         </section>
 
 	    <!-- Footer -->
-			<footer id="footer">
-				<ul class="icons">
-					<li><a target="new" href="https://www.facebook.com/predictionsleagueuk" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
-					<li><a target="new" href="https://twitter.com/predictionslge" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
-				</ul>
-				<p class="copyright">&copy; Predictions League. Credits: <a target="new" href="http://html5up.net">HTML5 UP</a></p>
-			</footer>
+		<footer id="footer">
+			<ul class="icons">
+				<li><a target="new" href="https://www.facebook.com/predictionsleagueuk" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+				<li><a target="new" href="https://twitter.com/predictionslge" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+			</ul>
+			<p class="copyright">&copy; Predictions League. Credits: <a target="new" href="http://html5up.net">HTML5 UP</a></p>
+		</footer>
+        <form id="loginForm" action="/account/login" method="POST">
+            <input id="loginProvider" type="hidden" name="provider" />
+        </form>
 
 		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/skel.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-			<script src="assets/js/main.js"></script>
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/skel.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+		<script src="assets/js/main.js"></script>
+        <script>
+            $(function () {
+                $('.js-login-with-facebook').click(function () {
+                    $('#loginProvider').val('Facebook');
+                    $('#loginForm').submit();
+                });
+                $('.js-login-with-twitter').click(function () {
+                    $('#loginProvider').val('Twitter');
+                    $('#loginForm').submit();
+                });
+            });
+        </script>
 	    <script>
-    	    (function (i, s, o, g, r, a, m) {
-    	        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-    	            (i[r].q = i[r].q || []).push(arguments)
-    	        }, i[r].l = 1 * new Date(); a = s.createElement(o),
-    	            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-    	    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-
-    	    ga('create', 'UA-65220001-1', 'auto');
-    	    ga('send', 'pageview');
+            if (window.location.host.indexOf('localhost') < 0) {
+                (function (i, s, o, g, r, a, m) {
+                    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                        (i[r].q = i[r].q || []).push(arguments)
+                    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+                })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+                ga('create', 'UA-65220001-1', 'auto');
+                ga('send', 'pageview');
+            }
     	</script>
 	</body>
 </html>

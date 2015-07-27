@@ -30,6 +30,9 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fixture email alerts
 // more logging
 
+// login w/ twitter
+// fixture details link
+// fixed dd bug
 // page global league table
 // page player profile predictions
 // page league gw matrix

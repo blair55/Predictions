@@ -37,6 +37,14 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 
 .cursor-pointer{ cursor: pointer;}
 
+.fixture-details {
+    font-size: 8pt;
+    display: inline-block;
+    margin-left: 2px;
+    cursor: pointer;
+    color: #f0ad4e;
+}
+
 .double-down-selected {
     border-color: #f0ad4e;
     -webkit-box-shadow: 0 0 6px #f0ad4e;

@@ -47,6 +47,10 @@ angular.module('frontendApp')
                     }
                 }
 
+                scope.$on("predictionSubmitted", function (event, args) {
+                    setDdClass(args.row);
+                });
+
                 scope.row.clearDoubleDown = function (row) {
                     row.isDoubleDown = false;
                     setDdClass(row);
