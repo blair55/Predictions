@@ -22,14 +22,15 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // faq
+// global history
 // all fixtures check box -> icon/label
 // fixture confidence rating from dd
-// pluralize gw/mnth winners
 // aggregated predictions by league
 // boot player from league
 // fixture email alerts
 // more logging
 
+// pluralize gw/mnth winners
 // login w/ twitter
 // fixture details link
 // fixed dd bug
@@ -117,7 +118,6 @@ compare outcome variation each week to see which game weeks are more/less predic
 
 ////// player stats
 // avg points per game / gw
-// points per gw bar chart
 // best gw points
 // avg delta / accuracy index
 // # home wins # away wins # draws
@@ -125,6 +125,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 //
 
 ////// done
+// points per gw bar chart
 // logging
 // 'captain' game double points
 // leagues / registration

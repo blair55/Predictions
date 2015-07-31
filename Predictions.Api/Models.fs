@@ -42,13 +42,13 @@ module ViewModels =
     type MicroLeagueViewModel = { id:string; name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PastGameWeekRowViewModel = { gameWeekNo:int; winner:PlayerViewModel; points:int; hasResult:bool }
+    type PastGameWeekRowViewModel = { gameWeekNo:int; winners:PlayerViewModel list; points:int; hasResult:bool; isGameWeekComplete:bool }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PastGameWeeksViewModel = { league:MicroLeagueViewModel; rows:PastGameWeekRowViewModel list }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type HistoryByMonthRowViewModel = { month:string; winner:PlayerViewModel; points:int }
+    type HistoryByMonthRowViewModel = { month:string; winners:PlayerViewModel list; points:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type HistoryByMonthViewModel = { league:MicroLeagueViewModel; rows:HistoryByMonthRowViewModel list }

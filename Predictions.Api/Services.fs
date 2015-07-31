@@ -389,7 +389,7 @@ module Services =
     let getPastMonthsWithWinnerView leagueId =
         let getHistoryByMonthViewModel (league:League) =
             let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
-                       |> List.map(fun (m, plr, pts) -> { HistoryByMonthRowViewModel.month=m; winner=(getPlayerViewModel plr); points=pts })
+                       |> List.map(fun (m, plrs, pts) -> { HistoryByMonthRowViewModel.month=m; winners=plrs|>List.map getPlayerViewModel; points=pts })
             { HistoryByMonthViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthViewModel))
 
@@ -404,7 +404,7 @@ module Services =
     let getPastGameWeeksWithWinnerView leagueId =
         let getPastGameWeeksViewModel (league:League) =
             let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
-                       |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
+                       |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
             { PastGameWeeksViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getPastGameWeeksViewModel))
 
@@ -443,14 +443,14 @@ module Services =
                     let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
                     let bracketClass = getBracketClass prd r
                     let buildModel (isOpen, isSubmitted, score, bracketClass, isDoubleDown) =
-                        { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=isOpen; isSubmitted=isSubmitted; score=score; bracketClass=bracketClass; isDoubleDown=isDoubleDown}
+                        { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=isOpen; isSubmitted=isSubmitted; score=score; bracketClass=bracketClass; isDoubleDown=isDoubleDown }
                     match fixtureDataToFixture fd r with
                     | OpenFixture fd -> buildModel (true,false,noScoreViewModel,bracketClass,false)
                     | ClosedFixture (fd, r) ->
                         match prd with
                         | Some p -> buildModel (false,true,(p.score|>toScoreViewModel),bracketClass,p.modifier=DoubleDown)
                         | None -> buildModel (false,false,noScoreViewModel,bracketClass,false)
-                let predictions = fixtureDataWithResults |> List.map(getPredictionViewModel)
+                let predictions = fixtureDataWithResults |> List.sortBy(fun (fd,_) -> fd.kickoff) |> List.map(getPredictionViewModel)
                 let (_, _, _, points) = getPlayerBracketProfile fixtures player
                 { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }
             let rows = league.players |> List.map(playerToMatrixRow) |> List.sortBy(fun row -> -row.points)
@@ -574,10 +574,9 @@ module Services =
         let allPlayers = getAllPlayers()
         let allWinners =
             getPastGameWeeksWithWinner gws allPlayers
-            |> List.map(fun (gw, plr, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winner=(getPlayerViewModel plr); points=pts; hasResult=true})
-        if allWinners |> List.isEmpty then { PastGameWeekRowViewModel.gameWeekNo=0; winner=noPlayerViewModel(); points=0; hasResult=false}
+            |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
+        if allWinners |> List.isEmpty then { PastGameWeekRowViewModel.gameWeekNo=0; winners=[]; points=0; hasResult=false; isGameWeekComplete=false }
         else allWinners |> List.maxBy(fun r -> r.gameWeekNo)
-
 
     open FixtureSourcing
 

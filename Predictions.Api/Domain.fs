@@ -247,12 +247,17 @@ module Domain =
         |> List.filter(fun fd -> player.predictions |> List.exists(fun p -> p.fixtureId = fd.id) = false)
         |> List.sortBy(fun fd -> fd.kickoff)
 
+    let getPlayersInPosition1 lgtbl =
+        let plrs = lgtbl |> List.filter(fun (pos, plr, _, _, pts) -> pos = 1) |> List.map(   fun (_, plr, _, _, _) -> plr)
+        let pts = lgtbl |> List.maxBy(fun (_, _, _, _, pts) -> pts) |> fun (_, _, _, _, pts) -> pts
+        (plrs, pts)
+
     let getPastGameWeeksWithWinner (gws:GameWeek list) players =
         gws
         |> List.map(fun gw -> gw, getFixturesForGameWeeks [gw])
         |> List.map(fun (gw, fixtures) -> gw, getLeagueTable players fixtures)
-        |> List.map(fun (gw, lgtbl) -> gw, lgtbl.Head)
-        |> List.map(fun (gw, (_, plr, _, _, pts)) -> gw, plr, pts)
+        |> List.map(fun (gw, lgtbl) -> gw, lgtbl |> getPlayersInPosition1)
+        |> List.map(fun (gw, (plr, pts)) -> gw, plr, pts)
 
     let getPastMonthsWithWinner (gws:GameWeek list) players =
         gws
@@ -260,8 +265,8 @@ module Domain =
         |> Seq.toList
         |> List.map(fun (m, gws) -> m, getFixturesForGameWeeks (gws|>Seq.toList))
         |> List.map(fun (m, fixtures) -> m, getLeagueTable players fixtures)
-        |> List.map(fun (m, lgtbl) -> m, lgtbl.Head)
-        |> List.map(fun (m, (_, plr, _, _, pts)) -> m, plr, pts)
+        |> List.map(fun (m, lgtbl) -> m, lgtbl |> getPlayersInPosition1)
+        |> List.map(fun (m, (plr, pts)) -> m, plr, pts)
 
     let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players player =
         fixtures
@@ -288,6 +293,8 @@ module Domain =
     let getGameWeeksWithClosedFixtures (gws:GameWeek list) =
         gws |> List.filter(fun gw -> [gw] |> getClosedFixturesForGameWeeks |> List.isEmpty = false)
 
+    let getIsGameWeekComplete (gw:GameWeek) =
+        gw.fixtures |> List.forall(isFixtureClosedAndHaveResult)
 
     // Rules 
     

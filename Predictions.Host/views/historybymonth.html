@@ -16,7 +16,9 @@
                 <a ng-href="#/history/{{model.league.id}}/month/{{row.month}}">{{row.month}}</a>
             </td>
             <td>
-                <a ng-href="#/player/{{row.winner.id}}/{{model.league.id}}">{{row.winner.name}}</a>
+                <span ng-repeat="winner in row.winners">
+                    <a ng-href="#/player/{{winner.id}}/{{model.league.id}}">{{winner.name}}</a><br />
+                </span>
             </td>
             <td class="numeric-cell">{{row.points}}</td>
         </tr>
