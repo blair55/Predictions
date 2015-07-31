@@ -26,6 +26,11 @@ angular.module('frontendApp')
           };
       });
 
+      var doubleDownUrl = '/api/fixtureDoubleDowns/' + $routeParams.fxid;
+      $http.get(doubleDownUrl).success(function (data) {
+          $scope.doubleDowns = data;
+      });
+
       var formGuideUrl = '/api/fixtureformguide/' + $routeParams.fxid;
       $http.get(formGuideUrl).success(function (data) {
           $scope.formGuide = data;

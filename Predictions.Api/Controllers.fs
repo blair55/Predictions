@@ -181,6 +181,10 @@ type HomeController() =
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =
         FxId fxId |> (getFixturePredictionGraphData >> resultToHttp)
+        
+    [<Route("fixturedoubledowns/{fxId:Guid}")>]
+    member this.GetFixtureDoubleDowns (fxId:Guid) =
+        FxId fxId |> (getFixtureDoubleDowns >> resultToHttp)
 
     [<Route("fixturepreviousmeetings/{fxId:Guid}")>]
     member this.GetFixturePreviousMeetings (fxId:Guid) =

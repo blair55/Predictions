@@ -37,6 +37,8 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 
 .cursor-pointer{ cursor: pointer;}
 
+.progress {margin-bottom: 0;}
+
 .fixture-details {
     font-size: 8pt;
     display: inline-block;

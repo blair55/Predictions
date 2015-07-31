@@ -239,7 +239,11 @@ module Data =
     type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
     let getAllPredictionsForFixture (fxid:FxId) =
         let args = { GetAllPredictionsForFixtureQueryArgs.fixtureId=fxid|>getFxId }
-        let sql = @"select predictionId, fixtureId, playerId, homeTeamScore, awayTeamScore, 0 as 'doubledown' from predictions where fixtureId = @fixtureId"
+        let sql = @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, 
+                    case when dd.predictionid is null then 0 else 1 end as DoubleDown
+                    from predictions pds
+                    left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId
+                    where pds.fixtureId = @fixtureId"
         use conn = newConn()
         conn.Query<PredictionsTableQueryResult>(sql, args)
         |> Seq.map queryResultToPrediction

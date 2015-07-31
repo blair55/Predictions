@@ -223,6 +223,20 @@ module Services =
              >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
              >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
         
+    let getFixtureDoubleDowns fxid =
+        let gws = gameWeeks()
+        let getAllPredictions (fd:FixtureData) = getAllPredictionsForFixture fd.id
+        let getDoubleDownPercentage (prds:Prediction list) =
+            let ddPrds = prds |> List.filter(fun p -> p.modifier = DoubleDown)
+            let totalPrds = Convert.ToDecimal(prds.Length)
+            let totalDdPrds = Convert.ToDecimal(ddPrds.Length)
+            let pc = (totalDdPrds / totalPrds) * (100m)
+            Math.Ceiling(pc)
+        fxid |> ((makeSureFixtureExists gws)
+             >> bind (switch fixtureToFixtureData)
+             >> bind (switch (getAllPredictions))
+             >> bind (switch (getDoubleDownPercentage)))
+
     let getFixturePreviousMeetingsView fxid =
         let gws = gameWeeks()
         let getResult (fixture:Fixture) =

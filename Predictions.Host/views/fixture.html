@@ -16,10 +16,23 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Aggregated Predictions
+        Aggregate Predictions
     </div>
     <div class="panel-body">
         <canvas class="chart chart-doughnut" height="80" data="data" legend="right" labels="labels" options="options"></canvas>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Double Downs
+    </div>
+    <div class="panel-body">
+        <div class="progress">
+            <div class="progress-bar progress-bar-warning" style="width: {{doubleDowns}}%;">
+                {{doubleDowns}}%
+            </div>
+        </div>
     </div>
 </div>
 
