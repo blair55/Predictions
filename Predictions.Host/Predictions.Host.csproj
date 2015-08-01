@@ -105,6 +105,7 @@
     <Content Include="scripts\directives\fixtureformguide.js" />
     <Content Include="scripts\directives\formguide.js" />
     <Content Include="scripts\directives\neighbours.js" />
+    <Content Include="scripts\directives\pagetitle.js" />
     <Content Include="scripts\directives\previousmeetingrow.js" />
     <Content Include="scripts\directives\submitscore.js" />
     <Content Include="scripts\directives\teamname.js" />
@@ -114,6 +115,7 @@
     <Content Include="scripts\services\googleanalytics.js" />
     <Content Include="scripts\services\interceptor.js" />
     <Content Include="scripts\services\notify.js" />
+    <Content Include="scripts\services\title.js" />
     <Content Include="styles\main.css" />
     <Content Include="views\adminaddgameweek.html" />
     <Content Include="views\adminaddresults.html" />

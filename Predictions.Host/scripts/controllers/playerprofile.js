@@ -8,11 +8,12 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('PlayerprofileCtrl', function ($scope, $http, $routeParams) {
+  .controller('PlayerprofileCtrl', function ($scope, $http, $routeParams, title) {
 
       var url = '/api/playerprofile/' + $routeParams.playerId;
       $http.get(url).success(function (data) {
           $scope.model = data;
+          title.set(data.player.name);
       });
 
       var graphUrl = '/api/playerprofilegraph/' + $routeParams.playerId;

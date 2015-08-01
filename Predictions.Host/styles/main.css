@@ -36,8 +36,12 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 .submit-score.min-mode .more-link{ display: none;}
 
 .cursor-pointer{ cursor: pointer;}
-
 .progress {margin-bottom: 0;}
+
+.page-title{ display: none;}
+@media (min-width: 768px) {
+    .page-title {display: block;}
+}
 
 .fixture-details {
     font-size: 8pt;
@@ -168,7 +172,7 @@ h4{margin-top:0;}
     float: left;
     border-color: #222 !important;
     margin: 0;
-    padding: 16px;
+    padding: 16px 16px 17px;
     border-radius: 0;
 }
 
@@ -179,6 +183,8 @@ h4{margin-top:0;}
 .navbar-brand {
     margin-left: 0;
     padding-left: 0;
+    position: absolute;
+    white-space: nowrap
 }
 
 .navmenu {

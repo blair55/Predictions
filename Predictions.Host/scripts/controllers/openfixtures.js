@@ -8,7 +8,8 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-    .controller('OpenfixturesCtrl', function($scope, $http) {
+    .controller('OpenfixturesCtrl', function($scope, $http, title) {
+        title.set('Open Fixtures');
 
         $http.get('/api/openfixtures').success(function(data) {
             $scope.model = data;

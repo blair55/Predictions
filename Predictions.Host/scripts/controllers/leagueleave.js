@@ -8,19 +8,19 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('LeagueleaveCtrl', function ($scope, $http, $routeParams, $location, notify) {
+    .controller('LeagueleaveCtrl', function($scope, $http, $routeParams, $location, notify, title) {
 
-      var url = '/api/league/' + $routeParams.leagueId;
+        title.set('Leave League');
+        var url = '/api/league/' + $routeParams.leagueId;
+        $http.get(url).success(function(data) {
+            $scope.model = data;
+        });
 
-      $http.get(url).success(function (data) {
-          $scope.model = data;
-      });
-
-      $scope.submit = function () {
-          var postUrl = '/api/leagueleave/' + $scope.model.id;
-          $http.post(postUrl).success(function () {
-              notify.success("League left successfully");
-              $location.path('leagues');
-          });
-      };
-  });
+        $scope.submit = function() {
+            var postUrl = '/api/leagueleave/' + $scope.model.id;
+            $http.post(postUrl).success(function() {
+                notify.success("League left successfully");
+                $location.path('leagues');
+            });
+        };
+    });

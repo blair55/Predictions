@@ -1,9 +1,7 @@
-<h4>Create League</h4>
-
 <form name="createLeagueForm">
     <div class="form-group">
         <label for="leaguename">League Name</label>
-        <input type="text" class="form-control" id="leaguename" ng-model="leagueName" placeholder="League Name" required>
+        <input type="text" class="form-control" id="leaguename" ng-model="leagueName" required>
     </div>
     <div class="well">
         <button ng-click="submit()" class="btn btn-primary" ng-disabled="createLeagueForm.$invalid">Create League</button>

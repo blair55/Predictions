@@ -8,11 +8,12 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-  .controller('FixtureCtrl', function ($scope, $http, $routeParams) {
+  .controller('FixtureCtrl', function ($scope, $http, $routeParams, title) {
 
       var url = '/api/fixture/' + $routeParams.fxid;
       $http.get(url).success(function (data) {
           $scope.model = data;
+          title.set(data.fixture.home.full.toUpperCase() + " v " + data.fixture.away.full.toUpperCase());
       });
 
       var graphUrl = '/api/fixturepredictiongraph/' + $routeParams.fxid;

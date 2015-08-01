@@ -8,10 +8,11 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-    .controller('LeagueinviteCtrl', function($scope, $http, $routeParams) {
+    .controller('LeagueinviteCtrl', function ($scope, $http, $routeParams, title) {
         var url = '/api/leagueinvite/' + $routeParams.leagueId;
         $http.get(url).success(function(data) {
             $scope.model = data;
+            title.set('Invite to ' + data.name);
             $scope.model.encodedInviteLink = encodeURIComponent(data.inviteLink);
             $scope.model.encodedShareText = encodeURIComponent("Join my Predictions League!");
         });

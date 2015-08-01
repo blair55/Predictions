@@ -8,8 +8,8 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-    .controller('CreateleagueCtrl', function($scope, $http, $location, notify) {
-
+    .controller('CreateleagueCtrl', function($scope, $http, $location, notify, title) {
+        title.set('Create League');
         $scope.submit = function() {
             var league = { name: $scope.leagueName };
 
