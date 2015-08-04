@@ -56,9 +56,9 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     -webkit-box-shadow: 0 0 6px #f0ad4e;
     -ms-box-shadow: 0 0 6px #f0ad4e;
     box-shadow: 0 0 6px #f0ad4e;
-    transition: all .15s ease-in;
-    -moz-transition: all .15s ease-in;
-    -webkit-transition: all .15s ease-in;
+    transition: all .15s ease-out;
+    -moz-transition: all .15s ease-out;
+    -webkit-transition: all .15s ease-out;
 }
 
 .dd.dd-unselectable .dd-button{
@@ -70,11 +70,10 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     -ms-opacity: 0.45;
     opacity: 0.45;
     
-    transition: all .15s ease-in;
-    -moz-transition: all .15s ease-in;
-    -webkit-transition: all .15s ease-in;
+    transition: all .15s ease-out;
+    -moz-transition: all .15s ease-out;
+    -webkit-transition: all .15s ease-out;
 }
-
 .dd.dd-selectable .dd-button{
     cursor: pointer;
     color: #f0ad4e;
@@ -83,18 +82,34 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     
-    transition: all .15s ease-in;
-    -moz-transition: all .15s ease-in;
-    -webkit-transition: all .15s ease-in;
+    transition: all .15s ease-out;
+    -moz-transition: all .15s ease-out;
+    -webkit-transition: all .15s ease-out;
 }
 
 .dd.dd-selected .dd-button{
     background-color: #f0ad4e;
     color: #fff;
     
-    transition: all .15s ease-in;
-    -moz-transition: all .15s ease-in;
-    -webkit-transition: all .15s ease-in;
+    transition: all .15s ease-out;
+    -moz-transition: all .15s ease-out;
+    -webkit-transition: all .15s ease-out;
+}
+
+
+.dd.dd-selected .dd-button .glyphicon-unchecked{
+    display: none;
+}
+.dd.dd-selected .dd-button .glyphicon-check{
+    display: inline-block;
+}
+.dd.dd-unselectable .dd-button .glyphicon-unchecked,
+.dd.dd-selectable .dd-button .glyphicon-unchecked {
+    display: inline-block;
+}
+.dd.dd-unselectable .dd-button .glyphicon-check,
+.dd.dd-selectable .dd-button .glyphicon-check {
+    display: none;
 }
 
 .double-down-cell {

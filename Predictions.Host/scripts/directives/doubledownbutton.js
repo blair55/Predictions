@@ -12,7 +12,9 @@ angular.module('frontendApp')
             template:
                 '<div class="dd" ng-class="ddClass">' +
                     '<span class="label dd-button" ng-click="trySetDoubleDown(row)">' +
-                    '<i class="glyphicon glyphicon-ok"></i>&nbsp;Double Down</span>' +
+                    '<i class="glyphicon glyphicon-unchecked"></i>' +
+                    '<i class="glyphicon glyphicon-check"></i>' +
+                    '&nbsp;Double Down</span>' +
                     '</div>',
             restrict: 'E',
             scope: {

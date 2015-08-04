@@ -22,7 +22,6 @@ sum points for all users per week to see high/low scoring weeks
 compare outcome variation each week to see which game weeks are more/less predictable
 
 // faq
-// title service
 // global history
 // all fixtures check box -> icon/label
 // aggregated predictions by league
@@ -30,6 +29,7 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fixture email alerts
 // more logging
 
+// title service
 // fixture confidence rating from dd
 // pluralize gw/mnth winners
 // login w/ twitter
