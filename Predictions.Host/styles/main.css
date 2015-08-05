@@ -62,40 +62,22 @@ body { padding-bottom: 70px; background-color:#fefefe;}
 }
 
 .dd.dd-unselectable .dd-button{
-    color: #f0ad4e;
-    border: solid 1px #f0ad4e;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    -ms-opacity: 0.45;
-    opacity: 0.45;
-    
-    transition: all .15s ease-out;
-    -moz-transition: all .15s ease-out;
-    -webkit-transition: all .15s ease-out;
+    color: #d3d3d3;
 }
 .dd.dd-selectable .dd-button{
     cursor: pointer;
     color: #f0ad4e;
-    border: solid 1px #f0ad4e;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    
     transition: all .15s ease-out;
     -moz-transition: all .15s ease-out;
     -webkit-transition: all .15s ease-out;
 }
-
 .dd.dd-selected .dd-button{
     background-color: #f0ad4e;
     color: #fff;
-    
     transition: all .15s ease-out;
     -moz-transition: all .15s ease-out;
     -webkit-transition: all .15s ease-out;
 }
-
 
 .dd.dd-selected .dd-button .glyphicon-unchecked{
     display: none;
