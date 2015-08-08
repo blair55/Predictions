@@ -230,7 +230,7 @@ module Services =
             let ddPrds = prds |> List.filter(fun p -> p.modifier = DoubleDown)
             let totalPrds = Convert.ToDecimal(prds.Length)
             let totalDdPrds = Convert.ToDecimal(ddPrds.Length)
-            let pc = (totalDdPrds / totalPrds) * (100m)
+            let pc = if totalPrds = 0m then 0m else (totalDdPrds / totalPrds) * (100m)
             Math.Ceiling(pc)
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch fixtureToFixtureData)
