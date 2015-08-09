@@ -1,5 +1,7 @@
 <p>
-    League Position: {{ model.position | ordinal }}
+    Position: {{ model.position | ordinal }}
+    <span class="text-muted small">&middot;</span>
+    <a ng-href="#/playerprofile/{{model.player.id}}">Profile</a>
 </p>
 <!--<canvas class="chart chart-line" height="80" data="data" labels="labels" options="options"></canvas>-->
 <div class="graph-placeholder league-position-graph clearfix">

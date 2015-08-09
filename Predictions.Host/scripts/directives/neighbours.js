@@ -10,14 +10,16 @@ angular.module('frontendApp')
     .directive('neighbours', function() {
         return {
             template:
-                '<div class="clearfix" ng-if="neighbours">' +
-                    '<div ng-if="neighbours.prev" class="pull-left">' +
-                        '<a ng-href="{{url + neighbours.prev}}">&larr; Prev</a>' +
-                    '</div>' +
-                    '<div ng-if="neighbours.next" class="pull-right">' +
-                        '<a ng-href="{{url + neighbours.next}}">Next &rarr;</a>' +
-                    '</div>' +
-                '</div>',
+                '<nav ng-if="neighbours">' +
+                    '<ul class="pager">' +
+                    '<li class="previous {{neighbours.prev ? "" : "disabled"}}">' +
+                    '<a ng-href="{{url + neighbours.prev}}"><span aria-hidden="true">&larr;</span> Prev</a>' +
+                    '</li>' +
+                    '<li class="next {{neighbours.next ? "" : "disabled"}}">' +
+                    '<a ng-href="{{url + neighbours.next}}">Next <span aria-hidden="true">&rarr;</span></a>' +
+                    '</li>' +
+                    '</ul>' +
+                    '</nav>',
             restrict: 'A',
             scope: {
                 url: '@',
