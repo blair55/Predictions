@@ -56,7 +56,7 @@ module Domain =
          | OpenFixture of FixtureData
          | ClosedFixture of (FixtureData * Result option)
     type PredictionModifier = | DoubleDown | NoModifier
-    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId; modifier:PredictionModifier }
+    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId; modifier:PredictionModifier; created:DateTime }
     type Player = { id:PlId; name:PlayerName; predictions:Prediction list; isAdmin:bool }
     type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture list }
     type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek list }
@@ -212,11 +212,11 @@ module Domain =
         |> Seq.map(fun (r, (p, (cs, co, tp))) -> (r, p, cs, co, tp))
         |> Seq.toList
 
-    let getPlayerPointsForGameWeeks allPlayers player gameWeeks =
+    let getPlayerPointsForGameWeeks allPlayers (player:Player) gameWeeks =
         gameWeeks
         |> List.map(fun gw -> gw, (getFixturesForGameWeeks [gw]))
         |> List.map(fun (gw, fixtures) -> gw, getLeagueTable allPlayers fixtures)
-        |> List.map(fun (gwno, ltrList) -> gwno, ltrList |> List.tryFind(fun (_, p, _, _, _) -> p = player))
+        |> List.map(fun (gwno, ltrList) -> gwno, ltrList |> List.tryFind(fun (_, plr, _, _, _) -> plr.id = player.id))
 
     let getPlayerProfilePointsForGameWeeks player gameWeeks =
         gameWeeks
@@ -248,7 +248,7 @@ module Domain =
         |> List.sortBy(fun fd -> fd.kickoff)
 
     let getPlayersInPosition1 lgtbl =
-        let plrs = lgtbl |> List.filter(fun (pos, plr, _, _, pts) -> pos = 1) |> List.map(   fun (_, plr, _, _, _) -> plr)
+        let plrs = lgtbl |> List.filter(fun (pos, _, _, _, _) -> pos = 1) |> List.map(   fun (_, plr, _, _, _) -> plr)
         let pts = lgtbl |> List.maxBy(fun (_, _, _, _, pts) -> pts) |> fun (_, _, _, _, pts) -> pts
         (plrs, pts)
 
@@ -268,10 +268,10 @@ module Domain =
         |> List.map(fun (m, lgtbl) -> m, lgtbl |> getPlayersInPosition1)
         |> List.map(fun (m, (plr, pts)) -> m, plr, pts)
 
-    let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players player =
+    let getLeaguePositionForFixturesForPlayer (fixtures:Fixture list) players (player:Player) =
         fixtures
         |> getLeagueTable players
-        |> List.tryFind(fun (_, plr, _, _, _) -> plr = player)
+        |> List.tryFind(fun (_, plr, _, _, _) -> plr.id = player.id)
         |> (function
             | Some (pos, _, _, _, _) -> pos
             | None -> -1)
@@ -367,13 +367,13 @@ module LeagueTableCalculation =
         let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
         let recentLge = getLeagueTable players recentFixtures
         let priorLge = getLeagueTable players priorFixtures
-        let findPlayerPriorPos player currentPos =
-            let playerPriorLgeRow = priorLge |> List.tryFind(fun (_, pl, _, _, _) -> pl = player)
+        let findPlayerPriorPos (player:Player) currentPos =
+            let playerPriorLgeRow = priorLge |> List.tryFind(fun (_, plr, _, _, _) -> plr.id = player.id)
             match playerPriorLgeRow with | Some (pos, _, _, _, _) -> pos | None -> currentPos
-        let toDiffLgeRow (pos, pl, cs, co, pts) =
-            let priorPos = findPlayerPriorPos pl pos
+        let toDiffLgeRow (pos, plr, cs, co, pts) =
+            let priorPos = findPlayerPriorPos plr pos
             let diffPos = priorPos - pos
-            { diffPosition=diffPos; position=pos; player=pl; correctScores=cs; correctOutcomes=co; points=pts }
+            { diffPosition=diffPos; position=pos; player=plr; correctScores=cs; correctOutcomes=co; points=pts }
         recentLge |> List.map(toDiffLgeRow)
 
 module List =
