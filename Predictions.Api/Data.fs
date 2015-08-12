@@ -154,7 +154,7 @@ module Data =
     type [<CLIMutable>] PredictionsTableQueryResult = { predictionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int; doubleDown:int; created:DateTime }
     let queryResultToPrediction (p:PredictionsTableQueryResult) =
         let modifier = match p.doubleDown with | 1 -> DoubleDown | _ -> NoModifier
-        { Prediction.id=p.predictionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore); modifier=modifier; created=p.created }
+        { Prediction.id=p.predictionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore); modifier=modifier }
     let tryFindPlayerByPlayerId playerId =
         let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
         let sql = @"select playerId, playerName, isAdmin from players where playerId = @playerId
@@ -213,21 +213,16 @@ module Data =
         let leagueResult = multi.Read<LeaguesTableQueryResult>() |> Seq.toList
         if leagueResult.IsEmpty then None
         else
-            let playersResult = multi.Read<PlayersTableWithLeagueJoinDateQueryResult>()
-            let predictionsResult = multi.Read<PredictionsTableQueryResult>()
-            let predictions =
-                predictionsResult
-                |> Seq.map queryResultToPrediction
-                |> Seq.toList
+            let playersResult = multi.Read<PlayersTableWithLeagueJoinDateQueryResult>() |> Seq.toList
+            let predictionsResult = multi.Read<PredictionsTableQueryResult>() |> Seq.toList
             let players =
+                let getPlayerPredictionsSinceJoinedLeague p =
+                    predictionsResult
+                    |> List.filter(fun pr -> pr.playerId = p.playerId)
+                    |> List.filter(fun pr -> pr.created > p.leagueJoinDate)
+                    |> List.map queryResultToPrediction
                 playersResult
-                |> Seq.map(fun p ->
-                    let playersPredictionsSinceJoiningLeague = 
-                        predictions
-                        |> List.filter(fun pr -> pr.playerId=(p.playerId|>PlId))
-                        |> List.filter(fun pr -> pr.created > p.leagueJoinDate)
-                    { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=playersPredictionsSinceJoiningLeague; isAdmin=p.isAdmin })
-                |> Seq.toList
+                |> List.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=p|>getPlayerPredictionsSinceJoinedLeague; isAdmin=p.isAdmin })
             let league = leagueResult |> List.head
             Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players; adminId=league.leagueAdminId|>PlId }
             

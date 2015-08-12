@@ -332,6 +332,7 @@ module Services =
                         predictionId=""
                         isGameWeekOpen=false }))
                    |> List.collect(fun o -> o)
+                   |> List.sortBy(fun r -> r.fixture.kickoff)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =

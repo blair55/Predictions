@@ -1,25 +1,41 @@
-﻿a fixture is made up of two teams
-a list of fixtures is published as a gameweek, with a deadline (first ko)
-players of the game submit scores for each fixture before the deadline
-fixture results are submitted after each fixture has been played
-players are scored on the accuracy of their predictions
-	3 points for correct score
-	1 point for correct outcome (homewin, awaywin, draw)
+﻿// badges
 
+- double down on cs home win
+- double down on cs away win
+- double down on cs draw
+- double down on cr home win
+- double down on cr away win
+- double down on cr draw
+- cr for every team in the league
+- cr win for every team in the league
+- cr draw for every team in the league
+- cr loss for every team in the league
+- top global league for 1 week
+- top league of 5+ for 1 week
+- top league of 10+ for 1 week
+- top league of 20+ for 1 week
+- top global league for 1 month
+- top league of 5+ for 1 month
+- top league of 10+ for 1 month
+- top league of 20+ for 1 month
+- make only incorrect predictions for 1 week
+- first to make a prediction in a gameweek
+- cr when in 20% minority
+- cs when in 20% minority
+- cs for game 5+ goals
+- cs nil nil
+- cs score draw
+- 3 cs in 1 week
+- 2 cs in 1 week
+- 1 cs in 1 week
+- 5 cr in 1 week
+- 3 cr in 1 week
+- 2 cr in 1 week
+- 3 cr draw in 1 week
+- 3 cr draw in 1 week
+- 3 cr home win in 1 week
+- 3 cr away win in 1 week
 
-admin can add a gameweek with fixtures with deadlines
-admin can add fixtures to a gameweek before submitting
-if gameweek must be changed after submitting any submitted player scores must be dropped
-players can work on open fixtures up until deadline
-admin can submit fixture results at any time
-players can review their score for previous gameweeks
-	all weeks view, table of gwno & points
-	in detail view with predicions v results, outcome & points
-league table includes number of fixtures player has submitted predictions for
-league table includes player accuracy index score (function of prediction v result difference, sum & home away separate)
-league position vs gameweek line chart
-sum points for all users per week to see high/low scoring weeks
-compare outcome variation each week to see which game weeks are more/less predictable
 
 // faq
 // global history
@@ -157,3 +173,30 @@ compare outcome variation each week to see which game weeks are more/less predic
 // fix gameweek no when adding new gw
 // no prediction submitted view on gameweek score
 //
+
+
+a fixture is made up of two teams
+a list of fixtures is published as a gameweek, with a deadline (first ko)
+players of the game submit scores for each fixture before the deadline
+fixture results are submitted after each fixture has been played
+players are scored on the accuracy of their predictions
+	3 points for correct score
+	1 point for correct outcome (homewin, awaywin, draw)
+
+
+admin can add a gameweek with fixtures with deadlines
+admin can add fixtures to a gameweek before submitting
+if gameweek must be changed after submitting any submitted player scores must be dropped
+players can work on open fixtures up until deadline
+admin can submit fixture results at any time
+players can review their score for previous gameweeks
+	all weeks view, table of gwno & points
+	in detail view with predicions v results, outcome & points
+league table includes number of fixtures player has submitted predictions for
+league table includes player accuracy index score (function of prediction v result difference, sum & home away separate)
+league position vs gameweek line chart
+sum points for all users per week to see high/low scoring weeks
+compare outcome variation each week to see which game weeks are more/less predictable
+
+
+
