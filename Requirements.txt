@@ -18,8 +18,11 @@
 - top league of 5+ for 1 month
 - top league of 10+ for 1 month
 - top league of 20+ for 1 month
-- make only incorrect predictions for 1 week
-- first to make a prediction in a gameweek
+- make only incorrect predictions in a gw
+- make only correct predictions in a gw
+- first to make a prediction in a gw
+- dd & cr when in 20% minority
+- dd when in 20% minority
 - cr when in 20% minority
 - cs when in 20% minority
 - cs for game 5+ goals
@@ -32,11 +35,15 @@
 - 3 cr in 1 week
 - 2 cr in 1 week
 - 3 cr draw in 1 week
-- 3 cr draw in 1 week
 - 3 cr home win in 1 week
 - 3 cr away win in 1 week
+- invite 3 users
+- create a league
 
+// who has got this badge and what was it for?
 
+// double down anytime
+// sql writes try catch
 // faq
 // global history
 // all fixtures check box -> icon/label
