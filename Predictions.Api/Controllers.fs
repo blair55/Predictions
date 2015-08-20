@@ -200,7 +200,7 @@ type HomeController() =
         player |> (switch getGlobalLeaguePositionforplayer >> resultToHttp)
 
     [<Route("globalleague/{page:int}")>]
-    member this.Getleaguepositionforplayer(page:int) =
+    member this.GetGlobalLeaguePage(page:int) =
         let getResult = this.GetLoggedInPlayerId() |> getLoggedInPlayer |> getGlobalLeagueTablePage
         page |> (switch getResult >> resultToHttp)
 

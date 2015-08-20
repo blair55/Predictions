@@ -348,7 +348,7 @@ module Services =
         playerId |> getPlayerGameWeekByPlayerIdAndGameWeekNo latestGwNo true
 
     let leagueToViewModel (league:League) = 
-        let gws = gameWeeks()
+        let gws = gameWeeksWithResults()
         let leagueTable = getLeagueTableRows league gws
         let rows = leagueTable |> List.map(leagueTableRowToViewModel)
         let latestGameWeekNo = gws |> getlatestGameWeekNo
@@ -554,7 +554,7 @@ module Services =
         getLeagueTableRows globalLeague gws
         
     let getGlobalLeaguePositionforplayer (player:Player) =
-        let gws = gameWeeks()
+        let gws = gameWeeksWithResults()
         let globalTableRows = getGlobalTableRows gws
         let index = globalTableRows |> Seq.findIndex(fun r -> r.player.id = player.id)
         let pos = globalTableRows.[index] |> (fun r -> r.position)
@@ -563,7 +563,7 @@ module Services =
         { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
 
     let getGlobalLeagueTablePage player page =
-        let gws = gameWeeks()
+        let gws = gameWeeksWithResults()
         let globalTableRows = getGlobalTableRows gws
         let totalPages = (globalTableRows.Length/globalLeaguePageSize)
         let amountToTake =
