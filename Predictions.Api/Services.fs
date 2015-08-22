@@ -400,36 +400,36 @@ module Services =
                 >> bind (makeSurePlayerIsLeagueAdmin)
                 >> bind (switch deleteLge)
                 >> bind (switch noPlayerViewModel))
-    
+        
+    let getHistoryByMonthViewModel (league:League) =
+        let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
+                    |> List.map(fun (m, plrs, pts) -> { HistoryByMonthRowViewModel.month=m; winners=plrs|>List.map getPlayerViewModel; points=pts })
+        { HistoryByMonthViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
     let getPastMonthsWithWinnerView leagueId =
-        let getHistoryByMonthViewModel (league:League) =
-            let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
-                       |> List.map(fun (m, plrs, pts) -> { HistoryByMonthRowViewModel.month=m; winners=plrs|>List.map getPlayerViewModel; points=pts })
-            { HistoryByMonthViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthViewModel))
-
-    let getMonthPointsView month leagueId =
-        let getHistoryByMonthWithMonthViewModel league =
-            let gws = month |> getGameWeeksForMonth (gameWeeksWithResults())
-            let fixtures = gws |> getFixturesForGameWeeks
-            let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
-            { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo); league=league|>getMircoLeagueViewModel }
-        LgId leagueId |> (getLeague >> bind (switch getHistoryByMonthWithMonthViewModel))
     
+    let getHistoryByMonthWithMonthViewModel month league =
+        let gws = month |> getGameWeeksForMonth (gameWeeksWithResults())
+        let fixtures = gws |> getFixturesForGameWeeks
+        let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
+        { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo); league=league|>getMircoLeagueViewModel }
+    let getMonthPointsView month leagueId =
+        LgId leagueId |> (getLeague >> bind (switch (getHistoryByMonthWithMonthViewModel month)))
+
+    let getPastGameWeeksViewModel (league:League) =
+        let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
+                    |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
+        { PastGameWeeksViewModel.rows=rows; league=league|>getMircoLeagueViewModel }    
     let getPastGameWeeksWithWinnerView leagueId =
-        let getPastGameWeeksViewModel (league:League) =
-            let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
-                       |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
-            { PastGameWeeksViewModel.rows=rows; league=league|>getMircoLeagueViewModel }
         LgId leagueId |> (getLeague >> bind (switch getPastGameWeeksViewModel))
 
+    let getGameWeekPointsViewModel gwno (league:League) =
+        let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
+        let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
+        let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
+        { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; league=league|>getMircoLeagueViewModel }
     let getGameWeekPointsView gwno leagueId =
-        let getGameWeekPointsViewModel (league:League) =
-            let fixtures = gameWeeks() |> List.filter(fun gw -> gw.number = gwno) |> getFixturesForGameWeeks
-            let month = fixtures |> List.map(fixtureToFixtureData) |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
-            let rows = (getLeagueTable league.players fixtures) |> List.map(leagueTableTupleToRowViewModel)
-            { GameWeekPointsViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; league=league|>getMircoLeagueViewModel }
-        LgId leagueId |> (getLeague >> bind (switch getGameWeekPointsViewModel))
+        LgId leagueId |> (getLeague >> bind (switch (getGameWeekPointsViewModel gwno)))
 
     let getGameWeekMatrix gwno leagueId =
         let getGameWeek gwno =
@@ -548,11 +548,14 @@ module Services =
 
     // global league functions
 
-    let getGlobalTableRows gws =
+    let getGlobalLeague() =
         let allPlayers = getAllPlayers()
-        let globalLeague = { League.id=newLgId(); name=""|>LeagueName; players=allPlayers; adminId=newPlId() }
-        getLeagueTableRows globalLeague gws
-        
+        { League.id=newLgId(); name="Global League"|>LeagueName; players=allPlayers; adminId=newPlId() }
+
+    let getGlobalTableRows gws =
+        let globalLeague = getGlobalLeague()
+        gws |> getLeagueTableRows globalLeague
+
     let getGlobalLeaguePositionforplayer (player:Player) =
         let gws = gameWeeksWithResults()
         let globalTableRows = getGlobalTableRows gws

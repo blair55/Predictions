@@ -167,6 +167,24 @@ type HomeController() =
     member this.GetGameWeekPoints (leagueId:Guid, gwno) =
         let getGwPointsView = gwno |> GwNo |> getGameWeekPointsView
         leagueId |> (getGwPointsView >> resultToHttp)
+
+
+    [<Route("leaguehistory/global/month")>]
+    member this.GetGlobalHistoryByMonth() =
+        getGlobalLeague() |> (getHistoryByMonthViewModel |> switch >> resultToHttp)
+
+    [<Route("leaguehistory/global/month/{month}")>]
+    member this.GetGlobalHistoryByMonth (month) =
+         getGlobalLeague() |> (month |> getHistoryByMonthWithMonthViewModel |> switch >> resultToHttp)
+
+    [<Route("leaguehistory/global/gameweek")>]
+    member this.GetGlobalPastGameWeeks() =
+        getGlobalLeague() |> (getPastGameWeeksViewModel |> switch >> resultToHttp)
+
+    [<Route("leaguehistory/global/gameweek/{gwno:int}")>]
+    member this.GetGlobalGameWeekPoints (gwno) =
+        getGlobalLeague() |> (gwno |> GwNo |> getGameWeekPointsViewModel |> switch >> resultToHttp)
+
         
     [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}")>]
     member this.GetGameWeekMatrix (leagueId:Guid, gwno) =
