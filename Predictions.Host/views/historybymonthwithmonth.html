@@ -1,7 +1,7 @@
 <ul class="list-inline">
     <li>Includes</li>
     <li ng-repeat="gw in model.gameweeks">
-        <a ng-href="#/history/{{model.league.id}}/gameweek/{{gw}}">GW#{{gw}}</a>
+        <a ng-href="#/history/{{model.league.id}}/gameweek/{{gw}}/0">GW#{{gw}}</a>
     </li>
 </ul>
 <table class="table table-striped">
@@ -27,4 +27,4 @@
     </tbody>
 </table>
 
-<div neighbours="neighbours" url="#/history/{{model.league.id}}/month/"></div>
+<div neighbours="model.neighbours" url="#/history/{{model.league.id}}/month/{{model.month}}/"></div>

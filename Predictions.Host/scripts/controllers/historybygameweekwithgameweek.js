@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
   .controller('HistorybygameweekwithgameweekCtrl', function ($scope, $http, $routeParams, auth, title) {
-      var url = '/api/leaguehistory/' + $routeParams.leagueId + '/gameweek/' + $routeParams.gameweekno;
+      var url = '/api/leaguehistory/' + $routeParams.leagueId + '/gameweek/' + $routeParams.gameweekno + '/page/' + $routeParams.page;
       $http.get(url).success(function (data) {
           $scope.model = data;
           title.set(data.league.name + " / GW#" + data.gameWeekNo + " Table");

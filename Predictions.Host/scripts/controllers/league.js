@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
     .controller('LeagueCtrl', function ($scope, $http, $routeParams, auth, title) {
-        var url = '/api/league/' + $routeParams.leagueId;
+        var url = '/api/league/' + $routeParams.leagueId + '/' + $routeParams.page;
         $http.get(url).success(function(data) {
             $scope.model = data;
             title.set(data.name);

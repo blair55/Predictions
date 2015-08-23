@@ -124,7 +124,6 @@
     <Content Include="views\createleague.html" />
     <Content Include="views\directives\submitscore.html" />
     <Content Include="views\fixture.html" />
-    <Content Include="views\globalleague.html" />
     <Content Include="views\historybygameweek.html" />
     <Content Include="views\historybygameweekwithgameweek.html" />
     <Content Include="views\historybymonth.html" />

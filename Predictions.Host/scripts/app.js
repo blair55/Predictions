@@ -58,11 +58,29 @@ angular
                 templateUrl: 'views/fixture.html',
                 controller: 'FixtureCtrl'
             })
+
+            //.when('/history/global/gameweek', {
+            //    templateUrl: 'views/globalhistorybygameweek.html',
+            //    controller: 'GlobalhistorybygameweekCtrl'
+            //})
+            //.when('/history/global/gameweek/:gameweekno/:page', {
+            //    templateUrl: 'views/globalhistorybygameweekwithgameweek.html',
+            //    controller: 'GlobalhistorybygameweekwithgameweekCtrl'
+            //})
+            //.when('/history/global/month', {
+            //    templateUrl: 'views/globalhistorybymonth.html',
+            //    controller: 'GlobalhistorybymonthCtrl'
+            //})
+            //.when('/history/global/month/:month/:page', {
+            //    templateUrl: 'views/globalhistorybymonthwithmonth.html',
+            //    controller: 'GlobalhistorybymonthwithmonthCtrl'
+            //})
+
             .when('/history/:leagueId/month', {
                 templateUrl: 'views/historybymonth.html',
                 controller: 'HistorybymonthCtrl'
             })
-            .when('/history/:leagueId/month/:month', {
+            .when('/history/:leagueId/month/:month/:page', {
                 templateUrl: 'views/historybymonthwithmonth.html',
                 controller: 'HistorybymonthwithmonthCtrl'
             })
@@ -70,10 +88,11 @@ angular
                 templateUrl: 'views/historybygameweek.html',
                 controller: 'HistorybygameweekCtrl'
             })
-            .when('/history/:leagueId/gameweek/:gameweekno', {
+            .when('/history/:leagueId/gameweek/:gameweekno/:page', {
                 templateUrl: 'views/historybygameweekwithgameweek.html',
                 controller: 'HistorybygameweekwithgameweekCtrl'
             })
+
             .when('/admin/addresults/:gameweekno', {
                 templateUrl: 'views/adminaddresultsforgameweek.html',
                 controller: 'AdminaddresultsforgameweekCtrl'
@@ -90,7 +109,7 @@ angular
                 templateUrl: 'views/createleague.html',
                 controller: 'CreateleagueCtrl'
             })
-            .when('/league/:leagueId', {
+            .when('/league/:leagueId/:page', {
                 templateUrl: 'views/league.html',
                 controller: 'LeagueCtrl'
             })
@@ -102,7 +121,7 @@ angular
                 templateUrl: 'views/leaguejoin.html',
                 controller: 'LeaguejoinCtrl'
             })
-            .when('/matrix/:leagueId/:gameweekno', {
+            .when('/matrix/:leagueId/:gameweekno/:page', {
                 templateUrl: 'views/matrix.html',
                 controller: 'MatrixCtrl'
             })

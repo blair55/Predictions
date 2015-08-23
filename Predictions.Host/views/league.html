@@ -10,7 +10,7 @@
             <li ng-if="isLoggedInPlayerLeagueAdmin">
                 <a ng-href="#/leaguedelete/{{model.id}}">Delete League</a>
             </li>
-            <li ng-if="!isLoggedInPlayerLeagueAdmin">
+            <li ng-if="!isLoggedInPlayerLeagueAdmin && model.id != 'global'">
                 <a ng-href="#/leagueleave/{{model.id}}">Leave League</a>
             </li>
             <li>
@@ -22,8 +22,7 @@
         </ul>
     </div>
     <p>
-        <!--Including results for GW#{{model.latestGameWeekNo}}-->
-        <a ng-href="#/matrix/{{model.id}}/{{model.latestGameWeekNo}}">GW#{{model.latestGameWeekNo}} Matrix</a>
+        <a ng-href="#/matrix/{{model.id}}/{{model.latestGameWeekNo}}/0">GW#{{model.latestGameWeekNo}} Matrix</a>
     </p>
 </div>
 
@@ -55,3 +54,5 @@
         </tr>
     </tbody>
 </table>
+
+<div neighbours="model.neighbours" url="#/league/{{model.id}}/"></div>

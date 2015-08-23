@@ -71,7 +71,7 @@ let playersList = [ for p in lotsofDummyNames ->
 let getRandomExpId() = Guid.NewGuid() |> str |> ExternalPlayerId
 
 let getRegisterPlayerCommands() =
-    playersList |> Seq.truncate 30 |> Seq.toList
+    playersList |> Seq.truncate 200 |> Seq.toList
     |> List.map(fun p -> { RegisterPlayerCommand.player=p; explid=getRandomExpId(); exProvider="Facebook"|>ExternalLoginProvider; email="" })
     
 let rpcmds = getRegisterPlayerCommands()
@@ -97,8 +97,8 @@ let prcmds = getSavePredictionCommandList playerIds fixtureIds
 prcmds |> List.iter savePrediction
 
 let getJoinLeagueCommands() =
-    let lgid = "1E7E8BDF-DD2C-4B10-B7BA-DE8E44C99FA9" |> sToGuid |> LgId
-    playerIds |> Seq.truncate 20 |> Seq.toList
+    let lgid = "350e4e39-a303-44f3-a804-8b57d20fa459" |> sToGuid |> LgId
+    playerIds |> Seq.truncate 95 |> Seq.toList
     |> List.map(fun pid -> { JoinLeagueCommand.playerId=pid; leagueId=lgid })
 
 let jlcmds = getJoinLeagueCommands()

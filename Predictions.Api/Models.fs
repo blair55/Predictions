@@ -52,18 +52,21 @@ module ViewModels =
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type HistoryByMonthViewModel = { league:MicroLeagueViewModel; rows:HistoryByMonthRowViewModel list }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type NeighboursViewModel = { prev:string; next:string; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueTableRowViewModel = { diffPos:int; position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type HistoryByMonthWithMonthViewModel = { league:MicroLeagueViewModel; month:string; rows:LeagueTableRowViewModel list; gameweeks:int list }
+    type HistoryByMonthWithMonthViewModel = { league:MicroLeagueViewModel; month:string; rows:LeagueTableRowViewModel list; gameweeks:int list; neighbours:NeighboursViewModel }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekPointsViewModel = { league:MicroLeagueViewModel; gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string; }
+    type HistoryByGameWeekWithGameWeekViewModel = { league:MicroLeagueViewModel; gameWeekNo:int; rows:LeagueTableRowViewModel list; month:string; neighbours:NeighboursViewModel }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type PlayerGameWeeksViewModelRow = { gameWeekNo:int; hasResults:bool; firstKo:DateTime; position:int; correctScores:int; correctOutcomes:int; points:int; }
+    type PlayerGameWeeksViewModelRow = { gameWeekNo:int; hasResults:bool; firstKo:DateTime; position:int; correctScores:int; correctOutcomes:int; points:int }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PlayerGameWeeksViewModel = { player:PlayerViewModel; position:int; rows:PlayerGameWeeksViewModelRow list; league:MicroLeagueViewModel }
@@ -113,12 +116,9 @@ module ViewModels =
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type ImportNewGameWeekViewModel = { gwno:int; rows:ImportNewGameWeekViewModelRow list }
-
-    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type NeighboursViewModel = { prev:string; next:string; }
     
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GlobalLeagueViewModel = { neighbours:NeighboursViewModel; rows:LeagueTableRowViewModel list }
+    type PagedLeagueViewModel = { neighbours:NeighboursViewModel; rows:LeagueTableRowViewModel list }
 
 [<AutoOpen>]
 module HomePageModels =
@@ -152,7 +152,7 @@ module LeagueModels =
     type CreateLeaguePostModel = { name:string; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list; latestGameWeekNo:int; adminId:string }
+    type LeagueViewModel = { id:string; name:string; rows:LeagueTableRowViewModel list; latestGameWeekNo:int; adminId:string; neighbours:NeighboursViewModel }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueInviteViewModel = { id:string; name:string; inviteLink:string; }
@@ -170,7 +170,7 @@ module GameWeekMatrixModels =
     type GameWeekMatrixFixtureColumnViewModel = { fixture:FixtureViewModel; isSubmitted:bool; score:ScoreViewModel; }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type GameWeekMatrixViewModel = { gameWeekNo:int; league:MicroLeagueViewModel; rows:GameWeekMatrixPlayerRowViewModel list; columns:GameWeekMatrixFixtureColumnViewModel list }
+    type GameWeekMatrixViewModel = { gameWeekNo:int; league:MicroLeagueViewModel; rows:GameWeekMatrixPlayerRowViewModel list; columns:GameWeekMatrixFixtureColumnViewModel list; neighbours:NeighboursViewModel }
 
 [<AutoOpen>]
 module PostModels =

@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th class="left-align">
-                <a ng-href="#history/{{model.league.id}}/gameweek/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Table</a>
+                <a ng-href="#history/{{model.league.id}}/gameweek/{{model.gameWeekNo}}/0">GW#{{model.gameWeekNo}} Table</a>
             </th>
             <th ng-repeat="col in model.columns">
                 <div>
@@ -47,4 +47,4 @@
     </tbody>
 </table>
 
-<div neighbours="neighbours" url="#/matrix/{{model.league.id}}/"></div>
+<div neighbours="model.neighbours" url="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}/"></div>

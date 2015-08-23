@@ -46,6 +46,7 @@ module Domain =
 
     let currentSeason = SnYr "prem-2015/16"
     let monthFormat = "MMMM yyyy"
+    let globalLeagueId = "global"
     let globalLeaguePageSize = 30
     let maxPlayersPerLeague = 100
 

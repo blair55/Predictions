@@ -1,7 +1,7 @@
 <p>
-    <a ng-href="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}">GW#{{model.gameWeekNo}} Matrix</a>
+    <a ng-href="#/matrix/{{model.league.id}}/{{model.gameWeekNo}}/0">GW#{{model.gameWeekNo}} Matrix</a>
     <span class="text-muted small">&middot;</span>
-    In Month <a ng-href="#/history/{{model.league.id}}/month/{{model.month}}">{{model.month}}</a>
+    In Month <a ng-href="#/history/{{model.league.id}}/month/{{model.month}}/0">{{model.month}}</a>
 </p>
 <table class="table table-striped">
     <thead>
@@ -26,4 +26,4 @@
     </tbody>
 </table>
 
-<div neighbours="neighbours" url="#/history/{{model.league.id}}/gameweek/"></div>
+<div neighbours="model.neighbours" url="#/history/{{model.league.id}}/gameweek/{{model.gameWeekNo}}/"></div>

@@ -87,9 +87,13 @@ type HomeController() =
         let saveLge = trySaveLeague player
         createLeague |> (saveLge >> resultToHttp)
 
-    [<Route("league/{leagueId:Guid}")>]
-    member this.GetLeagueView (leagueId:Guid) =
-        leagueId |> (getLeagueView >> resultToHttp)
+    [<Route("league/global/{page:int}")>]
+    member this.GetGlobalLeaguePage(page:int) =
+        page |> (switch getGlobalLeagueTablePage >> resultToHttp)
+
+    [<Route("league/{leagueId:Guid}/{page:int}")>]
+    member this.GetLeagueView (leagueId:Guid, page:int) =
+        leagueId |> (getLeagueView page >> resultToHttp)
 
     [<Route("leagueinvite/{leagueId:Guid}")>]
     member this.GetLeagueInviteView (leagueId:Guid) =
@@ -114,10 +118,18 @@ type HomeController() =
     member this.DeleteLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((deleteLeague player) >> resultToHttp)
-
+        
+    [<Route("player/{playerId:Guid}/global")>]
+    member this.GetGlobalLeaguePlayer (playerId:Guid) =
+        playerId |> (getGameWeekPointsForPlayerInGlobalLeague >> resultToHttp)
+        
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
-    member this.GetPlayer (playerId:Guid, leagueId:Guid) =
+    member this.GetLeaguePlayer (playerId:Guid, leagueId:Guid) =
         (playerId, leagueId) |> (getGameWeeksPointsForPlayerIdAndLeagueId >> resultToHttp)
+
+    [<Route("leaguepositiongraphforplayer/{playerId:Guid}/global")>]
+    member this.GetGlobalLeaguePositionGraph (playerId:Guid) =
+        playerId |> (getLeaguePositionGraphDataForPlayerInGlobalLeague >> resultToHttp)
         
     [<Route("leaguepositiongraphforplayer/{playerId:Guid}/{leagueId:Guid}")>]
     member this.GetLeaguePositionGraph (playerId:Guid, leagueId:Guid) =
@@ -155,41 +167,42 @@ type HomeController() =
     member this.GetHistoryByMonth(leagueId:Guid) =
         leagueId |> (getPastMonthsWithWinnerView >> resultToHttp)
 
-    [<Route("leaguehistory/{leagueId:Guid}/month/{month}")>]
-    member this.GetHistoryByMonth (leagueId:Guid, month) =
-        leagueId |> ((getMonthPointsView month) >> resultToHttp)
+    [<Route("leaguehistory/{leagueId:Guid}/month/{month}/page/{page:int}")>]
+    member this.GetHistoryByMonth (leagueId:Guid, month, page) =
+        leagueId |> (page |> getMonthPointsView month >> resultToHttp)
 
     [<Route("leaguehistory/{leagueId:Guid}/gameweek")>]
     member this.GetPastGameWeeks(leagueId:Guid) =
         leagueId |> (getPastGameWeeksWithWinnerView >> resultToHttp)
 
-    [<Route("leaguehistory/{leagueId:Guid}/gameweek/{gwno:int}")>]
-    member this.GetGameWeekPoints (leagueId:Guid, gwno) =
+    [<Route("leaguehistory/{leagueId:Guid}/gameweek/{gwno:int}/page/{page:int}")>]
+    member this.GetGameWeekPoints (leagueId:Guid, gwno, page) =
         let getGwPointsView = gwno |> GwNo |> getGameWeekPointsView
-        leagueId |> (getGwPointsView >> resultToHttp)
-
+        leagueId |> (page |> getGwPointsView >> resultToHttp)
 
     [<Route("leaguehistory/global/month")>]
     member this.GetGlobalHistoryByMonth() =
-        getGlobalLeague() |> (getHistoryByMonthViewModel |> switch >> resultToHttp)
+        getGlobalLeague() |> (getHistoryByMonthViewModel getGlobalLeagueMircoViewModel |> switch >> resultToHttp)
 
-    [<Route("leaguehistory/global/month/{month}")>]
-    member this.GetGlobalHistoryByMonth (month) =
-         getGlobalLeague() |> (month |> getHistoryByMonthWithMonthViewModel |> switch >> resultToHttp)
+    [<Route("leaguehistory/global/month/{month}/page/{page:int}")>]
+    member this.GetGlobalHistoryByMonth (month, page) =
+        getGlobalLeague() |> (getGlobalLeagueMircoViewModel |> getHistoryByMonthWithMonthViewModel month page |> switch >> resultToHttp)
 
     [<Route("leaguehistory/global/gameweek")>]
     member this.GetGlobalPastGameWeeks() =
-        getGlobalLeague() |> (getPastGameWeeksViewModel |> switch >> resultToHttp)
+        getGlobalLeague() |> (getHistoryByGameWeekViewModel getGlobalLeagueMircoViewModel |> switch >> resultToHttp)
 
-    [<Route("leaguehistory/global/gameweek/{gwno:int}")>]
-    member this.GetGlobalGameWeekPoints (gwno) =
-        getGlobalLeague() |> (gwno |> GwNo |> getGameWeekPointsViewModel |> switch >> resultToHttp)
+    [<Route("leaguehistory/global/gameweek/{gwno:int}/page/{page:int}")>]
+    member this.GetGlobalGameWeekPoints (gwno, page) =
+        getGlobalLeague() |> (getGlobalLeagueMircoViewModel |> getHistoryByGameWeekWithGameWeekViewModel (gwno |> GwNo) page |> switch >> resultToHttp)
 
+    [<Route("gameweekmatrix/global/gameweek/{gwno:int}/page/{page:int}")>]
+    member this.GetGlobalGameWeekMatrix (gwno, page) =
+        gwno |> GwNo |> (getGlobalGameWeekMatrix page >> resultToHttp)
         
-    [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}")>]
-    member this.GetGameWeekMatrix (leagueId:Guid, gwno) =
-        let getResult = gwno |> GwNo |> getGameWeekMatrix
-        leagueId |> (getResult >> resultToHttp)
+    [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}/page/{page:int}")>]
+    member this.GetGameWeekMatrix (leagueId:Guid, gwno, page) =
+        leagueId |> (gwno |> GwNo |> getGameWeekMatrix page >> resultToHttp)
 
     [<Route("fixture/{fxId:Guid}")>]
     member this.GetFixture (fxId:Guid) =
@@ -216,11 +229,6 @@ type HomeController() =
     member this.Getleaguepositionforplayer() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         player |> (switch getGlobalLeaguePositionforplayer >> resultToHttp)
-
-    [<Route("globalleague/{page:int}")>]
-    member this.GetGlobalLeaguePage(page:int) =
-        let getResult = this.GetLoggedInPlayerId() |> getLoggedInPlayer |> getGlobalLeagueTablePage
-        page |> (switch getResult >> resultToHttp)
 
     [<Route("getlastgameweekandwinner")>]
     member this.GetLastGameWeekAndWinner() =

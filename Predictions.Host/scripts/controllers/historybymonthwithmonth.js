@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
   .controller('HistorybymonthwithmonthCtrl', function ($scope, $http, $routeParams, auth, title) {
-      var url = '/api/leaguehistory/' + $routeParams.leagueId + '/month/' + $routeParams.month;
+      var url = '/api/leaguehistory/' + $routeParams.leagueId + '/month/' + $routeParams.month + '/page/' + $routeParams.page;
       $http.get(url).success(function (data) {
           $scope.model = data;
           title.set(data.league.name + " / " + data.month);

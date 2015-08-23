@@ -22,9 +22,10 @@
         <tr ng-repeat="row in model.rows">
             <td>
                 <span class="label label-primary">GW#{{row.gameWeekNo}}</span>
-                <!--<a ng-href="#/history/{{model.league.id}}/gameweek/{{row.gameWeekNo}}">Table</a>-->
                 <span class="text-muted small">&middot;</span>
-                <a ng-href="#/matrix/{{model.league.id}}/{{row.gameWeekNo}}">Matrix</a>
+                <a ng-href="#/history/{{model.league.id}}/gameweek/{{row.gameWeekNo}}/0">Table</a>
+                <span class="text-muted small">&middot;</span>
+                <a ng-href="#/matrix/{{model.league.id}}/{{row.gameWeekNo}}/0">Matrix</a>
                 <span class="text-muted small">&middot; {{ row.firstKo | date:'MMM' | uppercase }}</span>
             </td>
                 
