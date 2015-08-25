@@ -44,14 +44,14 @@
 
 // double down anytime
 // sql writes try catch
-// faq
-// global history
 // all fixtures check box -> icon/label
 // aggregated predictions by league
 // boot player from league
 // fixture email alerts
 // more logging
+// faq
 
+// global history
 // count points since league join date
 // title service
 // fixture confidence rating from dd

@@ -79,7 +79,7 @@ module ViewModels =
     type FixturePointsViewModel = { fixture:FixtureViewModel; resultSubmitted:bool; result:ScoreViewModel; openFixturesViewModelRow:OpenFixturesViewModelRow }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type LeaguePositionGraphData = { data:int list list; labels:string list }
+    type LeaguePositionGraphData = { data:int list list; labels:string list; scaleSteps:int }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type FixturePredictionGraphData = { data:int list; labels:string list }

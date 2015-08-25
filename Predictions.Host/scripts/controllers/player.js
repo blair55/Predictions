@@ -27,11 +27,13 @@ angular.module('frontendApp')
               scaleOverride: true,
               // ** Required if scaleOverride is true **
               // Number - The number of steps in a hard coded scale
-              scaleSteps: 16,
+              //scaleSteps: 16,
+              scaleSteps: data.scaleSteps - 1,
               // Number - The value jump in the hard coded scale
               scaleStepWidth: -1,
               // Number - The scale starting value
-              scaleStartValue: 17,
+              //scaleStartValue: 17
+              scaleStartValue: data.scaleSteps
           };
       });
   });

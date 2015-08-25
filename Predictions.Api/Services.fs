@@ -599,7 +599,7 @@ module Services =
                     |> List.filter(fun p -> p.id = plid)
                     |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs league.players plr)))
                     |> List.map(fun (_, posList) -> posList)
-        { LeaguePositionGraphData.data=data; labels=labels }
+        { LeaguePositionGraphData.data=data; labels=labels; scaleSteps=league.players.Length }
 
     let getLeaguePositionGraphDataForPlayerIdAndLeagueId (playerId, leagueId) =
         LgId leagueId |> (getLeague >> bind (getLeaguePositionGraphDataForPlayerInLeague playerId |> switch))
