@@ -1,47 +1,64 @@
-﻿// badges
+﻿// Trophies
 
-- double down on cs home win
-- double down on cs away win
-- double down on cs draw
-- double down on cr home win
-- double down on cr away win
-- double down on cr draw
-- cr for every team in the league
+all user predictions + fixures
+
+- double down on cs home win - fx
+- double down on cs away win - fx
+- double down on cs draw - fx
+- double down on cr home win - fx
+- double down on cr away win - fx
+- double down on cr draw - fx
+- make only incorrect predictions in a gw - gw
+- make only correct predictions in a gw - gw
+- 3 cs in 1 week - gw
+- 2 cs in 1 week - gw
+- 1 cs in 1 week - gw
+- 5 cr in 1 week - gw
+- 3 cr in 1 week - gw
+- 2 cr in 1 week - gw
+- 3 cr draw in 1 week - gw
+- 3 cr home win in 1 week - gw
+- 3 cr away win in 1 week - gw
+- cs for game 5+ goals - fx
+- cs nil nil - fx
+- cs score draw - fx
+
+all user predictions + fixtures + all predictions
+
+- first to make a prediction in a gw - gw
+- dd & cs when in 20% minority - fx
+- dd & cr when in 20% minority - fx
+- cr when in 20% minority - fx
+- cs when in 20% minority - fx
+
+all user predictions + fixtures + teams
+
+- cr for every team in the league 
 - cr win for every team in the league
 - cr draw for every team in the league
 - cr loss for every team in the league
+
+user history for global league
+
 - top global league for 1 week
+- top global league for 1 month
+
+user history for all leagues
+
 - top league of 5+ for 1 week
 - top league of 10+ for 1 week
 - top league of 20+ for 1 week
-- top global league for 1 month
 - top league of 5+ for 1 month
 - top league of 10+ for 1 month
 - top league of 20+ for 1 month
-- make only incorrect predictions in a gw
-- make only correct predictions in a gw
-- first to make a prediction in a gw
-- dd & cr when in 20% minority
-- dd when in 20% minority
-- cr when in 20% minority
-- cs when in 20% minority
-- cs for game 5+ goals
-- cs nil nil
-- cs score draw
-- 3 cs in 1 week
-- 2 cs in 1 week
-- 1 cs in 1 week
-- 5 cr in 1 week
-- 3 cr in 1 week
-- 2 cr in 1 week
-- 3 cr draw in 1 week
-- 3 cr home win in 1 week
-- 3 cr away win in 1 week
-- invite 3 users
-- create a league
 
-// who has got this badge and what was it for?
+- invite 3 users * need to capture attributable invite
+- create a league all user leagues
 
+// who has got this trophy and what was it for?
+
+// breadcrumb
+// closed fixture page view? (hide form, show result, show trophies?)
 // double down anytime
 // sql writes try catch
 // all fixtures check box -> icon/label
