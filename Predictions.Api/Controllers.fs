@@ -91,7 +91,7 @@ type HomeController() =
     member this.GetGlobalLeaguePage(page:int) =
         page |> (switch getGlobalLeagueTablePage >> resultToHttp)
 
-    [<Route("league/{leagueId:Guid}/{page:int}")>]
+    [<Route("league/{leagueId:Guid}/{page:int=0}")>]
     member this.GetLeagueView (leagueId:Guid, page:int) =
         leagueId |> (getLeagueView page >> resultToHttp)
 
