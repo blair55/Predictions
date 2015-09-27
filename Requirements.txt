@@ -2,38 +2,27 @@
 
 all user predictions + fixures
 
-- double down on cs home win - fx
-- double down on cs away win - fx
-- double down on cs draw - fx
-- double down on cr home win - fx
-- double down on cr away win - fx
-- double down on cr draw - fx
-- make only incorrect predictions in a gw - gw
-- make only correct predictions in a gw - gw
+- double down on cs - fx
+- double down on cr - fx
 - 3 cs in 1 week - gw
-- 2 cs in 1 week - gw
-- 1 cs in 1 week - gw
-- 5 cr in 1 week - gw
 - 3 cr in 1 week - gw
-- 2 cr in 1 week - gw
-- 3 cr draw in 1 week - gw
-- 3 cr home win in 1 week - gw
-- 3 cr away win in 1 week - gw
 - cs for game 5+ goals - fx
 - cs nil nil - fx
 - cs score draw - fx
+- make only correct predictions in a gw - gw
+- make only incorrect predictions in a gw - gw
 
 all user predictions + fixtures + all predictions
 
 - first to make a prediction in a gw - gw
-- dd & cs when in 20% minority - fx
-- dd & cr when in 20% minority - fx
-- cr when in 20% minority - fx
-- cs when in 20% minority - fx
+- dd & cs when in 10% minority - fx
+- dd & cr when in 10% minority - fx
+- cr when in 10% minority - fx
+- cs when in 10% minority - fx
 
 all user predictions + fixtures + teams
 
-- cr for every team in the league 
+- cr for every team in the league
 - cr win for every team in the league
 - cr draw for every team in the league
 - cr loss for every team in the league
@@ -46,14 +35,11 @@ user history for global league
 user history for all leagues
 
 - top league of 5+ for 1 week
-- top league of 10+ for 1 week
-- top league of 20+ for 1 week
 - top league of 5+ for 1 month
-- top league of 10+ for 1 month
-- top league of 20+ for 1 month
 
-- invite 3 users * need to capture attributable invite
-- create a league all user leagues
+- be admin of a league with 5 users
+
+
 
 // who has got this trophy and what was it for?
 
