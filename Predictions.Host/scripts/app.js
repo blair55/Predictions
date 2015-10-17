@@ -58,24 +58,7 @@ angular
                 templateUrl: 'views/fixture.html',
                 controller: 'FixtureCtrl'
             })
-
-            //.when('/history/global/gameweek', {
-            //    templateUrl: 'views/globalhistorybygameweek.html',
-            //    controller: 'GlobalhistorybygameweekCtrl'
-            //})
-            //.when('/history/global/gameweek/:gameweekno/:page', {
-            //    templateUrl: 'views/globalhistorybygameweekwithgameweek.html',
-            //    controller: 'GlobalhistorybygameweekwithgameweekCtrl'
-            //})
-            //.when('/history/global/month', {
-            //    templateUrl: 'views/globalhistorybymonth.html',
-            //    controller: 'GlobalhistorybymonthCtrl'
-            //})
-            //.when('/history/global/month/:month/:page', {
-            //    templateUrl: 'views/globalhistorybymonthwithmonth.html',
-            //    controller: 'GlobalhistorybymonthwithmonthCtrl'
-            //})
-
+            
             .when('/history/:leagueId/month', {
                 templateUrl: 'views/historybymonth.html',
                 controller: 'HistorybymonthCtrl'
@@ -146,6 +129,9 @@ angular
     })
     .config(function(blockUIConfig) {
         blockUIConfig.message = '';
+    })
+    .config(function ($compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|javascript):/);
     })
     .config(function(cfpLoadingBarProvider) {
         cfpLoadingBarProvider.includeSpinner = false;

@@ -13,5 +13,6 @@ angular.module('frontendApp')
         $http.get(url).success(function(data) {
             $scope.model = data;
             title.set(data.league.name + " / Month History");
+            title.useBackButton('#/league/' + data.league.id + "/0");
         });
     });

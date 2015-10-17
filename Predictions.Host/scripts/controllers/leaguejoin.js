@@ -11,6 +11,7 @@ angular.module('frontendApp')
     .controller('LeaguejoinCtrl', function($scope, $http, $routeParams, $location, notify, title) {
 
         title.set('Join League');
+        title.useBackButton('#/leagues');
         var url = '/api/leaguejoin/' + $routeParams.shareableLeagueId;
         $http.get(url).success(function(data) {
             $scope.model = data;

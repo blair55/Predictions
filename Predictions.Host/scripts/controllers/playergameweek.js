@@ -13,6 +13,7 @@ angular.module('frontendApp')
         $http.get(url).success(function(data) {
             $scope.model = data;
             title.set(data.player.name + " / GW#" + data.gameWeekNo);
+            title.useBackButton('#/playerprofile/' + data.player.id);
         });
         var neighboursUrl = '/api/gameweekneighbours/' + $routeParams.gameWeekNo;
         $http.get(neighboursUrl).success(function (data) {

@@ -1,4 +1,16 @@
 <div ng-if="loggedInPlayer">
+
+    <div class="alert alert-info clearfix" ng-if="!hasAckedHomeScreenMsg">
+        <div class="row">
+            <div class="col-xs-10">
+                <strong>New!</strong> Add To Home Screen to install Predictions League on your phone
+            </div>
+            <div class="col-xs-2">
+                <i class="glyphicon glyphicon-remove pull-right" ng-click="onAckHomeScreenMsg()"></i>
+            </div>
+        </div>
+    </div>
+
     <div class="panel panel-default">
         <div class="panel-body">
             <p>Hello, <strong>{{ loggedInPlayer.name }}</strong>!</p>

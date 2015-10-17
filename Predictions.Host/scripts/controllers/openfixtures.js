@@ -10,6 +10,7 @@
 angular.module('frontendApp')
     .controller('OpenfixturesCtrl', function($scope, $http, title) {
         title.set('Open Fixtures');
+        title.useBackButton('#/');
 
         $http.get('/api/openfixtures').success(function(data) {
             $scope.model = data;

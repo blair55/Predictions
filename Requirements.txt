@@ -43,7 +43,6 @@ user history for all leagues
 
 // who has got this trophy and what was it for?
 
-// breadcrumb
 // closed fixture page view? (hide form, show result, show trophies?)
 // double down anytime
 // sql writes try catch
@@ -54,6 +53,8 @@ user history for all leagues
 // more logging
 // faq
 
+// bigger info button
+// breadcrumb / back
 // global history
 // count points since league join date
 // title service

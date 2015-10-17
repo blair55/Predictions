@@ -13,6 +13,7 @@ angular.module('frontendApp')
         $http.get(url).success(function(data) {
             $scope.model = data;
             title.set('Invite to ' + data.name);
+            title.useBackButton('#/league/' + data.id + "/0");
             $scope.model.encodedInviteLink = encodeURIComponent(data.inviteLink);
             $scope.model.encodedShareText = encodeURIComponent("Join my Predictions League!");
         });

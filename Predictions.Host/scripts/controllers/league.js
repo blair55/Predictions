@@ -13,6 +13,7 @@ angular.module('frontendApp')
         $http.get(url).success(function(data) {
             $scope.model = data;
             title.set(data.name);
+            title.useBackButton('#/leagues');
             auth.withPlayer(function (player) {
                 $scope.loggedInPlayer = player;
                 $scope.isLoggedInPlayerLeagueAdmin = player.id == data.adminId;

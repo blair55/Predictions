@@ -9,10 +9,12 @@
  */
 angular.module('frontendApp')
     .controller('LeaguedeleteCtrl', function($scope, $http, $routeParams, $location, notify, title) {
-        title.set('Delete League');
+
         var url = '/api/league/' + $routeParams.leagueId;
         $http.get(url).success(function(data) {
             $scope.model = data;
+            title.set('Delete League');
+            title.useBackButton('#/league/' + data.id + "/0");
         });
 
         $scope.submit = function() {
