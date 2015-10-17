@@ -5,8 +5,10 @@ open Microsoft.Owin
 open Microsoft.Owin.Cors
 open Microsoft.Owin.Security
 open Microsoft.Owin.Security.Cookies
+open Microsoft.Owin.Security.DataHandler
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
+open Owin.Security.AesDataProtectorProvider
 open System.Web.Http.Owin
 open System
 open System.Configuration
@@ -76,6 +78,7 @@ type Config() =
         let cookieOptions = new CookieAuthenticationOptions()
         cookieOptions.AuthenticationType <- DefaultAuthenticationTypes.ApplicationCookie
         app.UseCookieAuthentication(cookieOptions) |> ignore
+        app.UseAesDataProtectorProvider() |> ignore
 
         let ids = ["A5EF0B11CEC04103A34A659048B21CE0572D7D47"  // VeriSign Class 3 Secure Server CA - G2
                    "0D445C165344C1827E1D20AB25F40163D8BE79A5"  // VeriSign Class 3 Secure Server CA - G3

@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Predictions.Host.AppHb", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Predictions.Sql", "Predictions.Sql\Predictions.Sql.csproj", "{91E76B78-0B9D-4886-BFE3-156FA9F042EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Predictions.SelfHost", "Predictions.SelfHost\Predictions.SelfHost.csproj", "{7E0995EC-4B40-463E-861A-583D44A7EDA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Predictions.CSharpUtils", "Predictions.CSharpUtils\Predictions.CSharpUtils.csproj", "{AFDF91DC-816A-434A-ABD9-59B6E4F325F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{91E76B78-0B9D-4886-BFE3-156FA9F042EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91E76B78-0B9D-4886-BFE3-156FA9F042EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91E76B78-0B9D-4886-BFE3-156FA9F042EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E0995EC-4B40-463E-861A-583D44A7EDA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0995EC-4B40-463E-861A-583D44A7EDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0995EC-4B40-463E-861A-583D44A7EDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0995EC-4B40-463E-861A-583D44A7EDA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFDF91DC-816A-434A-ABD9-59B6E4F325F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFDF91DC-816A-434A-ABD9-59B6E4F325F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFDF91DC-816A-434A-ABD9-59B6E4F325F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFDF91DC-816A-434A-ABD9-59B6E4F325F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
