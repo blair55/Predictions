@@ -17,6 +17,7 @@
             Welcome to the Predictions League 2015/16
         </div>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-body">
             <p ng-if="openfixturecount == 0">
@@ -31,12 +32,14 @@
             <a href="#openfixtures">Open Fixtures</a>
         </div>
     </div>
-    <div class="panel panel-default">
+
+    <div ng-if="global" class="panel panel-default">
         <div class="panel-body">
             <p>You are ranked <strong>{{ global.leaguePosition | ordinal }}</strong> of <strong>{{ global.totalPlayerCount }}</strong> players</p>
             <a href="#/league/global/{{global.playerLeaguePage}}">Global League Table</a>
         </div>
     </div>
+
     <div ng-if="lastgw.hasResult">
         <div class="panel panel-default">
             <div class="panel-body">
@@ -50,6 +53,7 @@
             </div>
         </div>
     </div>
+
     <div ng-if="leagues && leagues.rows.length == 0" class="panel panel-default">
         <div class="panel-body">
             <a class="btn btn-primary" ng-href="#createleague">Create your own League</a>

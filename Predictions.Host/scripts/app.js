@@ -135,6 +135,7 @@ angular
     })
     .config(function(cfpLoadingBarProvider) {
         cfpLoadingBarProvider.includeSpinner = false;
-    }).run(function(googleanalytics) {
+    })
+    .run(function (googleanalytics) {
         googleanalytics.init();
     });

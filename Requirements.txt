@@ -1,6 +1,6 @@
 ﻿// Trophies
 
-all user predictions + fixures
+all user predictions + fixtures
 
 - double down on cs - fx
 - double down on cr - fx
@@ -43,6 +43,8 @@ user history for all leagues
 
 // who has got this trophy and what was it for?
 
+// prem league table
+// fixture guide shows team league positions / position diffs / goal diffs
 // closed fixture page view? (hide form, show result, show trophies?)
 // double down anytime
 // sql writes try catch

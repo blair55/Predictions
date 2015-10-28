@@ -1,4 +1,4 @@
-<ul class="list-inline">
+<ul ng-if="model" class="list-inline">
     <li>Includes</li>
     <li ng-repeat="gw in model.gameweeks">
         <a ng-href="#/history/{{model.league.id}}/gameweek/{{gw}}/0">GW#{{gw}}</a>

@@ -6,16 +6,11 @@ open Microsoft.Owin.Cors
 open Microsoft.Owin.Security
 open Microsoft.Owin.Security.Cookies
 open Microsoft.AspNet.Identity
-open Microsoft.AspNet.Identity.Owin
-open System.Web.Http.Owin
 open System
 open System.Configuration
 open System.Net
 open System.Net.Http
-open System.Net.Http.Headers
-open System.Web
 open System.Web.Http
-open System.Web.Routing
 open System.Web.Http.Filters
 open System.Web.Http.Controllers
 
