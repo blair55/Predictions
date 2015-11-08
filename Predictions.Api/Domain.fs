@@ -434,3 +434,69 @@ module TeamNames =
         | "West Brom"      -> "WBA"
         | "West Ham"       -> "WHU"
         | _ -> team.Substring(0, 3)
+
+
+open Domain
+
+module Achievements =
+
+    type Achievement =
+        | HomeBoy
+        | Traveller
+        | ParkedTheBus
+        | MysticMeg
+        | GoalFrenzy
+        | BoreDraw
+        | ScoreDraw
+        | GreatWeek
+        | PerfectWeek
+        | ShootTheMoon
+        | EarlyBird
+        | GlobalLeagueTopWeek
+        | PrivateLeagueTopWeek
+        | Guvna
+
+    type AchLevel =
+        | Bronze
+        | Silver
+        | Gold
+
+    type AckedAch = { achievement:Achievement; level:AchLevel }
+
+    let getAchievementsForPlayer (plr:Player) gws =
+
+        // calculate achs
+
+        let fs = getClosedFixturesForGameWeeks gws
+                    |> Seq.filter(fun (_, r) -> r.IsSome)
+                    |> Seq.map(fun (fd, r) -> (fd, r.Value))
+
+        let correctScoreDoubleDowns (plr:Player) (fd:FixtureData) (r:Result) = 
+            let pr = plr.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
+            match Some r |> getBracketForPredictionComparedToResult pr with
+            | Incorrect
+            | CorrectOutcome _ -> false
+            | CorrectScore modifier ->
+                match modifier with
+                | NoModifier -> false
+                | DoubleDown -> true
+        
+        let fixturesWhen fs outcome =
+            fs |> Seq.filter(fun (fd, r:Result) -> if r.score |> getResultOutcome = outcome then correctScoreDoubleDowns plr fd r else false)
+
+        let homeWins = fixturesWhen fs HomeWin
+        let awayWins = fixturesWhen fs AwayWin
+        let draws = fixturesWhen fs Draw
+
+        // filter out already acked achs
+
+        let ackedAchs = [
+            { achievement=HomeBoy; level=Bronze } ]
+
+//        let newAchs = achs |> Seq.filter(fun a -> ackedAchs |> Seq.exists(fun aa -> aa = a) = false)
+
+        // notify of new achs
+
+        // share ach
+        
+        ()
