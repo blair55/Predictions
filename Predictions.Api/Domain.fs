@@ -301,6 +301,10 @@ module Domain =
     let inline getIsGameWeekComplete (gw:GameWeek) =
         gw.fixtures |> Array.forall(isFixtureClosedAndHaveResult)
 
+    let inline makeSureFixtureExists gws fxid =
+        let fixture = tryFindFixture gws fxid
+        NotFound "fixture does not exist" |> optionToResult fixture
+
     // Rules 
     
     // when adding gameweek:
@@ -462,42 +466,44 @@ module Achievements =
         | PrivateLeagueTopWeek
         | Guvna
 
-    type AchLevel =
-        | Bronze
-        | Silver
-        | Gold
-
-    type AckedAch = { achievement:Achievement; level:AchLevel }
+//    type AchLevel =
+//        | Bronze
+//        | Silver
+//        | Gold
 
     let getAchievementsForPlayer (plr:Player) gws =
 
         // calculate achs
 
         let fs = getClosedFixturesForGameWeeks gws
-                    |> Seq.filter(fun (_, r) -> r.IsSome)
-                    |> Seq.map(fun (fd, r) -> (fd, r.Value))
+                 |> Seq.filter(fun (_, r) -> r.IsSome)
+                 |> Seq.map(fun (fd, r) -> (fd, r.Value))
 
-        let correctScoreDoubleDowns (plr:Player) (fd:FixtureData) (r:Result) = 
+        let correctScores (plr:Player) (fd:FixtureData) (r:Result) modF = 
             let pr = plr.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
             match Some r |> getBracketForPredictionComparedToResult pr with
             | Incorrect
             | CorrectOutcome _ -> false
-            | CorrectScore modifier ->
-                match modifier with
-                | NoModifier -> false
-                | DoubleDown -> true
-        
-        let fixturesWhen fs outcome =
-            fs |> Seq.filter(fun (fd, r:Result) -> if r.score |> getResultOutcome = outcome then correctScoreDoubleDowns plr fd r else false)
+            | CorrectScore m -> modF m
 
-        let homeWins = fixturesWhen fs HomeWin
-        let awayWins = fixturesWhen fs AwayWin
-        let draws = fixturesWhen fs Draw
+        let isDoubleDown = function
+            | NoModifier -> false
+            | DoubleDown -> true
+
+        let fixturesWhenCsDd outcome fs = fs |> Seq.filter(fun (fd, r:Result) ->
+            if r.score |> getResultOutcome = outcome then isDoubleDown |> correctScores plr fd r else false)
+
+        let homeWins = fs |> fixturesWhenCsDd HomeWin
+        let awayWins = fs |> fixturesWhenCsDd AwayWin
+        let draws =    fs |> fixturesWhenCsDd Draw
+
+        let correctScores20percent fs prds =
+            fs prds
+            ()
 
         // filter out already acked achs
 
-        let ackedAchs = [
-            { achievement=HomeBoy; level=Bronze } ]
+        let ackedAchs = []
 
 //        let newAchs = achs |> Seq.filter(fun a -> ackedAchs |> Seq.exists(fun aa -> aa = a) = false)
 

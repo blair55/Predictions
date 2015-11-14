@@ -166,7 +166,7 @@ module Services =
             let labels = gws |> Array.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
             { PlayerProfileGraphData.data=[|data|]; labels=labels }
         PlId playerId |> (getPlayer >> bind (switch getResult))
-
+        
     let makeSureFixtureExists gws fxid =
         let fixture = tryFindFixture gws fxid
         NotFound "fixture does not exist" |> optionToResult fixture
