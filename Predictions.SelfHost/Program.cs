@@ -1,7 +1,11 @@
 ﻿using System;
+using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.Hosting;
+using Microsoft.Owin.StaticFiles.ContentTypes;
 using Predictions.Api;
 using Owin;
+using Microsoft.Owin;
+using Microsoft.Owin.StaticFiles;
 
 namespace Predictions.SelfHost
 {
@@ -9,16 +13,27 @@ namespace Predictions.SelfHost
     {
         public static void Main(string[] args)
         {
-            using (WebApp.Start("http://127.0.0.1:9000/", app =>
+            //using (WebApp.Start("http://localhost:9001/", app =>
+            using (WebApp.Start("http://*:9000/", app =>
             {
-                //Config.BuildApp(app);
                 app.UseErrorPage();
-                app.UseWelcomePage("/");
+                //app.UseWelcomePage("/");
+
+                var options = new FileServerOptions
+                {
+                    EnableDirectoryBrowsing = true,
+                    RequestPath = PathString.Empty,
+                    FileSystem = new PhysicalFileSystem(@"../../../Predictions.Host"),
+                };
+
+                app.UseFileServer(options);
+
+                Config.BuildApp(app);
             }))
             {
-                Console.WriteLine("starting app on :9000");
+                Console.WriteLine("starting app on *:9000");
                 Console.WriteLine("I'm running on {0} directly from assembly {1}", Environment.OSVersion, System.Reflection.Assembly.GetEntryAssembly().FullName);
-          
+
                 Console.ReadLine();
             }
         }

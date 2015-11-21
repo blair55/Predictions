@@ -7,7 +7,6 @@ open System.Net.Http
 open System.Web
 open System.Web.Http
 open System.Web.Routing
-open System.Web.Http.Cors
 open System.Net.Http.Headers
 open Predictions.Api.Domain
 open Predictions.Api.ViewModels

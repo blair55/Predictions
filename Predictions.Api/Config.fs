@@ -29,6 +29,10 @@ type ErrorFilter() =
     override this.OnException(context:HttpActionExecutedContext) =
         let response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
         Logging.error(context.Exception)
+        System.Console.WriteLine("**********************")
+        System.Console.WriteLine("{0}", context.Exception.Message)
+        System.Console.WriteLine("{0}", context.Exception.StackTrace)
+        System.Console.WriteLine(String.Empty);
         response.Content <- new StringContent("Something went wrong!")
         context.Response <- response
 
@@ -60,10 +64,12 @@ type LogRouteAttribute() =
 type Config() =
 
     static member private RegisterWebApi(config: HttpConfiguration) =
+//        config.EnableSystemDiagnosticsTracing() |> ignore
+        config.IncludeErrorDetailPolicy <- IncludeErrorDetailPolicy.Always
         config.MapHttpAttributeRoutes()
-        config.EnableCors()
+//        config.EnableCors()
         config.Filters.Add(new ErrorFilter())
-        config.Formatters.XmlFormatter.SupportedMediaTypes.Clear();
+        config.Formatters.XmlFormatter.SupportedMediaTypes.Clear()
         config.Formatters.JsonFormatter.SerializerSettings.ContractResolver
             <- Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
 
@@ -100,7 +106,7 @@ type Config() =
         app.UseFacebookAuthentication(facebookOptions) |> ignore
 
         app.UseCors(CorsOptions.AllowAll) |> ignore
-
+        
         let config = new HttpConfiguration()
         Config.RegisterWebApi(config)
         app.UseWebApi(config) |> ignore
