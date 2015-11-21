@@ -99,23 +99,25 @@ module Data =
     type [<CLIMutable>] BuildFixtureQueryResult = { fixtureId:Guid; gameWeekId:Guid; kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:Nullable<int>; awayTeamScore:Nullable<int> }
     let buildSeason (year:SnYr) =
         let args = { BuildSeasonQueryArgs.seasonYear=year|>getSnYr; }
-        let sql = @"select sns.seasonId, sns.seasonYear
-                    from seasons sns
-                    where sns.SeasonYear = @seasonYear
-                    select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription
-                    from seasons sns
-                    join gameWeeks gws on sns.SeasonId = gws.SeasonId
-                    where sns.SeasonYear = @seasonYear
-                    select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore
-                    from seasons sns
-                    join gameWeeks gws on sns.SeasonId = gws.SeasonId
-                    join fixtures fxs on gws.GameWeekId = fxs.GameWeekId
-                    where sns.SeasonYear = @seasonYear"
+        let sqlSn, sqlGw, sqlFx =
+            @"select sns.seasonId, sns.seasonYear
+            from seasons sns
+            where sns.SeasonYear = @seasonYear",
+            @"select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription
+            from seasons sns
+            join gameWeeks gws on sns.SeasonId = gws.SeasonId
+            where sns.SeasonYear = @seasonYear",
+            @"select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore
+            from seasons sns
+            join gameWeeks gws on sns.SeasonId = gws.SeasonId
+            join fixtures fxs on gws.GameWeekId = fxs.GameWeekId
+            where sns.SeasonYear = @seasonYear"
         use conn = newConn()
-        let multi = conn.QueryMultiple(sql, args)
-        let seasonResult = multi.Read<BuildSeasonQueryResult>() |> Seq.head
-        let gameWeeksResult = multi.Read<BuildGameWeekQueryResult>()
-        let fixturesResult = multi.Read<BuildFixtureQueryResult>()
+//        let multi = conn.QueryMultiple(sql, args)
+
+        let seasonResult = conn.Query<BuildSeasonQueryResult>(sqlSn, args) |> Seq.head
+        let gameWeeksResult = conn.Query<BuildGameWeekQueryResult>(sqlGw, args)
+        let fixturesResult = conn.Query<BuildFixtureQueryResult>(sqlFx, args)
         let buildFixture (result:BuildFixtureQueryResult) =
             let fd = { FixtureData.id=result.fixtureId|>FxId; gwId=result.gameWeekId|>GwId; home=result.homeTeamName; away=result.awayTeamName; kickoff=result.kickoff }
             let resultExists = result.homeTeamScore.HasValue && result.awayTeamScore.HasValue
@@ -155,19 +157,20 @@ module Data =
         { Prediction.id=p.predictionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore); modifier=modifier }
     let tryFindPlayerByPlayerId playerId =
         let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
-        let sql = @"select playerId, playerName, isAdmin from players where playerId = @playerId
-                    select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
-                        case when dd.predictionid is null then 0 else 1 end as DoubleDown
-                    from predictions pds
-                    left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId
-                    where pds.playerId = @playerId"
+        let sqlPl, sqlPr =
+            @"select playerId, playerName, isAdmin from players where playerId = @playerId",
+            @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
+                case when dd.predictionid is null then 0 else 1 end as DoubleDown
+            from predictions pds
+            left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId
+            where pds.playerId = @playerId"
         use conn = newConn()
-        let multi = conn.QueryMultiple(sql, args)
-        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toArray
+//        let multi = conn.QueryMultiple(sql, args)
+        let playersResult = conn.Query<PlayersTableQueryResult>(sqlPl, args) |> Seq.toArray
         if playersResult |> Array.isEmpty then None
         else
             let predictions =
-                multi.Read<PredictionsTableQueryResult>()
+                conn.Query<PredictionsTableQueryResult>(sqlPr, args)
                 |> Seq.map queryResultToPrediction
                 |> Seq.toArray
             let player = playersResult.[0]
@@ -189,30 +192,29 @@ module Data =
     type [<CLIMutable>] PlayersTableWithLeagueJoinDateQueryResult = { playerId:Guid; playerName:string; isAdmin:bool; leagueJoinDate:DateTime }
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
-        let sql = @"select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId
-                    from Leagues lgs
-                    where lgs.LeagueId = @leagueId
-                    and lgs.LeagueIsDeleted = 0
-
-                    select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate
-                    from Players pls
-                    join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
-                    where lpb.LeagueId = @leagueId
-                    
-                    select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created,
-                        case when dd.predictionid is null then 0 else 1 end as DoubleDown
-                    from Predictions pds
-                    join Players pls on pds.PlayerId = pls.PlayerId
-                    join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
-                    left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId
-                    where lpb.LeagueId = @leagueId"
+        let sqlLg, sqlPl, sqlPr = 
+            @"select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId
+            from Leagues lgs
+            where lgs.LeagueId = @leagueId
+            and lgs.LeagueIsDeleted = 0",
+            @"select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate
+            from Players pls
+            join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
+            where lpb.LeagueId = @leagueId",
+            @"select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created,
+                case when dd.predictionid is null then 0 else 1 end as DoubleDown
+            from Predictions pds
+            join Players pls on pds.PlayerId = pls.PlayerId
+            join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
+            left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId
+            where lpb.LeagueId = @leagueId"
         use conn = newConn()
-        let multi = conn.QueryMultiple(sql, args)
-        let leagueResult = multi.Read<LeaguesTableQueryResult>() |> Seq.toArray
+//        let multi = conn.QueryMultiple(sql, args)
+        let leagueResult = conn.Query<LeaguesTableQueryResult>(sqlLg, args) |> Seq.toArray
         if leagueResult |> Array.isEmpty then None
         else
-            let playersResult = multi.Read<PlayersTableWithLeagueJoinDateQueryResult>() |> Seq.toArray
-            let predictionsResult = multi.Read<PredictionsTableQueryResult>() |> Seq.toArray
+            let playersResult = conn.Query<PlayersTableWithLeagueJoinDateQueryResult>(sqlPl, args) |> Seq.toArray
+            let predictionsResult = conn.Query<PredictionsTableQueryResult>(sqlPr, args) |> Seq.toArray
             let players =
                 let getPlayerPredictionsSinceJoinedLeague p =
                     predictionsResult
@@ -263,16 +265,17 @@ module Data =
         |> Seq.toArray
 
     let getAllPlayers() =
-        let sql = @"select playerId, playerName, isAdmin from players
-                    select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
-                        case when dd.predictionid is null then 0 else 1 end as DoubleDown
-                    from predictions pds
-                    left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
+        let sqlPl, sqlPr =
+            @"select playerId, playerName, isAdmin from players",
+            @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
+                case when dd.predictionid is null then 0 else 1 end as DoubleDown
+            from predictions pds
+            left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
         use conn = newConn()
-        let multi = conn.QueryMultiple(sql)
-        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toArray
+//        let multi = conn.QueryMultiple(sql)
+        let playersResult = conn.Query<PlayersTableQueryResult>(sqlPl) |> Seq.toArray
         let predictions =
-            multi.Read<PredictionsTableQueryResult>()
+            conn.Query<PredictionsTableQueryResult>(sqlPr)
             |> Seq.map queryResultToPrediction
             |> Seq.toArray
         let getPredictionsForPlayerId plid =

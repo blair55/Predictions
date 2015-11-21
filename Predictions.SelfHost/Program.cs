@@ -14,7 +14,7 @@ namespace Predictions.SelfHost
         public static void Main(string[] args)
         {
             //using (WebApp.Start("http://localhost:9001/", app =>
-            using (WebApp.Start("http://*:9000/", app =>
+            using (WebApp.Start("http://*:80/", app =>
             {
                 app.UseErrorPage();
                 //app.UseWelcomePage("/");
