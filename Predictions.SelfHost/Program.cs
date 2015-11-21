@@ -23,7 +23,8 @@ namespace Predictions.SelfHost
                 {
                     EnableDirectoryBrowsing = true,
                     RequestPath = PathString.Empty,
-                    FileSystem = new PhysicalFileSystem(@"../../../Predictions.Host"),
+                    //FileSystem = new PhysicalFileSystem(@"../../../Predictions.Host"),
+                    FileSystem = new PhysicalFileSystem(@"../../../Predictions.Host.AppHb"),
                 };
 
                 app.UseFileServer(options);
