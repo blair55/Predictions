@@ -66,11 +66,7 @@ angular.module('frontendApp')
                     row.state = state.readonly;
                     row.existingScore = row.existingScoreOriginal;
                 };
-
-                scope.navToFixture = function(row) {
-                    $location.path("/fixture/" + row.fixture.fxId);
-                }
-
+                
                 scope.row.isSubmittable = function(row) {
                     switch (row.state) {
                     case state.create:

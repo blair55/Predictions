@@ -1,13 +1,11 @@
 ﻿namespace Predictions.Api
 
 open System
-open System.IO
-open System.Data
 open System.Data.SqlClient
 open System.Configuration
-open System.Collections.Generic
 open Dapper
 open Predictions.Api.Domain
+
 
 module Data =
     
@@ -70,7 +68,7 @@ module Data =
             { SavePredictionCommandArgs.id=cmd.id|>getPrId; fixtureId=cmd.fixtureId|>getFxId; playerId=cmd.playerId|>getPlayerId; homeScore=cmd.score|>fst; awayScore=cmd.score|>snd }
 
     type SaveFixtureCommand = { id:FxId; home:Team; away:Team; kickoff:KickOff }
-    type SaveGameWeekCommand = { id:GwId; seasonYear:SnYr; description:string; saveFixtureCommands:SaveFixtureCommand list }
+    type SaveGameWeekCommand = { id:GwId; seasonYear:SnYr; description:string; saveFixtureCommands:SaveFixtureCommand array }
     type SaveGameWeekCommandArgs = { id:Guid; seasonYear:string; description:string; }
     type SaveFixtureCommandArgs = { id:Guid; gameWeekId:Guid; ko:DateTime; home:string; away:string }
     let saveGameWeek (cmd:SaveGameWeekCommand) =
@@ -84,7 +82,7 @@ module Data =
         let saveFixture (fd:SaveFixtureCommand) =
             nonQuery @"insert into Fixtures(FixtureId, GameWeekId, KickOff, HomeTeamName, AwayTeamName) values (@Id, @GameWeekId, @ko, @Home, @Away)"
                 { SaveFixtureCommandArgs.id=fd.id|>getFxId; gameWeekId=cmd.id|>getGwId; ko=fd.kickoff; home=fd.home; away=fd.away }
-        cmd.saveFixtureCommands |> List.iter saveFixture
+        cmd.saveFixtureCommands |> Array.iter saveFixture
 
     type SaveDoubleDownCommand = { playerId:PlId; gameWeekId:GwId; predictionId:PrId }
     type SaveDoubleDownCommandArgs = { playerId:Guid; gameWeekId:Guid; predictionId:Guid }
@@ -128,10 +126,10 @@ module Data =
                 fdrs
                 |> Seq.filter(fun (fd, _) -> fd.gwId=(result.gameWeekId|>GwId))
                 |> Seq.map(fun (fd, r) -> fixtureDataToFixture fd r)
-                |> Seq.toList
+                |> Seq.toArray
             { GameWeek.id=result.gameWeekId|>GwId; number=result.gameWeekNumber|>GwNo; description=result.gameWeekDescription; fixtures=gwFixtures }
         let fdrs = fixturesResult |> Seq.map buildFixture
-        let gameWeeks = gameWeeksResult |> Seq.map(buildGameWeek fdrs) |> Seq.toList
+        let gameWeeks = gameWeeksResult |> Seq.map(buildGameWeek fdrs) |> Seq.toArray
         { id=seasonResult.seasonId|>SnId; year=seasonResult.seasonYear|>SnYr; gameWeeks=gameWeeks }
     
     type LeagueIdsPlayerIsInQueryArgs = { playerId:Guid }
@@ -145,7 +143,7 @@ module Data =
                     and lgs.LeagueIsDeleted = 0"
         use conn = newConn()
         let result = conn.Query<LeagueIdsPlayerIsInQueryResult>(sql, args)
-        result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toList
+        result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toArray
 
     type FindPlayerByPlayerIdQueryArgs = { playerId:Guid }
     type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string; isAdmin:bool }
@@ -165,14 +163,14 @@ module Data =
                     where pds.playerId = @playerId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
-        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toList
-        if playersResult.IsEmpty then None
+        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toArray
+        if playersResult |> Array.isEmpty then None
         else
             let predictions =
                 multi.Read<PredictionsTableQueryResult>()
                 |> Seq.map queryResultToPrediction
-                |> Seq.toList
-            let player = playersResult |> List.head
+                |> Seq.toArray
+            let player = playersResult.[0]
             Some (queryResultToPlayer player predictions)
 
     type FindPlayerByExternalIdQueryArgs = { externalId:string; externalProvider:string }
@@ -180,11 +178,11 @@ module Data =
         let args = { FindPlayerByExternalIdQueryArgs.externalId=externalPlayerId|>getExternalPlayerId; externalProvider=externalLoginProvider|>getExternalLoginProvider }
         let sql = @"select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider"
         use conn = newConn()
-        let result = conn.Query<PlayersTableQueryResult>(sql, args) |> Seq.toList
-        if result.IsEmpty then None
+        let result = conn.Query<PlayersTableQueryResult>(sql, args) |> Seq.toArray
+        if result |> Array.isEmpty then None
         else
-            let player = result |> List.head
-            Some (queryResultToPlayer player [])
+            let player = result.[0]
+            Some (queryResultToPlayer player Array.empty)
 
     type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
     type [<CLIMutable>] LeaguesTableQueryResult = { leagueId:Guid; leagueName:string; leagueAdminId:Guid }
@@ -210,20 +208,20 @@ module Data =
                     where lpb.LeagueId = @leagueId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql, args)
-        let leagueResult = multi.Read<LeaguesTableQueryResult>() |> Seq.toList
-        if leagueResult.IsEmpty then None
+        let leagueResult = multi.Read<LeaguesTableQueryResult>() |> Seq.toArray
+        if leagueResult |> Array.isEmpty then None
         else
-            let playersResult = multi.Read<PlayersTableWithLeagueJoinDateQueryResult>() |> Seq.toList
-            let predictionsResult = multi.Read<PredictionsTableQueryResult>() |> Seq.toList
+            let playersResult = multi.Read<PlayersTableWithLeagueJoinDateQueryResult>() |> Seq.toArray
+            let predictionsResult = multi.Read<PredictionsTableQueryResult>() |> Seq.toArray
             let players =
                 let getPlayerPredictionsSinceJoinedLeague p =
                     predictionsResult
-                    |> List.filter(fun pr -> pr.playerId = p.playerId)
-                    |> List.filter(fun pr -> pr.created > p.leagueJoinDate)
-                    |> List.map queryResultToPrediction
+                    |> Array.filter(fun pr -> pr.playerId = p.playerId)
+                    |> Array.filter(fun pr -> pr.created > p.leagueJoinDate)
+                    |> Array.map queryResultToPrediction
                 playersResult
-                |> List.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=p|>getPlayerPredictionsSinceJoinedLeague; isAdmin=p.isAdmin })
-            let league = leagueResult |> List.head
+                |> Array.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=p|>getPlayerPredictionsSinceJoinedLeague; isAdmin=p.isAdmin })
+            let league = leagueResult.[0]
             Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players; adminId=league.leagueAdminId|>PlId }
             
     type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
@@ -231,11 +229,11 @@ module Data =
         let args = { FindLeagueByShareableLeagueIdQueryArgs.shareableLeagueId=shareableLeagueId }
         let sql = @"select LeagueId, LeagueName, LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and LeagueIsDeleted = 0"
         use conn = newConn()
-        let result = conn.Query<LeaguesTableQueryResult>(sql, args) |> Seq.toList
-        if result.IsEmpty then None
+        let result = conn.Query<LeaguesTableQueryResult>(sql, args) |> Seq.toArray
+        if result |> Array.isEmpty then None
         else
-            let league = result |> List.head
-            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=[]; adminId=league.leagueAdminId|>PlId }
+            let league = result.[0]
+            Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=Array.empty; adminId=league.leagueAdminId|>PlId }
     
     type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
     let getAllPredictionsForFixture (fxid:FxId) =
@@ -248,7 +246,7 @@ module Data =
         use conn = newConn()
         conn.Query<PredictionsTableQueryResult>(sql, args)
         |> Seq.map queryResultToPrediction
-        |> Seq.toList
+        |> Seq.toArray
 
     type GetFixturePreviousMeetingsArgs = { homeTeamName:string; awayTeamName:string }
     type [<CLIMutable>] GetFixturePreviousMeetingsQueryResult = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
@@ -262,7 +260,7 @@ module Data =
         use conn = newConn()
         conn.Query<GetFixturePreviousMeetingsQueryResult>(sql, args)
         |> Seq.map(fun r -> (r.kickoff, r.homeTeamName, r.awayTeamName, r.homeTeamScore, r.awayTeamScore))
-        |> Seq.toList
+        |> Seq.toArray
 
     let getAllPlayers() =
         let sql = @"select playerId, playerName, isAdmin from players
@@ -272,16 +270,16 @@ module Data =
                     left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
         use conn = newConn()
         let multi = conn.QueryMultiple(sql)
-        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toList
+        let playersResult = multi.Read<PlayersTableQueryResult>() |> Seq.toArray
         let predictions =
             multi.Read<PredictionsTableQueryResult>()
             |> Seq.map queryResultToPrediction
-            |> Seq.toList
+            |> Seq.toArray
         let getPredictionsForPlayerId plid =
             predictions
-            |> List.filter(fun pr -> pr.playerId = (plid|>PlId))
+            |> Array.filter(fun pr -> pr.playerId = (plid|>PlId))
         playersResult
-            |> List.map(fun pl -> queryResultToPlayer pl (getPredictionsForPlayerId pl.playerId))
+            |> Array.map(fun pl -> queryResultToPlayer pl (getPredictionsForPlayerId pl.playerId))
 
     let getPlayerByExternalLogin (explid:ExternalPlayerId, exprov:ExternalLoginProvider) =
         match tryFindPlayerByExternalId explid exprov with

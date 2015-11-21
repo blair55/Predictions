@@ -14,10 +14,7 @@ open System
 open System.Configuration
 open System.Net
 open System.Net.Http
-open System.Net.Http.Headers
-open System.Web
 open System.Web.Http
-open System.Web.Routing
 open System.Web.Http.Filters
 open System.Web.Http.Controllers
 

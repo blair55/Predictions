@@ -12,5 +12,6 @@ angular.module('frontendApp')
         $http.get('/api/leagues').success(function (data) {
             $scope.model = data;
             title.set('My Leagues');
+            title.useBackButton('#/');
         });
     });

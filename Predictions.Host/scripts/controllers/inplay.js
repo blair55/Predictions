@@ -12,5 +12,6 @@ angular.module('frontendApp')
       $http.get('/api/inplay').success(function (data) {
           $scope.model = data;
           title.set('Active Game Week');
+          title.useBackButton('#/');
       });
   });

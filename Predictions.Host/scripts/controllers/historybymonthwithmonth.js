@@ -13,6 +13,7 @@ angular.module('frontendApp')
       $http.get(url).success(function (data) {
           $scope.model = data;
           title.set(data.league.name + " / " + data.month);
+          title.useBackButton('#/history/' + data.league.id + "/month");
       });
       var neighboursUrl = '/api/monthneighbours/' + $routeParams.month;
       $http.get(neighboursUrl).success(function (data) {

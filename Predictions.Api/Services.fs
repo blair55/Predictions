@@ -23,8 +23,8 @@ module Services =
         f |> isFixtureOpen |> createVm
     
     let season() = buildSeason currentSeason
-    let gameWeeks() = season().gameWeeks |> List.sortBy(fun gw -> gw.number)
-    let gameWeeksWithClosedFixtures() = gameWeeks() |> List.filter(fun gw -> getFixturesForGameWeeks [gw] |> List.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
+    let gameWeeks() = season().gameWeeks |> Array.sortBy(fun gw -> gw.number)
+    let gameWeeksWithClosedFixtures() = gameWeeks() |> Array.filter(fun gw -> getFixturesForGameWeeks [|gw|] |> Array.choose(onlyClosedFixtures) |> Seq.isEmpty = false)
     let gameWeeksWithResults() = gameWeeks() |> getGameWeeksWithAnyClosedFixturesWithResults
 
     let formGuideOutcomeToString = function | Win -> "w" | Draw -> "d" | Lose -> "l"
@@ -38,8 +38,8 @@ module Services =
         let getPredictionId (pr:Prediction option) =
             match pr with | Some p -> p.id |> getPrId |> str | None -> ""
         let getFormGuide team =
-            (getTeamFormGuideOutcome gameWeeks team) |> List.map(formGuideOutcomeToString)
-        let allFixturesAreOpenInGw = gw.fixtures |> List.forall isFixtureOpen
+            (getTeamFormGuideOutcome gameWeeks team) |> Array.map(formGuideOutcomeToString)
+        let allFixturesAreOpenInGw = gw.fixtures |> Array.forall isFixtureOpen
         { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
           scoreSubmitted=pr.IsSome
           newScore=None
@@ -53,19 +53,19 @@ module Services =
     let getOpenFixturesForPlayer (player:Player) =
         let gws = gameWeeks()
         let rows = gws
-                   |> List.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [gw] player)
-                   |> List.map(fun (gw, fdps) -> fdps |> List.map(fun (fd, p) -> toOpenFixtureViewModelRow (gw,fd,p) gws))
-                   |> List.collect(fun ofvmr -> ofvmr)
-                   |> List.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
+                   |> Array.map(fun gw -> gw, getOpenFixturesAndPredictionForPlayer [|gw|] player)
+                   |> Array.map(fun (gw, fdps) -> fdps |> Array.map(fun (fd, p) -> toOpenFixtureViewModelRow (gw,fd,p) gws))
+                   |> Array.collect(fun ofvmr -> ofvmr)
+                   |> Array.sortBy(fun ofvmr -> ofvmr.fixture.kickoff)
         { OpenFixturesViewModel.rows=rows }
 
     let getPlayerPointsForFixture (player:Player) (fxid:FxId) =
         let gws = gameWeeks()
         let getResult (gw, (fd:FixtureData), (r:Result option)) =
-            let getPredictionScoreViewModel (prediction:Prediction option) =
-                match prediction with
-                | Some p -> toScoreViewModel p.score
-                | None -> noScoreViewModel
+//            let getPredictionScoreViewModel (prediction:Prediction option) =
+//                match prediction with
+//                | Some p -> toScoreViewModel p.score
+//                | None -> noScoreViewModel
             let getResultScoreViewModel (result:Result option) =
                 match result with
                 | Some rslt -> toScoreViewModel rslt.score
@@ -113,7 +113,7 @@ module Services =
             getLeagueIdsThatPlayerIsIn player
             |> Seq.map getLeagueUnsafe
             |> Seq.map(fun l -> leagueToRowViewModel l player)
-            |> Seq.toList
+            |> Seq.toArray
         { LeaguesViewModel.rows=rows }
 
     let getBracketClass prd r =
@@ -122,7 +122,7 @@ module Services =
 
     let getPlayerGameWeekByPlayerIdAndGameWeekNo gameWeekNo revealPlayerScoresEvenIfFixtureIsOpen playerId =
         let getResult player =
-            let gw = gameWeeks() |> List.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
+            let gw = gameWeeks() |> Array.find(fun gw -> (getGameWeekNo gw.number) = gameWeekNo)
             let rowToViewModel (fd, (r:Result option), (p:Prediction option), pts) =
                 let fixture = fixtureDataToFixture fd r
                 let getVmPred (pred:Prediction option) =
@@ -143,8 +143,8 @@ module Services =
                     | ClosedFixture _ -> pred|>getIsDoubleDown
                 let bracketClass = getBracketClass p r
                 { GameWeekDetailsRowViewModel.fixture=(toFixtureViewModel fd gw); predictionSubmitted=p.IsSome; prediction=getVmPred p; resultSubmitted=r.IsSome; result=getVmResult r; points=pts; isDoubleDown=p|>getDoubleDown; bracketClass=bracketClass }
-            let rows = (getGameWeekDetailsForPlayer player gw) |> List.map(rowToViewModel) |> List.sortBy(fun g -> g.fixture.kickoff)
-            { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>List.sumBy(fun r -> r.points); rows=rows }
+            let rows = (getGameWeekDetailsForPlayer player gw) |> Array.map(rowToViewModel) |> Array.sortBy(fun g -> g.fixture.kickoff)
+            { GameWeekDetailsViewModel.gameWeekNo=gameWeekNo; player=(getPlayerViewModel player); totalPoints=rows|>Array.sumBy(fun r -> r.points); rows=rows }
         PlId playerId |> (getPlayer >> bind (switch getResult))
 
     let getPlayerProfileView playerId =
@@ -154,19 +154,19 @@ module Services =
                     PlayerProfileViewModelRow.gameWeekNo=(getGameWeekNo gw.number);
                     hasResults=(doesGameWeekHaveAnyResults gw); firstKo=(getFirstKoForGw gw);
                     correctScores=cs; correctOutcomes=co; points=pts }
-            let rows = (getPlayerProfilePointsForGameWeeks player gws) |> List.map(buildRow)
-            let totalPoints = rows |> List.sumBy(fun r -> r.points)
+            let rows = (getPlayerProfilePointsForGameWeeks player gws) |> Array.map(buildRow)
+            let totalPoints = rows |> Array.sumBy(fun r -> r.points)
             { PlayerProfileViewModel.player=player|>getPlayerViewModel; totalPoints=totalPoints; rows=rows }
         PlId playerId |> (getPlayer >> bind (switch getResult))
 
     let getPlayerProfileGraph playerId =
         let getResult player =
             let gws = gameWeeks()
-            let data = gws |> List.map(fun gw -> getGameWeekDetailsForPlayer player gw |> List.sumBy(fun (_, _, _, pts) -> pts))
-            let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
-            { PlayerProfileGraphData.data=[data]; labels=labels }
+            let data = gws |> Array.map(fun gw -> getGameWeekDetailsForPlayer player gw |> Array.sumBy(fun (_, _, _, pts) -> pts))
+            let labels = gws |> Array.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+            { PlayerProfileGraphData.data=[|data|]; labels=labels }
         PlId playerId |> (getPlayer >> bind (switch getResult))
-
+        
     let makeSureFixtureExists gws fxid =
         let fixture = tryFindFixture gws fxid
         NotFound "fixture does not exist" |> optionToResult fixture
@@ -175,14 +175,14 @@ module Services =
         let gws = gameWeeks()
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch fixtureToFixtureData)
-             >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id) (0, 0, 0))))
-             >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw]; labels=[fd.home; "Draw"; fd.away] })))
+             >> bind (switch (fun fd -> fd, (GetOutcomeCounts (getAllPredictionsForFixture fd.id |> Array.toList) (0, 0, 0))))
+             >> bind (switch (fun (fd, (hw, d, aw)) -> { FixturePredictionGraphData.data=[hw; d; aw] |> List.toArray; labels=[fd.home; "Draw"; fd.away] |> List.toArray })))
         
     let getFixtureDoubleDowns fxid =
         let gws = gameWeeks()
         let getAllPredictions (fd:FixtureData) = getAllPredictionsForFixture fd.id
-        let getDoubleDownPercentage (prds:Prediction list) =
-            let ddPrds = prds |> List.filter(fun p -> p.modifier = DoubleDown)
+        let getDoubleDownPercentage (prds:Prediction array) =
+            let ddPrds = prds |> Array.filter(fun p -> p.modifier = DoubleDown)
             let totalPrds = Convert.ToDecimal(prds.Length)
             let totalDdPrds = Convert.ToDecimal(ddPrds.Length)
             let pc = if totalPrds = 0m then 0m else (totalDdPrds / totalPrds) * (100m)
@@ -197,12 +197,12 @@ module Services =
         let getResult (fixture:Fixture) =
             let fd = fixtureToFixtureData fixture
             let rows = getFixturePreviousMeetingsData fd.home fd.away
-                        |> List.map(fun (kickoff, homeTeamName, awayTeamName, homeTeamScore, awayTeamScore) ->
+                        |> Array.map(fun (kickoff, homeTeamName, awayTeamName, homeTeamScore, awayTeamScore) ->
                             { FixturePreviousMeetingsQueryResultViewModelRow.kickoff=kickoff; home=homeTeamName|>getTeamViewModel; away=awayTeamName|>getTeamViewModel; homeTeamScore=homeTeamScore; awayTeamScore=awayTeamScore } )
-                        |> List.sortBy(fun r -> r.kickoff)
-                        |> List.rev
-            let thisFixtureRows = rows |> List.filter(fun r -> r.home.full=fd.home)
-            let reverseFixtureRows = rows |> List.filter(fun r -> r.home.full=fd.away)
+                        |> Array.sortBy(fun r -> r.kickoff)
+                        |> Array.rev
+            let thisFixtureRows = rows |> Array.filter(fun r -> r.home.full=fd.home)
+            let reverseFixtureRows = rows |> Array.filter(fun r -> r.home.full=fd.away)
             { FixturePreviousMeetingsQueryResultViewModel.allRows=rows; thisFixtureRows=thisFixtureRows; reverseFixtureRows=reverseFixtureRows }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
@@ -211,17 +211,17 @@ module Services =
         let gws = gameWeeks()
         let getResult (fixture:Fixture) =
             let fd = fixtureToFixtureData fixture
-            let homeFormGuide = getTeamFormGuide gws fd.home |> List.rev
-            let awayFormGuide = getTeamFormGuide gws fd.away |> List.rev
+            let homeFormGuide = getTeamFormGuide gws fd.home |> Array.rev
+            let awayFormGuide = getTeamFormGuide gws fd.away |> Array.rev
             let toRow (fg:FormGuideResultContainer) = {
                 FixtureFormGuideViewModelRow.fixture=toFixtureViewModel fg.fd fg.gameWeek
                 result=toScoreViewModel fg.result.score
                 outcome=formGuideOutcomeToString fg.outcome }
-            { FixtureFormGuideViewModel.homeRows=homeFormGuide|>List.map toRow; awayRows=awayFormGuide|>List.map toRow }
+            { FixtureFormGuideViewModel.homeRows=homeFormGuide|>Array.map toRow; awayRows=awayFormGuide|>Array.map toRow }
         fxid |> ((makeSureFixtureExists gws)
              >> bind (switch getResult))
 
-    let getNeighbours (col:List<'a>) getId findItem =
+    let getNeighbours (col:_[]) getId findItem =
         let i = col |> Seq.findIndex(findItem)
         let iToVal index = col.[index] |> getId
         let max = col.Length - 1
@@ -253,8 +253,8 @@ module Services =
     let getMonthNeighbours month =
         let months =
             gameWeeksWithResults()
-            |> List.map(getMonthForGameWeek)
-            |> Seq.distinct |> Seq.toList
+            |> Array.map(getMonthForGameWeek)
+            |> Seq.distinct |> Seq.toArray
         let getResult m =
             let findItem = (fun mth -> m = mth)
             let getId = (fun mth -> mth |> str)
@@ -264,7 +264,7 @@ module Services =
     let getGameWeeksWithClosedFixtures() =
         let rows = gameWeeks()
                    |> getGameWeeksWithClosedFixtures
-                   |> List.map(fun gw -> { GameWeeksWithClosedFixturesRowViewModel.gwno=gw.number|>getGameWeekNo; closedFixtureCount=[gw]|>getClosedFixturesForGameWeeks|>List.length })
+                   |> Array.map(fun gw -> { GameWeeksWithClosedFixturesRowViewModel.gwno=gw.number|>getGameWeekNo; closedFixtureCount=[|gw|]|>getClosedFixturesForGameWeeks|>Array.length })
         { GameWeeksWithClosedFixturesViewModel.rows=rows }
 
     let resultToScoreViewModel (result:Result option) =
@@ -274,29 +274,29 @@ module Services =
 
     let getClosedFixturesForGameWeek gwno =
         let rows = gameWeeks()
-                   |> List.filter(fun gw -> gw.number = gwno)
-                   |> List.map(fun gw -> gw, getClosedFixturesForGameWeeks [gw])
-                   |> List.map(fun (gw, fdr) -> fdr |> List.map(fun (fd, r) ->
+                   |> Array.filter(fun gw -> gw.number = gwno)
+                   |> Array.map(fun gw -> gw, getClosedFixturesForGameWeeks [|gw|])
+                   |> Array.map(fun (gw, fdr) -> fdr |> Array.map(fun (fd, r) ->
                       { OpenFixturesViewModelRow.fixture=(toFixtureViewModel fd gw)
                         newScore=None
                         scoreSubmitted=r.IsSome
                         existingScore=r|>resultToScoreViewModel
-                        homeFormGuide=[]
-                        awayFormGuide=[]
+                        homeFormGuide=Array.empty
+                        awayFormGuide=Array.empty
                         isDoubleDown=false
                         predictionId=""
                         isGameWeekOpen=false }))
-                   |> List.collect(fun o -> o)
-                   |> List.sortBy(fun r -> r.fixture.kickoff)
+                   |> Array.collect(fun o -> o)
+                   |> Array.sortBy(fun r -> r.fixture.kickoff)
         { ClosedFixturesForGameWeekViewModel.gameWeekNo=gwno|>getGameWeekNo; rows=rows }
 
     let getOpenFixturesWithNoPredictionsForPlayerCount player =
         getOpenFixturesWithNoPredictionForPlayer (gameWeeks()) player
-        |> List.length
+        |> Array.length
 
     let getlatestGameWeekNo gws =
-        if gws |> List.isEmpty then 0
-        else gws |> List.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
+        if gws |> Array.isEmpty then 0
+        else gws |> Array.maxBy(fun gw -> gw.number|>getGameWeekNo) |> (fun gw -> gw.number|>getGameWeekNo)
 
     let getInPlay playerId =
         let latestGwNo = gameWeeks() |> getlatestGameWeekNo
@@ -340,7 +340,7 @@ module Services =
             updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
             player
         | _ -> 
-            let player = { Player.id=newPlId(); name=userName; predictions=[]; isAdmin=false }
+            let player = { Player.id=newPlId(); name=userName; predictions=Array.empty; isAdmin=false }
             registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; email=email }
             player
 
@@ -348,13 +348,13 @@ module Services =
         let prId = PrId predictionId
         let gws = gameWeeks()
         let makeSurePredictionBelongsToPlayer prid =
-            let prediction = player.predictions |> List.tryFind(fun p -> p.id = prid)
+            let prediction = player.predictions |> Array.tryFind(fun p -> p.id = prid)
             Forbidden "Prediction does not exist or does not belong to you!" |> optionToResult prediction
         let makeSureGameWeekHasNotKickedOff (prediction:Prediction) =
             let fxs = gws |> getFixtureDatasForGameWeeks
-            let fd = fxs |> List.find(fun fd -> fd.id = prediction.fixtureId)
-            let gw = gws |> List.find(fun gw -> gw.id = fd.gwId)
-            let allFixturesAreOpenInGw = gw.fixtures |> List.forall isFixtureOpen
+            let fd = fxs |> Array.find(fun fd -> fd.id = prediction.fixtureId)
+            let gw = gws |> Array.find(fun gw -> gw.id = fd.gwId)
+            let allFixturesAreOpenInGw = gw.fixtures |> Array.forall isFixtureOpen
             if allFixturesAreOpenInGw then Success gw
             else gw.number |> getGameWeekNo |> sprintf "Too late! GW%i has already kicked off" |> Forbidden |> Failure
         let saveDoubleDown (gw:GameWeek) = { SaveDoubleDownCommand.playerId=player.id; gameWeekId=gw.id; predictionId=prId } |> saveDoubleDownInDb
@@ -387,7 +387,7 @@ module Services =
         { LeaguePositionViewModelRow.leaguePosition=pos; totalPlayerCount=total; playerLeaguePage=page }
 
         //leagueTableRowToViewModel //LeagueTableRow
-    let getPagedList page f (allRows:List<'a>) =
+    let getPagedList page f (allRows:_[]) =
         let totalPages = (allRows.Length/globalLeaguePageSize)
         let amountToTake =
             if totalPages = page then
@@ -399,9 +399,9 @@ module Services =
             |> Seq.skip(page*globalLeaguePageSize)
             |> Seq.take amountToTake
             |> Seq.map f
-            |> Seq.toList
+            |> Seq.toArray
         let neighbours =
-            let allPages = [0..totalPages]
+            let allPages = [|0..totalPages|]
             let findItem = (fun i -> i = page)
             let getId = (fun i -> i |> str)
             getNeighbours allPages getId findItem
@@ -413,13 +413,13 @@ module Services =
         let allPlayers = getAllPlayers()
         let allWinners =
             getPastGameWeeksWithWinner gws allPlayers
-            |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
-        if allWinners |> List.isEmpty then { PastGameWeekRowViewModel.gameWeekNo=0; winners=[]; points=0; hasResult=false; isGameWeekComplete=false }
-        else allWinners |> List.maxBy(fun r -> r.gameWeekNo)
+            |> Array.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>Array.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
+        if allWinners |> Array.isEmpty then { PastGameWeekRowViewModel.gameWeekNo=0; winners=[||]; points=0; hasResult=false; isGameWeekComplete=false }
+        else allWinners |> Array.maxBy(fun r -> r.gameWeekNo)
 
     let getHistoryByMonthViewModel toMicroLeague (league:League) =
         let rows = (getPastMonthsWithWinner (gameWeeksWithResults()) league.players)
-                    |> List.map(fun (m, plrs, pts) -> { HistoryByMonthRowViewModel.month=m; winners=plrs|>List.map getPlayerViewModel; points=pts })
+                    |> Array.map(fun (m, plrs, pts) -> { HistoryByMonthRowViewModel.month=m; winners=plrs|>Array.map getPlayerViewModel; points=pts })
         { HistoryByMonthViewModel.rows=rows; league=league|>toMicroLeague }
     let getPastMonthsWithWinnerView leagueId =
         LgId leagueId |> (getLeague >> bind (getHistoryByMonthViewModel getMicroLeagueViewModel |> switch))
@@ -427,21 +427,21 @@ module Services =
     let getHistoryByMonthWithMonthViewModel month page toMicroLeague (league:League) =
         let gws = month |> getGameWeeksForMonth (gameWeeksWithResults())
         let rows, neighbours = getLeagueTableRows league gws |> getPagedList page leagueTableRowToViewModel
-        { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>List.map(fun gw -> gw.number|>getGameWeekNo); league=league|>toMicroLeague; neighbours=neighbours }
+        { HistoryByMonthWithMonthViewModel.month=month; rows=rows; gameweeks=gws|>Array.map(fun gw -> gw.number|>getGameWeekNo); league=league|>toMicroLeague; neighbours=neighbours }
     let getMonthPointsView month page leagueId =
         LgId leagueId |> (getLeague >> bind (switch (getHistoryByMonthWithMonthViewModel month page getMicroLeagueViewModel)))
 
     let getHistoryByGameWeekViewModel toMicroLeague (league:League) =
         let rows = (getPastGameWeeksWithWinner (gameWeeksWithResults()) league.players)
-                    |> List.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>List.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
+                    |> Array.map(fun (gw, plrs, pts) -> { PastGameWeekRowViewModel.gameWeekNo=(getGameWeekNo gw.number); winners=plrs|>Array.map getPlayerViewModel; points=pts; hasResult=true; isGameWeekComplete=gw|>getIsGameWeekComplete})
         { PastGameWeeksViewModel.rows=rows; league=league|>toMicroLeague }
     let getPastGameWeeksWithWinnerView leagueId =
         LgId leagueId |> (getLeague >> bind (getHistoryByGameWeekViewModel getMicroLeagueViewModel |> switch))
 
     let getHistoryByGameWeekWithGameWeekViewModel gwno page toMicroLeague (league:League) =
-        let gws = gameWeeks() |> List.filter(fun gw -> gw.number = gwno)
+        let gws = gameWeeks() |> Array.filter(fun gw -> gw.number = gwno)
         let fixtures = gws |> getFixturesForGameWeeks
-        let month = fixtures |> List.map fixtureToFixtureData |> List.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
+        let month = fixtures |> Array.map fixtureToFixtureData |> Array.minBy(fun fd -> fd.kickoff) |> fun fd -> fd.kickoff.ToString(monthFormat)
         let rows, neighbours = getLeagueTableRows league gws |> getPagedList page leagueTableRowToViewModel
         { HistoryByGameWeekWithGameWeekViewModel.gameWeekNo=(getGameWeekNo gwno); rows=rows; month=month; league=league|>toMicroLeague; neighbours=neighbours }
     let getGameWeekPointsView gwno page leagueId =
@@ -477,7 +477,7 @@ module Services =
             if league.players.Length < maxPlayersPerLeague then league |> Success
             else Invalid "League has reached maximum number of players" |> Failure
         let joinLge (league:League) =
-            let playerAlreadyInLeague = league.players |> List.exists(fun p -> p = player)
+            let playerAlreadyInLeague = league.players |> Array.exists(fun p -> p = player)
             if playerAlreadyInLeague then () else joinLeagueInDb { JoinLeagueCommand.leagueId=lgid; playerId=player.id }
         let returnLeague() = getLeagueView 0 leagueId
         lgid |> (getLeague
@@ -514,8 +514,8 @@ module Services =
         getLeagueView 0 (getLgId lgid)
 
     let getGameWeekMatrixViewModel page toMicroLeague (gameWeek:GameWeek, league:League) =
-        let fixtures = getFixturesForGameWeeks [gameWeek]
-        let fixtureDataWithResults = fixtures |> List.map(fixtureToFixtureDataWithResult)
+        let fixtures = getFixturesForGameWeeks [|gameWeek|]
+        let fixtureDataWithResults = fixtures |> Array.map(fixtureToFixtureDataWithResult)
         let columns =
             let toColumn (fd, result:Result option) =
                     let vm = toFixtureViewModel fd gameWeek
@@ -523,12 +523,12 @@ module Services =
                     | Some r -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=true; score=r.score|>toScoreViewModel }
                     | None -> { GameWeekMatrixFixtureColumnViewModel.fixture=vm; isSubmitted=false; score=noScoreViewModel }
             fixtures
-            |> List.map fixtureToFixtureDataWithResult
-            |> List.sortBy(fun (fd, _) -> fd.kickoff)
-            |> List.map toColumn
+            |> Array.map fixtureToFixtureDataWithResult
+            |> Array.sortBy(fun (fd, _) -> fd.kickoff)
+            |> Array.map toColumn
         let playerToMatrixRow (player:Player) =
             let getPredictionViewModel ((fd:FixtureData), r) =
-                let prd = player.predictions |> List.tryFind(fun p -> p.fixtureId = fd.id)
+                let prd = player.predictions |> Array.tryFind(fun p -> p.fixtureId = fd.id)
                 let bracketClass = getBracketClass prd r
                 let buildModel (isOpen, isSubmitted, score, bracketClass, isDoubleDown) =
                     { GameWeekMatrixPlayerRowPredictionViewModel.isFixtureOpen=isOpen; isSubmitted=isSubmitted; score=score; bracketClass=bracketClass; isDoubleDown=isDoubleDown }
@@ -538,15 +538,15 @@ module Services =
                     match prd with
                     | Some p -> buildModel (false,true,(p.score|>toScoreViewModel),bracketClass,p.modifier=DoubleDown)
                     | None -> buildModel (false,false,noScoreViewModel,bracketClass,false)
-            let predictions = fixtureDataWithResults |> List.sortBy(fun (fd,_) -> fd.kickoff) |> List.map(getPredictionViewModel)
+            let predictions = fixtureDataWithResults |> Array.sortBy(fun (fd,_) -> fd.kickoff) |> Array.map(getPredictionViewModel)
             let (_, _, _, points) = getPlayerBracketProfile fixtures player
             { GameWeekMatrixPlayerRowViewModel.player=player|>getPlayerViewModel; predictions=predictions; points=points }
-        let rows = league.players |> List.map(playerToMatrixRow) |> List.sortBy(fun row -> -row.points)
+        let rows = league.players |> Array.map(playerToMatrixRow) |> Array.sortBy(fun row -> -row.points)
         let pagedrows, neighbours = rows |> getPagedList page (fun o->o)
         { GameWeekMatrixViewModel.gameWeekNo=(getGameWeekNo gameWeek.number); rows=pagedrows; columns=columns; league=league|>toMicroLeague; neighbours=neighbours }
 
     let getGameWeek gwno =
-        match gameWeeks() |> List.tryFind(fun gw -> gw.number = gwno) with
+        match gameWeeks() |> Array.tryFind(fun gw -> gw.number = gwno) with
         | Some gw -> Success gw
         | None -> NotFound "game week not found" |> Failure
 
@@ -573,7 +573,7 @@ module Services =
             match r with
             | Some (pos, _, cs, co, pts) -> buildRow gw pos cs co pts
             | None -> buildRow gw 0 0 0 0
-        let rows = (getPlayerPointsForGameWeeks league.players player gameWeeks) |> List.map(getPlayerGameWeeksViewModelRow)
+        let rows = (getPlayerPointsForGameWeeks league.players player gameWeeks) |> Array.map(getPlayerGameWeeksViewModelRow)
         let fixtures = gameWeeks |> getFixturesForGameWeeks
         let pos = getLeaguePositionForFixturesForPlayer fixtures league.players player
         { PlayerGameWeeksViewModel.player=(getPlayerViewModel player); position=pos; rows=rows; league=league|>toMicroLeague }
@@ -593,12 +593,12 @@ module Services =
     let getLeaguePositionGraphDataForPlayerInLeague playerId (league:League) =
         let plid = PlId playerId
         let gws = gameWeeksWithResults()
-        let fixtures = gws |> compoundList |> List.map(getFixturesForGameWeeks)
-        let labels = gws |> List.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
+        let fixtures = gws |> Array.toList |> compoundList |> List.map(fun gws -> gws |> List.toArray |> getFixturesForGameWeeks) |> List.toArray
+        let labels = gws |> Array.map(fun gw -> "GW#" + (gw.number|>getGameWeekNo|>str))
         let data = league.players
-                    |> List.filter(fun p -> p.id = plid)
-                    |> List.map(fun plr -> (plr, fixtures |> List.map(fun fs -> getLeaguePositionForFixturesForPlayer fs league.players plr)))
-                    |> List.map(fun (_, posList) -> posList)
+                    |> Array.filter(fun p -> p.id = plid)
+                    |> Array.map(fun plr -> (plr, fixtures |> Array.map(fun fs -> getLeaguePositionForFixturesForPlayer fs league.players plr)))
+                    |> Array.map(fun (_, posList) -> posList)
         { LeaguePositionGraphData.data=data; labels=labels; scaleSteps=league.players.Length }
 
     let getLeaguePositionGraphDataForPlayerIdAndLeagueId (playerId, leagueId) =
@@ -614,7 +614,7 @@ module Services =
         let importGwNo = gws |> getlatestGameWeekNo |> (fun gwno -> gwno+1)
         getNewGwFixtures importGwNo
         |> List.map(fun (d, h, a) -> { ImportNewGameWeekViewModelRow.home=h; away=a; kickoff=d })
-        |> fun rows -> { ImportNewGameWeekViewModel.rows=rows; gwno=importGwNo }
+        |> fun rows -> { ImportNewGameWeekViewModel.rows=rows|>List.toArray; gwno=importGwNo }
 
     let submitImportNextGameWeek() =
         let gws = gameWeeks()
@@ -622,7 +622,8 @@ module Services =
         let teams =
             gws
             |> getFixturesForGameWeeks
-            |> List.map(fixtureToFixtureData)
+            |> Array.map(fixtureToFixtureData)
+            |> Array.toList
             |> List.collect(fun fd -> [fd.home, fd.away])
             |> List.unzip
             |> fun (h,a) -> h@a
@@ -645,7 +646,7 @@ module Services =
         
         let saveGw fxs =
             let fxcmds = fxs |> List.map(fun (d,h,a) -> { SaveFixtureCommand.id=newFxId(); home=h; away=a; kickoff=d })
-            { SaveGameWeekCommand.id=newGwId(); seasonYear=currentSeason; description=""; saveFixtureCommands=fxcmds }
+            { SaveGameWeekCommand.id=newGwId(); seasonYear=currentSeason; description=""; saveFixtureCommands=fxcmds|>List.toArray }
             |> saveGameWeek
 
         importGwNo |> (switch (getNewGwFixtures)

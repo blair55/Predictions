@@ -14,6 +14,7 @@ angular.module('frontendApp')
         var url = '/api/league/' + $routeParams.leagueId;
         $http.get(url).success(function(data) {
             $scope.model = data;
+            title.useBackButton('#/league/' + data.id + "/0");
         });
 
         $scope.submit = function() {

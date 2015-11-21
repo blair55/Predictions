@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th class="left-align">
-                <a ng-href="#history/{{model.league.id}}/gameweek/{{model.gameWeekNo}}/0">GW#{{model.gameWeekNo}} Table</a>
+                <a ng-if="model" ng-href="#history/{{model.league.id}}/gameweek/{{model.gameWeekNo}}/0">GW#{{model.gameWeekNo}} Table</a>
             </th>
             <th ng-repeat="col in model.columns">
                 <div>

@@ -8,7 +8,7 @@
  * Controller of the frontendApp
  */
 angular.module('frontendApp')
-    .controller('MainCtrl', function($scope, $http, auth, title) {
+    .controller('MainCtrl', function($scope, $http, localStorageService, auth, title) {
         title.set('Predictions League');
         auth.withPlayer(function(player) {
             $scope.loggedInPlayer = player;
@@ -25,4 +25,9 @@ angular.module('frontendApp')
         $http.get('/api/leagues').success(function(data) {
             $scope.leagues = data;
         });
+        $scope.hasAckedHomeScreenMsg = localStorageService.get('hasAckedHomeScreenMsg');
+        $scope.onAckHomeScreenMsg = function () {
+            localStorageService.set('hasAckedHomeScreenMsg', true);
+            $scope.hasAckedHomeScreenMsg = true;
+        };
     });

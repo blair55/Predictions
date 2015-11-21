@@ -49,6 +49,7 @@ body { padding-bottom: 70px; background-color:#fefefe;}
     margin-left: 2px;
     cursor: pointer;
     color: #f0ad4e;
+    text-transform: uppercase;
 }
 
 .double-down-selected {
@@ -165,12 +166,23 @@ h4{margin-top:0;}
     padding: 5px 0;
 }
 
+.navbar-back {
+    margin: 0;
+    padding: 12px;
+    background-color: #222 !important;
+    border-color: #222 !important;
+    color: #fff;
+    font-size: 18px;
+}
+.navbar-back:hover, .navbar-back:active, .navbar-back:focus {
+    color: #fff;
+    border-color: #222 !important;
+}
 .navbar-toggle {
-    float: left;
     border-color: #222 !important;
     margin: 0;
     padding: 16px 16px 17px;
-    border-radius: 0;
+    border:0;
 }
 
 .navmenu-brand {
@@ -246,6 +258,7 @@ h4{margin-top:0;}
 table.table-no-top-border > tbody > tr:first-child > td {
     border-top: 0;
 }
+
 .graph-placeholder {
     display: block;
 }

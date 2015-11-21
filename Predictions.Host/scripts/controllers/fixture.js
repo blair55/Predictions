@@ -14,6 +14,7 @@ angular.module('frontendApp')
       $http.get(url).success(function (data) {
           $scope.model = data;
           title.set(data.fixture.home.full.toUpperCase() + " v " + data.fixture.away.full.toUpperCase());
+          title.useBackButton('#/openfixtures');
       });
 
       var graphUrl = '/api/fixturepredictiongraph/' + $routeParams.fxid;
