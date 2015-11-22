@@ -55,7 +55,6 @@ module WebUtils =
             member this.ExecuteAsync(cancellationToken) =
                 let authProperties = new AuthenticationProperties()
                 let referrer = getQueryParamFromReferrerUri request.Headers.Referrer "redirect"
-                System.Console.WriteLine("referrer: {0}", referrer)
                 authProperties.RedirectUri <- "/account/callback?redirect=" + referrer
                 request.GetOwinContext().Authentication.Challenge(authProperties, loginProvider)
                 let response = new HttpResponseMessage(HttpStatusCode.Unauthorized)

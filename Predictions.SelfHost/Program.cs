@@ -29,7 +29,7 @@ namespace Predictions.SelfHost
 
                 app.UseFileServer(options);
 
-                Config.BuildApp(app);
+                Config.buildApp(app);
             }))
             {
                 Console.WriteLine("starting app on *:9000");

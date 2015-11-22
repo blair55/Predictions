@@ -11,7 +11,7 @@ namespace Predictions.Host.AppHb
     {
         public void Configuration(IAppBuilder app)
         {
-            Config.BuildApp(app);
+            Config.buildApp(app);
         }
     }
 }
