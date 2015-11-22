@@ -1,1 +1,1 @@
-xbuild ./Predictions.sln && mono ./Predictions.Api/bin/Debug/Predictions.Api.exe
+sudo mono ./build/Predictions.Api.exe

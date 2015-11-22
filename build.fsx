@@ -5,27 +5,22 @@ open Fake
 let buildDir = "./build"
 
 Target "Clean" (fun _ ->
-    CleanDir buildDir
+  CleanDir buildDir
 )
 
 Target "RestorePackages" (fun _ ->
-    RestorePackages()
+  "./Predictions.sln"
+  |> RestoreMSSolutionPackages (fun p -> { p with ToolPath = "./nuget.exe" })
 )
 
 Target "Compile" (fun _ ->
-    !! "AppHarbor.sln"
-    |> MSBuildRelease buildDir "Build"
-    |> ignore
+  !! "./Predictions.sln"
+  |> MSBuildRelease buildDir "Build"
+  |> ignore
 )
 
-//Target "Test" (fun _ ->
-//    !! (buildDir + "/**/*UnitTests.dll")
-//    |> NUnit (fun defaults -> defaults)
-//)
-
 "Clean"
-//  ==> "RestorePackages"
+  ==> "RestorePackages"
   ==> "Compile"
-//  ==> "Test"
 
 RunTargetOrDefault "Compile"
