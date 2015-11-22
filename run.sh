@@ -1,1 +1,1 @@
-sudo xbuild Predictions.sln && sudo mono ./Predictions.SelfHost/bin/Debug/Predictions.SelfHost.exe
+xbuild ./Predictions.sln && mono ./Predictions.Api/bin/Debug/Predictions.Api.exe
