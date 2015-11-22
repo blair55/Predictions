@@ -4,6 +4,6 @@ echo "deb http://download.mono-project.com/repo/debian wheezy-libjpeg62-compat m
 sudo apt-get update
 sudo apt-get install -y build-essential mono-complete fsharp
 mozroots --import --sync
-curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-sudo apt-get install -y nodejs
-sudo npm install -g grunt-cli
+#curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
+#sudo apt-get install -y nodejs
+#sudo npm install -g grunt-cli
