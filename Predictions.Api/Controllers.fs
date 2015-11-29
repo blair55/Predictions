@@ -30,6 +30,10 @@ type AccountController() =
     member this.LoginWithExternal(model:ExternalLoginPostModel) =
         new ChallengeResult(model.provider, this.Request)
 
+    [<HttpGet>][<Route("time")>]
+    member this.GetTime() =
+        GMTDateTime.Now()
+
     [<HttpGet>][<Route("logout")>]
     member this.GetLogOut() =
         this.AuthManager.SignOut()
