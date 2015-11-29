@@ -91,7 +91,7 @@ module Config =
         fsOptions.FileSystem <- new PhysicalFileSystem(config "StaticFileRoot")
 
         let config = new HttpConfiguration()
-//        config.EnableSystemDiagnosticsTracing() |> ignore
+        //config.EnableSystemDiagnosticsTracing() |> ignore
         //config.IncludeErrorDetailPolicy <- IncludeErrorDetailPolicy.Always
         //config.EnableCors()
         config.MapHttpAttributeRoutes()

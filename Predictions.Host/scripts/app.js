@@ -58,7 +58,7 @@ angular
                 templateUrl: 'views/fixture.html',
                 controller: 'FixtureCtrl'
             })
-            
+
             .when('/history/:leagueId/month', {
                 templateUrl: 'views/historybymonth.html',
                 controller: 'HistorybymonthCtrl'
@@ -138,4 +138,5 @@ angular
     })
     .run(function (googleanalytics) {
         googleanalytics.init();
-    });
+    })
+    ;
