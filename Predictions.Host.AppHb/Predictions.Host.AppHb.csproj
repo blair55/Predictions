@@ -109,7 +109,6 @@
     <Content Include="images\PlayerPointsGraph.png" />
     <Content Include="index.html" />
     <Content Include="largetile.png" />
-    <Content Include="login.html" />
     <Content Include="mediumtile.png" />
     <Content Include="robots.txt" />
     <Content Include="scripts\oldieshim.js" />

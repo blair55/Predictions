@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Web
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Predictions.Api", "Predictions.Api\Predictions.Api.fsproj", "{9E5A39D8-EC5F-4169-B54B-42DB5293E3E4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Predictions.Host.AppHb", "Predictions.Host.AppHb\Predictions.Host.AppHb.csproj", "{70EFF670-38B3-4C26-9BF2-BBA61AEDBDC8}"
 EndProject
 Global
