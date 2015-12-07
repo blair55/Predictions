@@ -3,10 +3,10 @@ namespace Predictions.Api
 open System
 open System.Linq
 open System.Net
-open System.Net.Http
 open System.Web
 open System.Web.Http
 open System.Web.Routing
+open System.Net.Http
 open System.Net.Http.Headers
 open Predictions.Api.Domain
 open Predictions.Api.ViewModels
