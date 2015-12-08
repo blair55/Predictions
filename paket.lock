@@ -3,6 +3,7 @@ NUGET
   specs:
     Dapper (1.42) - framework: >= net45
     dbup (3.2.1) - framework: >= net451
+    FAKE (4.10.3)
     FSharp.Data (2.2.3) - framework: >= net45
     logentries.core (2.7.1) - framework: >= net45
       Microsoft.WindowsAzure.ConfigurationManager (>= 3.1.0) - framework: >= net40
@@ -80,7 +81,6 @@ NUGET
     Newtonsoft.Json (6.0.4) - framework: >= net45
     NLog (4.0.1) - framework: >= net45
     Npgsql (2.2.1) - framework: >= net45
-    NuGet.CommandLine (3.3.0)
     Owin (1.0) - framework: >= net45
     Owin.Security.AesDataProtectorProvider (1.1.0) - framework: >= net45
       Microsoft.Owin.Security (>= 3.0.1)

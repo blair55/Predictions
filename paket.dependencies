@@ -1,6 +1,6 @@
 source https://www.nuget.org/api/v2/
 
-nuget Nuget.CommandLine
+nuget FAKE
 nuget Dapper 1.42 framework: >= net45
 nuget dbup 3.2.1 framework: >= net451
 nuget FSharp.Data 2.2.3 framework: >= net45

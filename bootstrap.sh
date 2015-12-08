@@ -3,7 +3,7 @@ echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /
 echo "deb http://download.mono-project.com/repo/debian wheezy-libjpeg62-compat main" | sudo tee -a /etc/apt/sources.list.d/mono-xamarin.list
 sudo apt-get update
 sudo apt-get install -y build-essential mono-complete fsharp
-#mozroots --import --sync
+mozroots --import --sync
 #curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
 #sudo apt-get install -y nodejs
 #sudo npm install -g grunt-cli
