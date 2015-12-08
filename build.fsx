@@ -14,9 +14,6 @@ Target "StopRunning" (fun _ ->
 Target "Clean" (fun _ ->
     CleanDir buildDir)
 
-Target "RestorePackages" (fun _ ->
-    slnFile |> RestoreMSSolutionPackages (fun p -> { p with ToolPath = "./nuget.exe" }))
-
 Target "Compile" (fun _ ->
     !! slnFile |> MSBuildRelease buildDir "Build" |> ignore)
 
@@ -39,10 +36,14 @@ Target "Run" (fun _ ->
         info.FileName <- sprintf "%s\\%s\\Predictions.Api.exe" cwd buildDir
         info.WorkingDirectory <- sprintf "%s\\%s" cwd buildDir))
 
+Target "All" DoNothing
+
 "StopRunning"
     ==> "Clean"
-    ==> "RestorePackages"
     ==> "Compile"
     ==> "Run"
 
-RunTargetOrDefault "Run"
+"Compile"
+    ==> "All"
+
+RunTargetOrDefault "All"

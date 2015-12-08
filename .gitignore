@@ -8,6 +8,7 @@ Predictions.Api/app.config
 .vagrant/*
 
 .fake/
+.paket/paket.exe
 
 # User-specific files
 *.suo
