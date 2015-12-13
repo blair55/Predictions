@@ -21,28 +21,28 @@ module Domain =
     type ExternalLoginProvider = ExternalLoginProvider of string
     type PlayerName = PlayerName of string
 
-    let inline nguid() = Guid.NewGuid()
-    let inline newLgId() = nguid()|>LgId
-    let inline newFxId() = nguid()|>FxId
-    let inline newPrId() = nguid()|>PrId
-    let inline newGwId() = nguid()|>GwId
-    let inline newSnId() = nguid()|>SnId
-    let inline newPlId() = nguid()|>PlId
-    let inline makeLeagueName (name:string) =
+    let nguid() = Guid.NewGuid()
+    let newLgId() = nguid()|>LgId
+    let newFxId() = nguid()|>FxId
+    let newPrId() = nguid()|>PrId
+    let newGwId() = nguid()|>GwId
+    let newSnId() = nguid()|>SnId
+    let newPlId() = nguid()|>PlId
+    let makeLeagueName (name:string) =
         (if name.Length > 50 then name.Substring(0, 50) else name) |> LeagueName
-    
-    let inline getPlayerId (PlId id) = id
-    let inline getGameWeekNo (GwNo n) = n
-    let inline getLgId (LgId id) = id
-    let inline getFxId (FxId id) = id
-    let inline getGwId (GwId id) = id
-    let inline getPrId (PrId id) = id
-    let inline getSnId (SnId id) = id
-    let inline getSnYr (SnYr year) = year
-    let inline getPlayerName (PlayerName plrName) = plrName
-    let inline getLeagueName (LeagueName lgeName) = lgeName
-    let inline getExternalPlayerId (ExternalPlayerId expid) = expid
-    let inline getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
+
+    let getPlayerId (PlId id) = id
+    let getGameWeekNo (GwNo n) = n
+    let getLgId (LgId id) = id
+    let getFxId (FxId id) = id
+    let getGwId (GwId id) = id
+    let getPrId (PrId id) = id
+    let getSnId (SnId id) = id
+    let getSnYr (SnYr year) = year
+    let getPlayerName (PlayerName plrName) = plrName
+    let getLeagueName (LeagueName lgeName) = lgeName
+    let getExternalPlayerId (ExternalPlayerId expid) = expid
+    let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
 
     let currentSeason = SnYr "prem-2015/16"
     let monthFormat = "MMMM yyyy"
@@ -73,92 +73,92 @@ module Domain =
         | NotFound of string
         | InternalError of string
 
-    let inline fixtureDataToFixture fd r =
+    let fixtureDataToFixture fd r =
         match fd.kickoff > GMTDateTime.Now() with
         | true -> OpenFixture fd
         | false -> ClosedFixture (fd, r)
 
-    let inline fixtureToFixtureData f =
+    let fixtureToFixtureData f =
         match f with
         | OpenFixture fd -> fd
         | ClosedFixture (fd, _) -> fd
 
-    let inline fixtureToFixtureDataWithResult f =
+    let fixtureToFixtureDataWithResult f =
         match f with
-        | OpenFixture fd -> fd, None 
+        | OpenFixture fd -> fd, None
         | ClosedFixture (fd, r) -> (fd, r)
 
     let isFixtureOpen f = match f with | OpenFixture _ -> true | ClosedFixture _ -> false
     let isFixtureClosedAndHaveResult f = match f with | OpenFixture _ -> false | ClosedFixture (_, r) -> r.IsSome
     let isFixtureClosedAndHaveNoResult f = match f with | OpenFixture _ -> false | ClosedFixture (_, r) -> r.IsNone
 
-    let inline getFixturesForGameWeeks (gws:GameWeek array) =
+    let getFixturesForGameWeeks (gws:GameWeek array) =
         gws |> Array.collect(fun gw -> gw.fixtures)
-        
-    let inline getFixtureDatasForGameWeeks (gws:GameWeek array) =
+
+    let getFixtureDatasForGameWeeks (gws:GameWeek array) =
         gws
         |> Array.collect(fun gw -> gw.fixtures)
         |> Array.map(fixtureToFixtureData)
         |> Array.sortBy(fun fd -> fd.kickoff)
 
-    let inline getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek array) =
+    let getGameWeeksWithAnyClosedFixturesWithResults (gws:GameWeek array) =
         gws |> Array.filter(fun gw -> gw.fixtures |> Array.exists(isFixtureClosedAndHaveResult))
 
-    let inline tryFindFixture (gws:GameWeek array) fxid =
+    let tryFindFixture (gws:GameWeek array) fxid =
         gws
         |> Array.collect(fun gw -> gw.fixtures)
         |> Array.map(fun f -> f, fixtureToFixtureData f)
         |> Array.tryFind(fun (f, fd) -> fd.id = fxid)
         |> fstOption
 
-    let inline tryFindFixtureWithGameWeek (gws:GameWeek array) fxid =
+    let tryFindFixtureWithGameWeek (gws:GameWeek array) fxid =
         gws
         |> Array.collect(fun gw -> gw.fixtures |> Array.map(fun f -> gw, f))
         |> Array.map(fun (gw, f) -> gw, f, fixtureToFixtureData f)
         |> Array.tryFind(fun (gw, f, fd) -> fd.id = fxid)
 
-    let inline getMonthForGameWeek (gw:GameWeek) =
+    let getMonthForGameWeek (gw:GameWeek) =
         gw.fixtures
         |> Array.map(fixtureToFixtureData)
         |> Array.minBy(fun fd -> fd.kickoff)
         |> fun fd -> fd.kickoff.ToString(monthFormat)
 
-    let inline getGameWeeksForMonth (gws:GameWeek array) (month) =
+    let getGameWeeksForMonth (gws:GameWeek array) (month) =
         gws
         |> Array.map(fun gw -> gw, (gw.fixtures |> Array.map(fixtureToFixtureData) |> Array.minBy(fun fd -> fd.kickoff)))
         |> Array.filter(fun (_, f) -> f.kickoff.ToString(monthFormat) = month)
         |> Array.map(fun (gw, _) -> gw)
 
-    let inline getFixturesInPlay gws =
+    let getFixturesInPlay gws =
         gws |> Array.map(fun gw -> gw, ([|gw|] |> getFixturesForGameWeeks |> Array.filter(isFixtureClosedAndHaveNoResult)))
-        
-    let inline getFirstKoForGw (gw:GameWeek) =
+
+    let getFirstKoForGw (gw:GameWeek) =
         gw.fixtures
         |> Array.map(fixtureToFixtureData)
         |> Array.minBy(fun f -> f.kickoff) |> fun f -> f.kickoff
 
-    let inline doesGameWeekHaveAnyResults (gw:GameWeek) =
+    let doesGameWeekHaveAnyResults (gw:GameWeek) =
         getFixturesForGameWeeks [|gw|] |> Array.exists(isFixtureClosedAndHaveResult)
 
     // base calculations
 
-    let inline getModifierMultiplier m =
+    let getModifierMultiplier m =
         match m with
         | DoubleDown -> 2
         | NoModifier -> 1
 
-    let inline getPointsForBracket b =
+    let getPointsForBracket b =
         match b with
         | CorrectScore m -> 3 * getModifierMultiplier m
         | CorrectOutcome m -> 1 * getModifierMultiplier m
         | Incorrect -> 0
 
-    let inline getResultOutcome score =
+    let getResultOutcome score =
         if fst score > snd score then HomeWin
         else if fst score < snd score then AwayWin
         else Draw
 
-    let inline getBracketForPredictionComparedToResult (prediction:Prediction option) (result:Result option) =
+    let getBracketForPredictionComparedToResult (prediction:Prediction option) (result:Result option) =
         if prediction.IsNone || result.IsNone then Incorrect
         else if prediction.Value.score = result.Value.score then CorrectScore prediction.Value.modifier
         else
@@ -167,20 +167,20 @@ module Domain =
             if predictionOutcome = resultOutcome then CorrectOutcome prediction.Value.modifier
             else Incorrect
 
-    let inline tryFindPlayerPredictionForFixture (player:Player) (fd:FixtureData) =
+    let tryFindPlayerPredictionForFixture (player:Player) (fd:FixtureData) =
         player.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
-    
-    let inline onlyClosedFixtures f =
+
+    let onlyClosedFixtures f =
         match f with
         | OpenFixture _ -> None
         | ClosedFixture fr -> fr|>ClosedFixture|>Some
-        
-    let inline onlyOpenFixtures f =
+
+    let onlyOpenFixtures f =
         match f with
         | OpenFixture fd -> fd|>OpenFixture|>Some
         | ClosedFixture _ -> None
 
-    let inline getPlayerBracketProfile (fixtures:Fixture array) player =
+    let getPlayerBracketProfile (fixtures:Fixture array) player =
         let brackets = fixtures
                        |> Array.choose onlyClosedFixtures
                        |> Array.map fixtureToFixtureDataWithResult
@@ -201,14 +201,14 @@ module Domain =
                   let newacc = (newi, g)::acc
                   bumprank newsumdelta newacc t
 
-    let inline rank rows =
+    let rank rows =
         rows
         |> Seq.groupBy(fun (_, x) -> x)
         |> Seq.mapi(fun i (_, g) -> i+1, g) |> Seq.toList
         |> bumprank 0 []
         |> Seq.collect(fun (i, g) -> g |> Seq.map(fun x -> i, x))
-        
-    let inline getLeagueTable players fixtures =
+
+    let getLeagueTable players fixtures =
         players
         |> Array.map(fun p -> getPlayerBracketProfile fixtures p)
         |> Array.map(fun (p, cs, co, tp) -> (p, (cs, co, tp)))
@@ -217,7 +217,7 @@ module Domain =
         |> Seq.map(fun (r, (p, (cs, co, tp))) -> (r, p, cs, co, tp))
         |> Seq.toArray
 
-    let inline getPlayerPointsForGameWeeks allPlayers (player:Player) gameWeeks =
+    let getPlayerPointsForGameWeeks allPlayers (player:Player) gameWeeks =
         gameWeeks
         |> Array.map(fun gw -> gw, (getFixturesForGameWeeks [|gw|]))
         |> Array.map(fun (gw, fixtures) -> gw, getLeagueTable allPlayers fixtures)
@@ -225,18 +225,18 @@ module Domain =
 
     let getPlayerProfilePointsForGameWeeks player gameWeeks =
         gameWeeks
-        |> Array.map(fun gw -> 
+        |> Array.map(fun gw ->
                     let fixtures = getFixturesForGameWeeks [|gw|]
                     let (p, cs, co, tp) = getPlayerBracketProfile fixtures player
                     (gw, cs, co, tp))
 
-    let inline getGameWeekDetailsForPlayer player gameWeek =
+    let getGameWeekDetailsForPlayer player gameWeek =
         getFixturesForGameWeeks [|gameWeek|]
         |> Array.map(fixtureToFixtureDataWithResult)
         |> Array.map(fun (fd, r) -> (fd, r, tryFindPlayerPredictionForFixture player fd))
         |> Array.map(fun (fd, r, p) -> (fd, r, p, (getBracketForPredictionComparedToResult p r |> getPointsForBracket)))
-        
-    let inline getOpenFixturesAndPredictionForPlayer (gws:GameWeek array) (player:Player) =
+
+    let getOpenFixturesAndPredictionForPlayer (gws:GameWeek array) (player:Player) =
         gws
         |> getFixturesForGameWeeks
         |> Array.choose(onlyOpenFixtures)
@@ -244,7 +244,7 @@ module Domain =
         |> Array.map(fun fd -> fd, player.predictions |> Array.tryFind(fun p -> p.fixtureId = fd.id))
         |> Array.sortBy(fun (fd, _) -> fd.kickoff)
 
-    let inline getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek array) (player:Player) =
+    let getOpenFixturesWithNoPredictionForPlayer (gws:GameWeek array) (player:Player) =
         gws
         |> getFixturesForGameWeeks
         |> Array.choose(onlyOpenFixtures)
@@ -252,19 +252,19 @@ module Domain =
         |> Array.filter(fun fd -> player.predictions |> Array.exists(fun p -> p.fixtureId = fd.id) = false)
         |> Array.sortBy(fun fd -> fd.kickoff)
 
-    let inline getPlayersInPosition1 lgtbl =
+    let getPlayersInPosition1 lgtbl =
         let plrs = lgtbl |> Array.filter(fun (pos, _, _, _, _) -> pos = 1) |> Array.map(   fun (_, plr, _, _, _) -> plr)
         let pts = lgtbl |> Array.maxBy(fun (_, _, _, _, pts) -> pts) |> fun (_, _, _, _, pts) -> pts
         (plrs, pts)
 
-    let inline getPastGameWeeksWithWinner (gws:GameWeek array) players =
+    let getPastGameWeeksWithWinner (gws:GameWeek array) players =
         gws
         |> Array.map(fun gw -> gw, getFixturesForGameWeeks [|gw|])
         |> Array.map(fun (gw, fixtures) -> gw, getLeagueTable players fixtures)
         |> Array.map(fun (gw, lgtbl) -> gw, lgtbl |> getPlayersInPosition1)
         |> Array.map(fun (gw, (plr, pts)) -> gw, plr, pts)
 
-    let inline getPastMonthsWithWinner (gws:GameWeek array) players =
+    let getPastMonthsWithWinner (gws:GameWeek array) players =
         gws
         |> Seq.groupBy(getMonthForGameWeek)
         |> Seq.toArray
@@ -273,7 +273,7 @@ module Domain =
         |> Array.map(fun (m, lgtbl) -> m, lgtbl |> getPlayersInPosition1)
         |> Array.map(fun (m, (plr, pts)) -> m, plr, pts)
 
-    let inline getLeaguePositionForFixturesForPlayer (fixtures:Fixture array) players (player:Player) =
+    let getLeaguePositionForFixturesForPlayer (fixtures:Fixture array) players (player:Player) =
         fixtures
         |> getLeagueTable players
         |> Array.tryFind(fun (_, plr, _, _, _) -> plr.id = player.id)
@@ -289,28 +289,28 @@ module Domain =
                   | AwayWin -> GetOutcomeCounts t (hw, d, aw+1)
         | [] -> (hw, d, aw)
 
-    let inline getClosedFixturesForGameWeeks gws =
+    let getClosedFixturesForGameWeeks gws =
         gws
         |> getFixturesForGameWeeks
         |> Array.choose(onlyClosedFixtures)
         |> Array.map(fixtureToFixtureDataWithResult)
 
-    let inline getGameWeeksWithClosedFixtures (gws:GameWeek array) =
+    let getGameWeeksWithClosedFixtures (gws:GameWeek array) =
         gws |> Array.filter(fun gw -> [|gw|] |> getClosedFixturesForGameWeeks |> Array.isEmpty = false)
 
-    let inline getIsGameWeekComplete (gw:GameWeek) =
+    let getIsGameWeekComplete (gw:GameWeek) =
         gw.fixtures |> Array.forall(isFixtureClosedAndHaveResult)
 
-    let inline makeSureFixtureExists gws fxid =
+    let makeSureFixtureExists gws fxid =
         let fixture = tryFindFixture gws fxid
         NotFound "fixture does not exist" |> optionToResult fixture
 
-    // Rules 
-    
+    // Rules
+
     // when adding gameweek:
         // cannot add fixture to gameweek with same home & away teams
         // cannot add fixture to gameweek with ko in past
-    
+
     // when saving prediction/result:
         // cannot add score with negative scores
         // cannot add more than one prediction per user
@@ -339,7 +339,7 @@ module FormGuide =
         let getResultForTeam (fd:FixtureData, result:Result) =
             let gw = gws |> Array.find(fun gw -> gw.id = fd.gwId)
             let isHomeTeam = fd.home = team
-            let outcome = 
+            let outcome =
                 match getResultOutcome result.score with
                 | Outcome.Draw -> Draw
                 | HomeWin -> if isHomeTeam then Win else Lose
@@ -367,8 +367,8 @@ module LeagueTableCalculation =
     open Domain
 
     type LeagueTableRow = { diffPosition:int; position:int; player:Player; correctScores:int; correctOutcomes:int; points:int }
-    
-    let inline getLeagueTableRows (league:League) gwsWithResults =
+
+    let getLeagueTableRows (league:League) gwsWithResults =
         let players = league.players
 //        let getSafeTail collection = if collection |> Array.exists(fun _ -> true) then collection |> Array.tail else collection
         let getSafeTail collection =
@@ -388,7 +388,7 @@ module LeagueTableCalculation =
         recentLge |> Array.map(toDiffLgeRow)
 
 module List =
-    
+
     type private ListLengthResult = | AisShorter | BisShorter | Same
     let makeListsEqualLength (a:List<_>) (b:List<_>) =
         let result =
@@ -409,7 +409,7 @@ module FixtureSourcing =
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
         let results = HtmlDocument.Parse(gwhtml)
         results.Descendants ["tr"]
-        |> Seq.map(fun tr -> 
+        |> Seq.map(fun tr ->
             let tds = tr.Descendants ["td"] |> Seq.toList
             let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
             let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
@@ -420,7 +420,7 @@ module FixtureSourcing =
         |> Seq.toList
 
 module TeamNames =
-    
+
     let getAbrvTeamName team =
         match team with
         | "Arsenal"        -> "ARS"
@@ -479,7 +479,7 @@ module Achievements =
                  |> Seq.filter(fun (_, r) -> r.IsSome)
                  |> Seq.map(fun (fd, r) -> (fd, r.Value))
 
-        let correctScores (plr:Player) (fd:FixtureData) (r:Result) modF = 
+        let correctScores (plr:Player) (fd:FixtureData) (r:Result) modF =
             let pr = plr.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
             match Some r |> getBracketForPredictionComparedToResult pr with
             | Incorrect
@@ -510,5 +510,5 @@ module Achievements =
         // notify of new achs
 
         // share ach
-        
+
         ()
