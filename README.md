@@ -1,3 +1,1 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/t1uytvx74nllwm5e/branch/master?svg=true)](https://ci.appveyor.com/project/blair55/predictions/branch/master)
-
-# Predictions
+[![Build Status](https://travis-ci.org/blair55/Predictions.svg?branch=master)](https://travis-ci.org/blair55/Predictions)
