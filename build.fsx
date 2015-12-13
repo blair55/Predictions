@@ -42,8 +42,6 @@ Target "All" DoNothing
     ==> "Clean"
     ==> "Compile"
     ==> "Run"
-
-"Compile"
     ==> "All"
 
 RunTargetOrDefault "All"
