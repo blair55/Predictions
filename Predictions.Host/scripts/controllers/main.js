@@ -25,9 +25,9 @@ angular.module('frontendApp')
         $http.get('/api/leagues').success(function(data) {
             $scope.leagues = data;
         });
-        $scope.hasAckedHomeScreenMsg = localStorageService.get('hasAckedHomeScreenMsg-2');
-        $scope.onAckHomeScreenMsg = function () {
-            localStorageService.set('hasAckedHomeScreenMsg-2', true);
-            $scope.hasAckedHomeScreenMsg = true;
-        };
+        // $scope.hasAckedHomeScreenMsg = localStorageService.get('hasAckedHomeScreenMsg-2');
+        // $scope.onAckHomeScreenMsg = function () {
+        //     localStorageService.set('hasAckedHomeScreenMsg-2', true);
+        //     $scope.hasAckedHomeScreenMsg = true;
+        // };
     });
