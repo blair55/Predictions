@@ -4,76 +4,7 @@ open System
 
 module Domain =
 
-    type LgId = LgId of Guid
-    type FxId = FxId of Guid
-    type GwId = GwId of Guid
-    type PlId = PlId of Guid
-    type PrId = PrId of Guid
-    type SnId = SnId of Guid
-    type GwNo = GwNo of int
-    type SnYr = SnYr of string
-    type Team = string
-    type KickOff = DateTime
-    type Role = User | Admin
-    type LeagueName = LeagueName of string
-    type ShareableLeagueId = ShareableLeagueId of string
-    type ExternalPlayerId = ExternalPlayerId of string
-    type ExternalLoginProvider = ExternalLoginProvider of string
-    type PlayerName = PlayerName of string
-
-    let nguid() = Guid.NewGuid()
-    let newLgId() = nguid()|>LgId
-    let newFxId() = nguid()|>FxId
-    let newPrId() = nguid()|>PrId
-    let newGwId() = nguid()|>GwId
-    let newSnId() = nguid()|>SnId
-    let newPlId() = nguid()|>PlId
-    let makeLeagueName (name:string) =
-        (if name.Length > 50 then name.Substring(0, 50) else name) |> LeagueName
-
-    let getPlayerId (PlId id) = id
-    let getGameWeekNo (GwNo n) = n
-    let getLgId (LgId id) = id
-    let getFxId (FxId id) = id
-    let getGwId (GwId id) = id
-    let getPrId (PrId id) = id
-    let getSnId (SnId id) = id
-    let getSnYr (SnYr year) = year
-    let getPlayerName (PlayerName plrName) = plrName
-    let getLeagueName (LeagueName lgeName) = lgeName
-    let getExternalPlayerId (ExternalPlayerId expid) = expid
-    let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
-
-    let currentSeason = SnYr "prem-2015/16"
-    let monthFormat = "MMMM yyyy"
-    let globalLeagueId = "global"
-    let globalLeaguePageSize = 30
-    let maxPlayersPerLeague = 100
-
-    type Score = int * int
-    type Result = { score:Score }
-    type FixtureData = { id:FxId; gwId:GwId; home:Team; away:Team; kickoff:KickOff }
-    type Fixture =
-         | OpenFixture of FixtureData
-         | ClosedFixture of (FixtureData * Result option)
-    type PredictionModifier = | DoubleDown | NoModifier
-    type Prediction = { id:PrId; score:Score; fixtureId:FxId; playerId:PlId; modifier:PredictionModifier }
-    type Player = { id:PlId; name:PlayerName; predictions:Prediction array; isAdmin:bool }
-    type GameWeek = { id:GwId; number:GwNo; description:string; fixtures:Fixture array }
-    type Season = { id:SnId; year:SnYr; gameWeeks:GameWeek array }
-    type Outcome = HomeWin | AwayWin | Draw
-    type Bracket = CorrectScore of PredictionModifier | CorrectOutcome of PredictionModifier | Incorrect
-
-    type League = { id:LgId; name:LeagueName; players:Player array; adminId:PlId }
-
-    type AppError =
-        | NotLoggedIn of string
-        | Forbidden of string
-        | Invalid of string
-        | NotFound of string
-        | InternalError of string
-
-    let fixtureDataToFixture fd r =
+    let fixtureDataToFixture (fd:FixtureData) r =
         match fd.kickoff > GMTDateTime.Now() with
         | true -> OpenFixture fd
         | false -> ClosedFixture (fd, r)
@@ -451,25 +382,41 @@ open Domain
 module Achievements =
 
     type Achievement =
-        | HomeBoy
-        | Traveller
-        | ParkedTheBus
-        | MysticMeg
-        | GoalFrenzy
-        | BoreDraw
-        | ScoreDraw
-        | GreatWeek
-        | PerfectWeek
-        | ShootTheMoon
-        | EarlyBird
-        | GlobalLeagueTopWeek
-        | PrivateLeagueTopWeek
-        | Guvna
+        | HomeBoy of FixtureData
+        | Traveller of FixtureData
+        | ParkedTheBus of FixtureData
+        | MysticMeg of FixtureData
+        | GoalFrenzy of FixtureData
+        | BoreDraw of FixtureData
+        | ScoreDraw of FixtureData
+        | GreatWeek of FixtureData
+        | PerfectWeek of FixtureData
+        | ShootTheMoon of FixtureData
+        | EarlyBird of GameWeek
+        | GlobalLeagueTopWeek of GameWeek
+        | Guvna of League
 
-//    type AchLevel =
-//        | Bronze
-//        | Silver
-//        | Gold
+    let getAchName = function
+        | HomeBoy _ -> "HomeBoy"
+        | Traveller _ -> "Traveller"
+        | ParkedTheBus _ -> "ParkedTheBus"
+        | MysticMeg _ -> "MysticMeg"
+        | GoalFrenzy _ -> "GoalFrenzy"
+        | BoreDraw _ -> "BoreDraw"
+        | ScoreDraw _ -> "ScoreDraw"
+        | GreatWeek _ -> "GreatWeek"
+        | PerfectWeek _ -> "PerfectWeek"
+        | ShootTheMoon _ -> "ShootTheMoon"
+        | EarlyBird _ -> "EarlyBird"
+        | GlobalLeagueTopWeek _ -> "GlobalLeagueTopWeek"
+        | Guvna _ -> "Guvna"
+
+    // acked fixture achs
+    // id // playerid // ach // fxid // created
+    // acked gameweek achs
+    // id // playerid // ach // gwid // created
+    // acked league achs
+    // id // playerid // ach // lgid // created
 
     let getAchievementsForPlayer (plr:Player) gws =
 
@@ -487,25 +434,48 @@ module Achievements =
             | CorrectScore m -> modF m
 
         let isDoubleDown = function
-            | NoModifier -> false
             | DoubleDown -> true
+            | _ -> false
 
-        let fixturesWhenCsDd outcome fs = fs |> Seq.filter(fun (fd, r:Result) ->
-            if r.score |> getResultOutcome = outcome then isDoubleDown |> correctScores plr fd r else false)
+        let fixturesWhenCsDd outcome fs =
+            fs
+            |> Seq.filter(fun (fd, r:Result) ->
+                if r.score |> getResultOutcome = outcome then
+                    isDoubleDown |> correctScores plr fd r
+                else false)
+            |> Seq.map(fun (fd, _) -> fd)
 
-        let homeWins = fs |> fixturesWhenCsDd HomeWin
-        let awayWins = fs |> fixturesWhenCsDd AwayWin
-        let draws =    fs |> fixturesWhenCsDd Draw
-
-        let correctScores20percent fs prds =
-            fs prds
-            ()
+        let allAchs = seq {
+            yield! fs |> fixturesWhenCsDd HomeWin |> Seq.map HomeBoy
+            yield! fs |> fixturesWhenCsDd AwayWin |> Seq.map Traveller
+            yield! fs |> fixturesWhenCsDd Draw |> Seq.map ParkedTheBus
+        }
 
         // filter out already acked achs
 
-        let ackedAchs = []
+        let ackedAchs:Achievement seq = Seq.empty // from db
 
-//        let newAchs = achs |> Seq.filter(fun a -> ackedAchs |> Seq.exists(fun aa -> aa = a) = false)
+
+
+        let getUnAckedAchs (allAchs:Achievement seq) (ackedAchs:Achievement seq) =
+            let (|Gold|Silver|Bronze|) = function
+                | e when e > 4 -> Gold
+                | e when e > 2 -> Silver
+                | _ -> Bronze
+
+            let group achs =
+                achs
+                |> Seq.groupBy getAchName
+                |> Seq.map(fun (name, achs) -> name, achs |> Seq.length)
+                |> Map.ofSeq
+            let all, acked = allAchs |> group, ackedAchs |> group
+
+            //let s = all |> Map.map(fun r -> )
+
+            ()
+
+
+        //let newAchs = achs |> Seq.filter(fun a -> ackedAchs |> Seq.exists(fun aa -> aa = a) = false)
 
         // notify of new achs
 

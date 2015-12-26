@@ -1,19 +1,18 @@
 ﻿namespace Predictions.Api
 
 open System
+open System.Data
 open System.Data.SqlClient
 open System.Configuration
 open Dapper
 open Predictions.Api.Domain
 
-
 module Data =
-    
+
     let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
 //    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
-    let newConn() = new SqlConnection(connString)
     let nonQuery sql args =
-        use conn = newConn()
+        use conn = new SqlConnection(connString)
         conn.Execute(sql, args) |> ignore
 
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
@@ -24,25 +23,25 @@ module Data =
 
     type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
     type SaveLeagueCommandArgs = { id:Guid; name:string; shareableId:string; adminId:Guid }
-    let saveLeagueInDb (cmd:SaveLeagueCommand) = 
+    let saveLeagueInDb (cmd:SaveLeagueCommand) =
         nonQuery @"insert into Leagues(LeagueId, LeagueShareableId, LeagueName, LeagueAdminId, LeagueIsDeleted) values (@id, @shareableId, @name, @adminId, 0)"
             { SaveLeagueCommandArgs.id=cmd.id|>getLgId; name=cmd.name|>getLeagueName; shareableId=cmd.id|>getShareableLeagueId; adminId=cmd.admin.id|>getPlayerId }
 
     type JoinLeagueCommand = { leagueId:LgId; playerId:PlId }
     type JoinLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
-    let joinLeagueInDb (cmd:JoinLeagueCommand) = 
+    let joinLeagueInDb (cmd:JoinLeagueCommand) =
         nonQuery @"insert into LeaguePlayerBridge(LeagueId, PlayerId) values (@leagueId, @playerId)"
             { JoinLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
 
     type LeaveLeagueCommand = { leagueId:LgId; playerId:PlId }
     type LeaveLeagueCommandArgs = { leagueId:Guid; playerId:Guid }
-    let leaveLeagueInDb (cmd:LeaveLeagueCommand) = 
+    let leaveLeagueInDb (cmd:LeaveLeagueCommand) =
         nonQuery @"delete from LeaguePlayerBridge where LeagueId = @leagueId and PlayerId = @playerId"
             { LeaveLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId; playerId=cmd.playerId|>getPlayerId }
 
     type DeleteLeagueCommand = { leagueId:LgId; }
     type DeleteLeagueCommandArgs = { leagueId:Guid; }
-    let deleteLeagueInDb (cmd:DeleteLeagueCommand) = 
+    let deleteLeagueInDb (cmd:DeleteLeagueCommand) =
         nonQuery @"update Leagues set LeagueIsDeleted = 1 where LeagueId = @leagueId"
             { DeleteLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId }
 
@@ -51,7 +50,7 @@ module Data =
     let updateUserNameInDb (cmd:UpdateUserNameCommand) =
         nonQuery @"UPDATE Players SET PlayerName = @playerName WHERE PlayerId = @playerId"
             { UpdateUserNameCommandArgs.playerId=cmd.playerId|>getPlayerId; playerName=cmd.playerName|>getPlayerName }
-            
+
     type SaveResultCommand = { fixtureId:FxId; score:Score }
     type SaveResultCommandArgs = { fixtureId:Guid; homeScore:int; awayScore:int }
     let saveResult (cmd:SaveResultCommand) =
@@ -94,30 +93,77 @@ module Data =
             { SaveDoubleDownCommandArgs.playerId=cmd.playerId|>getPlayerId; gameWeekId=cmd.gameWeekId|>getGwId; predictionId=cmd.predictionId|>getPrId }
 
     type BuildSeasonQueryArgs = { seasonYear:string; }
+    type LeagueIdsPlayerIsInQueryArgs = { playerId:Guid }
+    type FindPlayerByPlayerIdQueryArgs = { playerId:Guid }
+    type FindPlayerByExternalIdQueryArgs = { externalId:string; externalProvider:string }
+    type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
+    type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
+    type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
+    type GetFixturePreviousMeetingsQueryArgs = { homeTeamName:string; awayTeamName:string }
+
     type [<CLIMutable>] BuildSeasonQueryResult = { seasonId:Guid; seasonYear:string }
     type [<CLIMutable>] BuildGameWeekQueryResult = { gameWeekId:Guid; seasonId:Guid; gameWeekNumber:int; gameWeekDescription:string }
     type [<CLIMutable>] BuildFixtureQueryResult = { fixtureId:Guid; gameWeekId:Guid; kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:Nullable<int>; awayTeamScore:Nullable<int> }
+    type [<CLIMutable>] LeagueIdsPlayerIsInQueryResult = { leagueId:Guid }
+    type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string; isAdmin:bool }
+    type [<CLIMutable>] LeaguesTableQueryResult = { leagueId:Guid; leagueName:string; leagueAdminId:Guid }
+    type [<CLIMutable>] PlayersTableWithLeagueJoinDateQueryResult = { playerId:Guid; playerName:string; isAdmin:bool; leagueJoinDate:DateTime }
+    type [<CLIMutable>] GetFixturePreviousMeetingsQueryResult = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
+    type [<CLIMutable>] PredictionsTableQueryResult = { predictionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int; doubleDown:int; created:DateTime }
+
+    type Query =
+        | BuildSeason of BuildSeasonQueryArgs
+        | BuildGameWeek of BuildSeasonQueryArgs
+        | BuildFixture of BuildSeasonQueryArgs
+        | GetLeagueIdsPlayerIsIn of LeagueIdsPlayerIsInQueryArgs
+        | FindPlayerByPlayerId of FindPlayerByPlayerIdQueryArgs
+        | GetPredictionsForPlayer of FindPlayerByPlayerIdQueryArgs
+        | FindPlayerByExternalId of FindPlayerByExternalIdQueryArgs
+        | FindLeagueByLeagueId of FindLeagueByLeagueIdQueryArgs
+        | GetPlayersWithLeagueJoinDate of FindLeagueByLeagueIdQueryArgs
+        | GetPredictionsForPlayersInLeague of FindLeagueByLeagueIdQueryArgs
+        | FindLeagueByShareableLeagueId of FindLeagueByShareableLeagueIdQueryArgs
+        | GetAllPredictionsForFixture of GetAllPredictionsForFixtureQueryArgs
+        | GetFixturePreviousMeetings of GetFixturePreviousMeetingsQueryArgs
+        | GetAllPlayers
+        | GetAllPredictions
+
+    let agent = MailboxProcessor.Start(fun inbox -> async {
+        while true do
+            let! msg = inbox.Receive()
+            msg() })
+ 
+    let query<'r> query =
+        let getQueryFuncWithArgs sql args = (fun (conn:IDbConnection) -> conn.Query<'r>(sql, args))
+        let getQueryFuncWithNoArgs (sql:string) = (fun (conn:IDbConnection) -> conn.Query<'r>(sql))
+        let queryF =
+            match query with
+            | BuildSeason a -> getQueryFuncWithArgs "select sns.seasonId, sns.seasonYear from seasons sns where sns.SeasonYear = @seasonYear" a
+            | BuildGameWeek a -> getQueryFuncWithArgs "select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription from seasons sns join gameWeeks gws on sns.SeasonId = gws.SeasonId where sns.SeasonYear = @seasonYear" a
+            | BuildFixture a -> getQueryFuncWithArgs "select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore from seasons sns join gameWeeks gws on sns.SeasonId = gws.SeasonId join fixtures fxs on gws.GameWeekId = fxs.GameWeekId where sns.SeasonYear = @seasonYear" a
+            | GetLeagueIdsPlayerIsIn a -> getQueryFuncWithArgs "select lgs.leagueId from leagues lgs join leaguePlayerBridge lpb on lgs.leagueId = lpb.leagueId where lpb.playerId = @playerId and lgs.LeagueIsDeleted = 0" a
+            | FindPlayerByPlayerId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where playerId = @playerId" a
+            | FindPlayerByExternalId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider" a
+            | GetPredictionsForPlayer a -> getQueryFuncWithArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId where pds.playerId = @playerId" a
+            | FindLeagueByLeagueId a -> getQueryFuncWithArgs "select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId from Leagues lgs where lgs.LeagueId = @leagueId and lgs.LeagueIsDeleted = 0" a
+            | GetPlayersWithLeagueJoinDate a -> getQueryFuncWithArgs "select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate from Players pls join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId where lpb.LeagueId = @leagueId" a
+            | GetPredictionsForPlayersInLeague a -> getQueryFuncWithArgs "select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from Predictions pds join Players pls on pds.PlayerId = pls.PlayerId join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId where lpb.LeagueId = @leagueId" a
+            | FindLeagueByShareableLeagueId a -> getQueryFuncWithArgs "select LeagueId, LeagueName, LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and LeagueIsDeleted = 0" a
+            | GetAllPredictionsForFixture a -> getQueryFuncWithArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId where pds.fixtureId = @fixtureId" a
+            | GetFixturePreviousMeetings a -> getQueryFuncWithArgs "select kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore from fixtures where hometeamscore is not null and awayteamscore is not null and ((hometeamname = @hometeamname and awayteamname = @awayteamname) or (awayteamname = @hometeamname and hometeamname = @awayteamname))" a
+            | GetAllPlayers -> getQueryFuncWithNoArgs "select playerId, playerName, isAdmin from players"
+            | GetAllPredictions -> getQueryFuncWithNoArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
+        agent.PostAndReply(fun channel -> 
+            (fun () ->
+                use conn = new SqlConnection(connString)
+                try conn |> queryF |> channel.Reply
+                with ex -> Logging.error ex ))
+
     let buildSeason (year:SnYr) =
         let args = { BuildSeasonQueryArgs.seasonYear=year|>getSnYr; }
-        let sqlSn, sqlGw, sqlFx =
-            @"select sns.seasonId, sns.seasonYear
-            from seasons sns
-            where sns.SeasonYear = @seasonYear",
-            @"select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription
-            from seasons sns
-            join gameWeeks gws on sns.SeasonId = gws.SeasonId
-            where sns.SeasonYear = @seasonYear",
-            @"select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore
-            from seasons sns
-            join gameWeeks gws on sns.SeasonId = gws.SeasonId
-            join fixtures fxs on gws.GameWeekId = fxs.GameWeekId
-            where sns.SeasonYear = @seasonYear"
-        use conn = newConn()
-//        let multi = conn.QueryMultiple(sql, args)
-
-        let seasonResult = conn.Query<BuildSeasonQueryResult>(sqlSn, args) |> Seq.head
-        let gameWeeksResult = conn.Query<BuildGameWeekQueryResult>(sqlGw, args)
-        let fixturesResult = conn.Query<BuildFixtureQueryResult>(sqlFx, args)
+        let seasonResult = BuildSeason args |> query<BuildSeasonQueryResult> |> Seq.head
+        let gameWeeksResult = BuildGameWeek args |> query<BuildGameWeekQueryResult>
+        let fixturesResult = BuildFixture args |> query<BuildFixtureQueryResult>
         let buildFixture (result:BuildFixtureQueryResult) =
             let fd = { FixtureData.id=result.fixtureId|>FxId; gwId=result.gameWeekId|>GwId; home=result.homeTeamName; away=result.awayTeamName; kickoff=result.kickoff }
             let resultExists = result.homeTeamScore.HasValue && result.awayTeamScore.HasValue
@@ -133,90 +179,47 @@ module Data =
         let fdrs = fixturesResult |> Seq.map buildFixture
         let gameWeeks = gameWeeksResult |> Seq.map(buildGameWeek fdrs) |> Seq.toArray
         { id=seasonResult.seasonId|>SnId; year=seasonResult.seasonYear|>SnYr; gameWeeks=gameWeeks }
-    
-    type LeagueIdsPlayerIsInQueryArgs = { playerId:Guid }
-    type [<CLIMutable>] LeagueIdsPlayerIsInQueryResult = { leagueId:Guid }
+
     let getLeagueIdsThatPlayerIsIn (player:Player) =
         let args = { LeagueIdsPlayerIsInQueryArgs.playerId=player.id|>getPlayerId }
-        let sql = @"select lgs.leagueId
-                    from leagues lgs
-                    join leaguePlayerBridge lpb on lgs.leagueId = lpb.leagueId
-                    where lpb.playerId = @playerId
-                    and lgs.LeagueIsDeleted = 0"
-        use conn = newConn()
-        let result = conn.Query<LeagueIdsPlayerIsInQueryResult>(sql, args)
+        let result = GetLeagueIdsPlayerIsIn args |> query<LeagueIdsPlayerIsInQueryResult>
         result |> Seq.map(fun r -> r.leagueId|>LgId) |> Seq.toArray
 
-    type FindPlayerByPlayerIdQueryArgs = { playerId:Guid }
-    type [<CLIMutable>] PlayersTableQueryResult = { playerId:Guid; playerName:string; isAdmin:bool }
     let queryResultToPlayer (player:PlayersTableQueryResult) predictions =
         { Player.id=player.playerId|>PlId; name=player.playerName|>PlayerName; predictions=predictions; isAdmin=player.isAdmin }
-    type [<CLIMutable>] PredictionsTableQueryResult = { predictionId:Guid; fixtureId:Guid; playerId:Guid; homeTeamScore:int; awayTeamScore:int; doubleDown:int; created:DateTime }
     let queryResultToPrediction (p:PredictionsTableQueryResult) =
         let modifier = match p.doubleDown with | 1 -> DoubleDown | _ -> NoModifier
         { Prediction.id=p.predictionId|>PrId; fixtureId=p.fixtureId|>FxId; playerId=p.playerId|>PlId; score=(p.homeTeamScore, p.awayTeamScore); modifier=modifier }
     let tryFindPlayerByPlayerId playerId =
         let args = { FindPlayerByPlayerIdQueryArgs.playerId=playerId|>getPlayerId }
-        let sqlPl, sqlPr =
-            @"select playerId, playerName, isAdmin from players where playerId = @playerId",
-            @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
-                case when dd.predictionid is null then 0 else 1 end as DoubleDown
-            from predictions pds
-            left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId
-            where pds.playerId = @playerId"
-        use conn = newConn()
-//        let multi = conn.QueryMultiple(sql, args)
-        let playersResult = conn.Query<PlayersTableQueryResult>(sqlPl, args) |> Seq.toArray
+        let playersResult = FindPlayerByPlayerId args |> query<PlayersTableQueryResult> |> Seq.toArray
         if playersResult |> Array.isEmpty then None
         else
             let predictions =
-                conn.Query<PredictionsTableQueryResult>(sqlPr, args)
+                GetPredictionsForPlayer args
+                |> query<PredictionsTableQueryResult>
                 |> Seq.map queryResultToPrediction
                 |> Seq.toArray
             let player = playersResult.[0]
             Some (queryResultToPlayer player predictions)
 
-    type FindPlayerByExternalIdQueryArgs = { externalId:string; externalProvider:string }
     let tryFindPlayerByExternalId externalPlayerId externalLoginProvider =
         let args = { FindPlayerByExternalIdQueryArgs.externalId=externalPlayerId|>getExternalPlayerId; externalProvider=externalLoginProvider|>getExternalLoginProvider }
-        let sql = @"select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider"
-        use conn = newConn()
-        let result = conn.Query<PlayersTableQueryResult>(sql, args) |> Seq.toArray
+        let result = FindPlayerByExternalId args |> query<PlayersTableQueryResult> |> Seq.toArray
         if result |> Array.isEmpty then None
         else
             let player = result.[0]
             Some (queryResultToPlayer player Array.empty)
 
-    type FindLeagueByLeagueIdQueryArgs = { leagueId:Guid }
-    type [<CLIMutable>] LeaguesTableQueryResult = { leagueId:Guid; leagueName:string; leagueAdminId:Guid }
-    type [<CLIMutable>] PlayersTableWithLeagueJoinDateQueryResult = { playerId:Guid; playerName:string; isAdmin:bool; leagueJoinDate:DateTime }
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
-        let sqlLg, sqlPl, sqlPr = 
-            @"select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId
-            from Leagues lgs
-            where lgs.LeagueId = @leagueId
-            and lgs.LeagueIsDeleted = 0",
-            @"select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate
-            from Players pls
-            join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
-            where lpb.LeagueId = @leagueId",
-            @"select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created,
-                case when dd.predictionid is null then 0 else 1 end as DoubleDown
-            from Predictions pds
-            join Players pls on pds.PlayerId = pls.PlayerId
-            join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId
-            left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId
-            where lpb.LeagueId = @leagueId"
-        use conn = newConn()
-//        let multi = conn.QueryMultiple(sql, args)
-        let leagueResult = conn.Query<LeaguesTableQueryResult>(sqlLg, args) |> Seq.toArray
+        let leagueResult = FindLeagueByLeagueId args |> query<LeaguesTableQueryResult> |> Seq.toArray
         if leagueResult |> Array.isEmpty then None
         else
-            let playersResult = conn.Query<PlayersTableWithLeagueJoinDateQueryResult>(sqlPl, args) |> Seq.toArray
-            let predictionsResult = conn.Query<PredictionsTableQueryResult>(sqlPr, args) |> Seq.toArray
+            let playersResult = GetPlayersWithLeagueJoinDate args |> query<PlayersTableWithLeagueJoinDateQueryResult> |> Seq.toArray
+            let predictionsResult = GetPredictionsForPlayersInLeague args |> query<PredictionsTableQueryResult> |> Seq.toArray
             let players =
-                let getPlayerPredictionsSinceJoinedLeague p =
+                let getPlayerPredictionsSinceJoinedLeague (p:PlayersTableWithLeagueJoinDateQueryResult) =
                     predictionsResult
                     |> Array.filter(fun pr -> pr.playerId = p.playerId)
                     |> Array.filter(fun pr -> pr.created > p.leagueJoinDate)
@@ -225,57 +228,37 @@ module Data =
                 |> Array.map(fun p -> { Player.id=p.playerId|>PlId; name=p.playerName|>PlayerName; predictions=p|>getPlayerPredictionsSinceJoinedLeague; isAdmin=p.isAdmin })
             let league = leagueResult.[0]
             Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=players; adminId=league.leagueAdminId|>PlId }
-            
-    type FindLeagueByShareableLeagueIdQueryArgs = { shareableLeagueId:string }
+
     let tryFindLeagueByShareableId shareableLeagueId =
         let args = { FindLeagueByShareableLeagueIdQueryArgs.shareableLeagueId=shareableLeagueId }
-        let sql = @"select LeagueId, LeagueName, LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and LeagueIsDeleted = 0"
-        use conn = newConn()
-        let result = conn.Query<LeaguesTableQueryResult>(sql, args) |> Seq.toArray
+        let result = FindLeagueByShareableLeagueId args |> query<LeaguesTableQueryResult> |> Seq.toArray
         if result |> Array.isEmpty then None
         else
             let league = result.[0]
             Some { League.id=league.leagueId|>LgId; name=league.leagueName|>LeagueName; players=Array.empty; adminId=league.leagueAdminId|>PlId }
-    
-    type GetAllPredictionsForFixtureQueryArgs = { fixtureId:Guid }
+
     let getAllPredictionsForFixture (fxid:FxId) =
-        let args = { GetAllPredictionsForFixtureQueryArgs.fixtureId=fxid|>getFxId }
-        let sql = @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
-                        case when dd.predictionid is null then 0 else 1 end as DoubleDown
-                    from predictions pds
-                    left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId
-                    where pds.fixtureId = @fixtureId"
-        use conn = newConn()
-        conn.Query<PredictionsTableQueryResult>(sql, args)
+        { GetAllPredictionsForFixtureQueryArgs.fixtureId=fxid|>getFxId }
+        |> GetAllPredictionsForFixture
+        |> query<PredictionsTableQueryResult>
         |> Seq.map queryResultToPrediction
         |> Seq.toArray
 
-    type GetFixturePreviousMeetingsArgs = { homeTeamName:string; awayTeamName:string }
-    type [<CLIMutable>] GetFixturePreviousMeetingsQueryResult = { kickoff:DateTime; homeTeamName:string; awayTeamName:string; homeTeamScore:int; awayTeamScore:int; }
     let getFixturePreviousMeetingsData home away =
-        let args = { GetFixturePreviousMeetingsArgs.homeTeamName=home; awayTeamName=away }
-        let sql = @"SELECT kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore FROM Fixtures
-                    where hometeamscore is not null
-                    and awayteamscore is not null
-                    and ((hometeamname = @homeTeamName and awayteamname = @awayTeamName)
-                          or (awayteamname = @homeTeamName and hometeamname = @awayTeamName))"
-        use conn = newConn()
-        conn.Query<GetFixturePreviousMeetingsQueryResult>(sql, args)
+        { GetFixturePreviousMeetingsQueryArgs.homeTeamName=home; awayTeamName=away }
+        |> GetFixturePreviousMeetings
+        |> query<GetFixturePreviousMeetingsQueryResult>
         |> Seq.map(fun r -> (r.kickoff, r.homeTeamName, r.awayTeamName, r.homeTeamScore, r.awayTeamScore))
         |> Seq.toArray
 
     let getAllPlayers() =
-        let sqlPl, sqlPr =
-            @"select playerId, playerName, isAdmin from players",
-            @"select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created,
-                case when dd.predictionid is null then 0 else 1 end as DoubleDown
-            from predictions pds
-            left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
-        use conn = newConn()
-//        let multi = conn.QueryMultiple(sql)
-        let playersResult = conn.Query<PlayersTableQueryResult>(sqlPl) |> Seq.toArray
+        let playersResult =
+            GetAllPlayers
+            |> query<PlayersTableQueryResult>
+            |> Seq.toArray
         let predictions =
-            conn.Query<PredictionsTableQueryResult>(sqlPr)
+            GetAllPredictions
+            |> query<PredictionsTableQueryResult>
             |> Seq.map queryResultToPrediction
             |> Seq.toArray
         let getPredictionsForPlayerId plid =
@@ -293,7 +276,7 @@ module Data =
         match tryFindPlayerByPlayerId plId with
         | Some p -> p |> Success
         | None -> NotFound "Player not found" |> Failure
-        
+
     let getLeagueByShareableId shareableLeagueId =
         match tryFindLeagueByShareableId shareableLeagueId with
         | Some league -> league |> Success
@@ -307,6 +290,4 @@ module Data =
     let getLeagueUnsafe (leagueId:LgId) =
         match tryFindLeagueByLeagueId leagueId with
         | Some league -> league
-        | None -> failwith "League not found" 
-
-    
+        | None -> failwith "League not found"
