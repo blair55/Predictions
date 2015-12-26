@@ -7,15 +7,21 @@ open System.Configuration
 open Dapper
 open Predictions.Api.Domain
 
-
-
 module Data =
 
     let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
 //    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
+
+    let agent = MailboxProcessor.Start(fun inbox -> async {
+        while true do
+            let! msg = inbox.Receive()
+            msg() })
+ 
     let nonQuery sql args =
-        use conn = new SqlConnection(connString)
-        conn.Execute(sql, args) |> ignore
+        agent.Post(fun () ->
+            use conn = new SqlConnection(connString)
+            try conn.Execute(sql, args) |> ignore
+            with ex -> Logging.error ex)
 
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
     type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string; email:string }
@@ -130,11 +136,6 @@ module Data =
         | GetAllPlayers
         | GetAllPredictions
 
-    let agent = MailboxProcessor.Start(fun inbox -> async {
-        while true do
-            let! msg = inbox.Receive()
-            msg() })
- 
     let query<'r> query =
         let getQueryFuncWithArgs sql args = (fun (conn:IDbConnection) -> conn.Query<'r>(sql, args))
         let getQueryFuncWithNoArgs (sql:string) = (fun (conn:IDbConnection) -> conn.Query<'r>(sql))
@@ -159,7 +160,7 @@ module Data =
             (fun () ->
                 use conn = new SqlConnection(connString)
                 try conn |> queryF |> channel.Reply
-                with ex -> Logging.error ex ))
+                with ex -> Logging.error ex))
 
     let buildSeason (year:SnYr) =
         let args = { BuildSeasonQueryArgs.seasonYear=year|>getSnYr; }
