@@ -7,6 +7,8 @@ open System.Configuration
 open Dapper
 open Predictions.Api.Domain
 
+
+
 module Data =
 
     let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]

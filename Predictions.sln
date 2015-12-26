@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".settings", ".settings", "{
 		.bowerrc = .bowerrc
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
 		bootstrap.sh = bootstrap.sh
 		bower.json = bower.json
 		build.bat = build.bat

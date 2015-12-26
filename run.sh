@@ -1,1 +1,1 @@
-sudo mono ./build/Predictions.Api.exe
+mono ./build/Predictions.Api.exe

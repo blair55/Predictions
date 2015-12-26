@@ -62,6 +62,7 @@ type LogRouteAttribute() =
 module Config =
 
     let config (key:string) = ConfigurationManager.AppSettings.[key]
+    let hostUrl = config "HostUrl"
 
     let buildApp(app:IAppBuilder) =
     
