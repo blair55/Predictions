@@ -35,11 +35,11 @@
 				<p>Fantasy football for match results!</p>
 				<form action="/account/login" method="POST">
 					<input type="hidden" name="provider" value="Facebook" />
-					<input type="submit" class="special" value="Facebook Login" />
+					<input type="submit" class="special" value="Facebook Login" onClick="clicked(this);" />
 				</form>
 				<form action="/account/login" method="POST">
 		            <input type="hidden" name="provider" value="Twitter" />
-					<input type="submit" class="special" value="Twitter Login" />
+					<input type="submit" class="special" value="Twitter Login" onClick="clicked(this);" />
 		        </form>
 			</div>
 		</header>
@@ -53,6 +53,11 @@
 		</footer>
 
 	    <script>
+			function clicked(item){
+				item.value = 'please wait'
+				item.className = ''
+			}
+
             if (window.location.host.indexOf('localhost') < 0) {
                 (function (i, s, o, g, r, a, m) {
                     i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
