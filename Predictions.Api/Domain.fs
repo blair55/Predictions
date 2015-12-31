@@ -343,7 +343,7 @@ module FixtureSourcing =
         |> Seq.map(fun tr ->
             let tds = tr.Descendants ["td"] |> Seq.toList
             let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-            let dateS = sprintf "%s %s %s 2015" dateA.[2] dateA.[0] dateA.[1]
+            let dateS = sprintf "%s %s %s 2016" dateA.[2] dateA.[0] dateA.[1]
             let date = Convert.ToDateTime(dateS)
             let home = tds.[1].InnerText()
             let away = tds.[5].InnerText()
