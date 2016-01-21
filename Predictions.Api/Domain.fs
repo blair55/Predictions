@@ -9,13 +9,11 @@ module Domain =
         | true -> OpenFixture fd
         | false -> ClosedFixture (fd, r)
 
-    let fixtureToFixtureData f =
-        match f with
+    let fixtureToFixtureData = function
         | OpenFixture fd -> fd
         | ClosedFixture (fd, _) -> fd
 
-    let fixtureToFixtureDataWithResult f =
-        match f with
+    let fixtureToFixtureDataWithResult = function
         | OpenFixture fd -> fd, None
         | ClosedFixture (fd, r) -> (fd, r)
 
@@ -381,104 +379,186 @@ open Domain
 
 module Achievements =
 
+    type AchLevel =
+        | Gold | Silver | Bronze | NoLevel
+        static member (-)(existing:AchLevel, latest:AchLevel) =
+            match existing with
+            | Gold -> []
+            | Silver ->
+                match latest with
+                | Gold -> [Gold]
+                | _ -> []
+            | Bronze ->
+                match latest with
+                | Gold -> [Gold; Silver]
+                | Silver -> [Silver]
+                | _ -> []
+            | NoLevel ->
+                match latest with
+                | Gold -> [Gold; Silver; Bronze]
+                | Silver -> [Silver; Bronze]
+                | Bronze -> [Bronze]
+                | NoLevel -> []
+
     type Achievement =
-        | HomeBoy of FixtureData
-        | Traveller of FixtureData
-        | ParkedTheBus of FixtureData
-        | MysticMeg of FixtureData
-        | GoalFrenzy of FixtureData
-        | BoreDraw of FixtureData
-        | ScoreDraw of FixtureData
-        | GreatWeek of FixtureData
-        | PerfectWeek of FixtureData
-        | ShootTheMoon of FixtureData
-        | EarlyBird of GameWeek
-        | GlobalLeagueTopWeek of GameWeek
-        | Guvna of League
+        | HomeBoy
+        | Traveller
+        | ParkedTheBus
+        | MysticMeg
+        | GoalFrenzy
+        | BoreDraw
+        | ScoreDraw
+        | GreatWeek
+        | PerfectWeek
+        | ShootTheMoon
+        | EarlyBird
+        | GlobalLeagueTopWeek
+        | Guvna
 
-    let getAchName = function
-        | HomeBoy _ -> "HomeBoy"
-        | Traveller _ -> "Traveller"
-        | ParkedTheBus _ -> "ParkedTheBus"
-        | MysticMeg _ -> "MysticMeg"
-        | GoalFrenzy _ -> "GoalFrenzy"
-        | BoreDraw _ -> "BoreDraw"
-        | ScoreDraw _ -> "ScoreDraw"
-        | GreatWeek _ -> "GreatWeek"
-        | PerfectWeek _ -> "PerfectWeek"
-        | ShootTheMoon _ -> "ShootTheMoon"
-        | EarlyBird _ -> "EarlyBird"
-        | GlobalLeagueTopWeek _ -> "GlobalLeagueTopWeek"
-        | Guvna _ -> "Guvna"
+    type AchProfile = {
+        HomeBoy:AchLevel
+        Traveller:AchLevel
+        ParkedTheBus:AchLevel
+        MysticMeg:AchLevel
+        GoalFrenzy:AchLevel
+        BoreDraw:AchLevel
+        ScoreDraw:AchLevel
+        GreatWeek:AchLevel
+        PerfectWeek:AchLevel
+        ShootTheMoon:AchLevel
+        EarlyBird:AchLevel
+        GlobalLeagueTopWeek:AchLevel
+        Guvna:AchLevel }
 
-    // acked fixture achs
-    // id // playerid // ach // fxid // created
-    // acked gameweek achs
-    // id // playerid // ach // gwid // created
-    // acked league achs
-    // id // playerid // ach // lgid // created
+    type UnAckedAchProfile = {
+        HomeBoy:AchLevel seq
+        Traveller:AchLevel seq
+        ParkedTheBus:AchLevel seq
+        MysticMeg:AchLevel seq
+        GoalFrenzy:AchLevel seq
+        BoreDraw:AchLevel seq
+        ScoreDraw:AchLevel seq
+        GreatWeek:AchLevel seq
+        PerfectWeek:AchLevel seq
+        ShootTheMoon:AchLevel seq
+        EarlyBird:AchLevel seq
+        GlobalLeagueTopWeek:AchLevel seq
+        Guvna:AchLevel seq }
 
-    let getAchievementsForPlayer (plr:Player) gws =
-
-        // calculate achs
-
-        let fs = getClosedFixturesForGameWeeks gws
+    let fs gws = getClosedFixturesForGameWeeks gws
                  |> Seq.filter(fun (_, r) -> r.IsSome)
                  |> Seq.map(fun (fd, r) -> (fd, r.Value))
 
-        let correctScores (plr:Player) (fd:FixtureData) (r:Result) modF =
-            let pr = plr.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
-            match Some r |> getBracketForPredictionComparedToResult pr with
-            | Incorrect
-            | CorrectOutcome _ -> false
-            | CorrectScore m -> modF m
+    let correctScores (plr:Player) (fd:FixtureData) (r:Result) modF =
+        let pr = plr.predictions |> Seq.tryFind(fun pr -> pr.fixtureId = fd.id)
+        match Some r |> getBracketForPredictionComparedToResult pr with
+        | Incorrect
+        | CorrectOutcome _ -> false
+        | CorrectScore m -> modF m
 
-        let isDoubleDown = function
-            | DoubleDown -> true
-            | _ -> false
+    let isDoubleDown = function
+        | DoubleDown -> true
+        | _ -> false
 
-        let fixturesWhenCsDd outcome fs =
-            fs
-            |> Seq.filter(fun (fd, r:Result) ->
-                if r.score |> getResultOutcome = outcome then
-                    isDoubleDown |> correctScores plr fd r
-                else false)
-            |> Seq.map(fun (fd, _) -> fd)
+    let fixturesWhenCsDd outcome plr fs =
+        fs
+        |> Seq.filter(fun (fd, r:Result) ->
+            if r.score |> getResultOutcome = outcome then
+                isDoubleDown |> correctScores plr fd r
+            else false)
+        |> Seq.map(fun (fd, _) -> fd)
 
-        let allAchs = seq {
-            yield! fs |> fixturesWhenCsDd HomeWin |> Seq.map HomeBoy
-            yield! fs |> fixturesWhenCsDd AwayWin |> Seq.map Traveller
-            yield! fs |> fixturesWhenCsDd Draw |> Seq.map ParkedTheBus
-        }
+    let getLevelForInstances count =
+        match count with
+        | _ when count > 4 -> Gold
+        | _ when count > 2 -> Silver
+        | _ when count > 0 -> Bronze
+        | _ -> NoLevel
 
-        // filter out already acked achs
-
-        let ackedAchs:Achievement seq = Seq.empty // from db
-
-
-
-        let getUnAckedAchs (allAchs:Achievement seq) (ackedAchs:Achievement seq) =
-            let (|Gold|Silver|Bronze|) = function
-                | e when e > 4 -> Gold
-                | e when e > 2 -> Silver
-                | _ -> Bronze
-
-            let group achs =
-                achs
-                |> Seq.groupBy getAchName
-                |> Seq.map(fun (name, achs) -> name, achs |> Seq.length)
-                |> Map.ofSeq
-            let all, acked = allAchs |> group, ackedAchs |> group
-
-            //let s = all |> Map.map(fun r -> )
-
-            ()
+    //let getAchName = function
+    //    | HomeBoy _ -> "HomeBoy"
+    //    | Traveller _ -> "Traveller"
+    //    | ParkedTheBus _ -> "ParkedTheBus"
+    //    | MysticMeg _ -> "MysticMeg"
+    //    | GoalFrenzy _ -> "GoalFrenzy"
+    //    | BoreDraw _ -> "BoreDraw"
+    //    | ScoreDraw _ -> "ScoreDraw"
+    //    | GreatWeek _ -> "GreatWeek"
+    //    | PerfectWeek _ -> "PerfectWeek"
+    //    | ShootTheMoon _ -> "ShootTheMoon"
+    //    | EarlyBird _ -> "EarlyBird"
+    //    | GlobalLeagueTopWeek _ -> "GlobalLeagueTopWeek"
+    //    | Guvna _ -> "Guvna"
 
 
-        //let newAchs = achs |> Seq.filter(fun a -> ackedAchs |> Seq.exists(fun aa -> aa = a) = false)
 
-        // notify of new achs
+// per ach category:
+    // calculate all ach instances
+    // calculate latest ach levels based on all ach instances
+    // compare latest ach level vs stored acked ach levels
+    // return all un-acked ach levels (and all ach instances)
 
-        // share ach
+// now we have a map of ach category -> un-acked ach levels
+// collected un-acked ach levels are then
+//   stored in the AckedAchLevels table
+//     table used to drive player ach profile mini & full views
+//   stored in the notifications table
+//     table used to notify player
 
-        ()
+// table: AckedAchLevels
+// cols: created | playerid | ach | level
+// comp key: playerid | ach | level
+// indexes: playerid; ach
+
+// table: AchNotfications
+// cols: created | playerid | ach | level | acked
+// comp key: playerid | ach | level
+// indexes: playerid
+
+    let getExistingAchProfileForPlayer (plr:Player) =
+        // query db for all AckedAchLevelsForPlayer then filter each ack
+        { AchProfile.HomeBoy=NoLevel
+          Traveller=NoLevel
+          ParkedTheBus=NoLevel
+          MysticMeg=NoLevel
+          GoalFrenzy=NoLevel
+          BoreDraw=NoLevel
+          ScoreDraw=NoLevel
+          GreatWeek=NoLevel
+          PerfectWeek=NoLevel
+          ShootTheMoon=NoLevel
+          EarlyBird=NoLevel
+          GlobalLeagueTopWeek=NoLevel
+          Guvna=NoLevel }
+
+    let getUnackedLevels gws (plr:Player, profile:AchProfile) = function
+        | HomeBoy -> profile.HomeBoy - (gws |> fs |> fixturesWhenCsDd HomeWin plr |> Seq.toList |> (fun x -> x.Length) |> getLevelForInstances)
+        | Traveller -> profile.Traveller - (gws |> fs |> fixturesWhenCsDd HomeWin plr |> Seq.toList |> (fun x -> x.Length) |> getLevelForInstances)
+        | ParkedTheBus -> profile.ParkedTheBus - (gws |> fs |> fixturesWhenCsDd HomeWin plr |> Seq.toList |> (fun x -> x.Length) |> getLevelForInstances)
+        | MysticMeg -> []
+        | GoalFrenzy -> []
+        | BoreDraw -> []
+        | ScoreDraw -> []
+        | GreatWeek -> []
+        | PerfectWeek -> []
+        | ShootTheMoon -> []
+        | EarlyBird -> []
+        | GlobalLeagueTopWeek -> []
+        | Guvna -> []
+
+    let getUnackedAchievementsForPlayer (plr:Player) gws =
+        let existingProfile = plr |> getExistingAchProfileForPlayer
+        let getLevels = getUnackedLevels gws (plr, existingProfile)
+        { UnAckedAchProfile.HomeBoy=HomeBoy |> getLevels
+          Traveller=Traveller |> getLevels
+          ParkedTheBus=ParkedTheBus |> getLevels
+          MysticMeg=MysticMeg |> getLevels
+          GoalFrenzy=GoalFrenzy |> getLevels
+          BoreDraw=BoreDraw |> getLevels
+          ScoreDraw=ScoreDraw |> getLevels
+          GreatWeek=GreatWeek |> getLevels
+          PerfectWeek=PerfectWeek |> getLevels
+          ShootTheMoon=ShootTheMoon |> getLevels
+          EarlyBird=EarlyBird |> getLevels
+          GlobalLeagueTopWeek=GlobalLeagueTopWeek |> getLevels
+          Guvna=Guvna |> getLevels }
