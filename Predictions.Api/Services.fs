@@ -448,13 +448,13 @@ module Services =
         LgId leagueId |> (getLeague >> bind (switch (getHistoryByGameWeekWithGameWeekViewModel gwno page getMicroLeagueViewModel)))
         
     let getGlobalLeagueTablePage page =
-        let gws = gameWeeksWithResults()
+        let gws = gameWeeks()
         let latestGameWeekNo = gws |> getlatestGameWeekNo
         let rows, neighbours = gws |> getGlobalTableRows |> getPagedList page leagueTableRowToViewModel
         { LeagueViewModel.id=globalLeagueId; name="Global League"; rows=rows; latestGameWeekNo=latestGameWeekNo; adminId=""; neighbours=neighbours }
     
     let leagueToViewModel page (league:League) = 
-        let gws = gameWeeksWithResults()
+        let gws = gameWeeks()
         let latestGameWeekNo = gws |> getlatestGameWeekNo
         let rows, neighbours = getLeagueTableRows league gws |> getPagedList page leagueTableRowToViewModel
         { LeagueViewModel.id=league.id|>leagueIdToString; name=league.name|>getLeagueName; rows=rows; latestGameWeekNo=latestGameWeekNo; adminId=league.adminId|>getPlayerId|>str; neighbours=neighbours }
