@@ -336,7 +336,7 @@ open FSharp.Data
 module FixtureSourcing =
 
     let getNewGwFixtures no =
-        let url = sprintf "http://fantasy.premierleague.com/fixtures/%i" no
+        let url = sprintf "http://fantasy.premierleague.com/fixtures/%i/" no
         let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
         let results = HtmlDocument.Parse(gwhtml)
         results.Descendants ["tr"]
