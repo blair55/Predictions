@@ -120,6 +120,10 @@ angular
                 templateUrl: 'views/leaguedelete.html',
                 controller: 'LeaguedeleteCtrl'
             })
+            .when('/predictedleaguetable', {
+              templateUrl: 'views/predictedleaguetable.html',
+              controller: 'PredictedleaguetableCtrl'
+            })
             .otherwise({
                 redirectTo: '/'
             });
