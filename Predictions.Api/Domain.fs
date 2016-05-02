@@ -380,7 +380,7 @@ open Domain
 
 module TeamLeagueTable =
     
-    type TeamRow = { team:string; played:int; won:int; drawn:int; lost:int; gf:int; ga:int; gd:int; points:int }
+    type TeamRow = { pos:int; team:string; played:int; won:int; drawn:int; lost:int; gf:int; ga:int; gd:int; points:int }
 
     let getTeamLeagueTableForPlayerPredictions (plr:Player) (gws:GameWeek array) =
         let fxs =
@@ -393,10 +393,9 @@ module TeamLeagueTable =
             |> Seq.distinct
 
         let isPredictionForTeam team fixtureId fn =
-            fxs
-            |> List.tryFind(fun f -> f.id = fixtureId)
-            |> Option.map (fun fixture -> fn(fixture) = team)
-            |> function | Some _ -> true | _ -> false
+            match fxs |> List.tryFind(fun f -> f.id = fixtureId) with
+            | Some f -> fn(f) = team
+            | _ -> false
 
         let groupedByTeam teams =
             teams
@@ -413,21 +412,23 @@ module TeamLeagueTable =
             let (awayloss, awaydraw, awaywin) = GetOutcomeCounts awayPredictions (0, 0, 0)
             let gf = (homePredictions |> List.sumBy(fun pr -> fst pr.score)) + (awayPredictions |> List.sumBy(fun pr -> snd pr.score))
             let ga = (homePredictions |> List.sumBy(fun pr -> snd pr.score)) + (awayPredictions |> List.sumBy(fun pr -> fst pr.score))
-            let points = ((homewin + awaywin) * 3) + (homedraw + awaydraw)
-            { team = team
-              played = homePredictions.Length + awayPredictions.Length
-              won = homewin + awaywin
-              drawn = homedraw + awaydraw
-              lost = homeloss + awayloss
-              gf = gf
-              ga = ga
-              gd = gf - ga
-              points = points }
+            let played = homePredictions.Length + awayPredictions.Length
+            let won = homewin + awaywin
+            let drawn = homedraw + awaydraw
+            let lost = homeloss + awayloss
+            let gd = gf - ga
+            let points = (won * 3) + drawn
+            (team, played, won, drawn, lost, gf, ga, gd, points)
 
         distinctTeams
         |> groupedByTeam
-        |> Seq.map(getTeamRow)
-        |> Seq.sortBy(fun tr -> -tr.points, -tr.gd)
+        |> Array.ofSeq
+        |> Array.map(getTeamRow)
+        |> Array.map(fun (t, p, w, d, l, gf, ga, gd, points) -> ((t, p, w, d, l, ga), (gf, gd, points)))
+        |> Array.sortBy(fun (_, (gf, gd, pts)) -> -pts, -gd, -gf)
+        |> rank
+        |> Seq.map(fun (r, ((t, p, w, d, l, ga), (gf, gd, points))) -> 
+                            { pos = r; team = t; played = p; won = w; drawn = d; lost = l; gf = gf; ga = ga; gd = gd; points = points })
 
 module Achievements =
 

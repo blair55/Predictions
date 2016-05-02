@@ -1,1 +1,32 @@
-<p>This is the predictedleaguetable view.</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th class="numeric-cell">P</th>
+            <th class="numeric-cell">W</th>
+            <th class="numeric-cell">D</th>
+            <th class="numeric-cell">L</th>
+            <th class="numeric-cell hidden-xs">GF</th>
+            <th class="numeric-cell hidden-xs">GA</th>
+            <th class="numeric-cell">GD</th>
+            <th class="numeric-cell">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in model.rows">
+            <td class="numeric-cell">{{row.pos}}</td>
+            <td>
+                <teamname team="row.team"></teamname>
+            </td>
+            <td class="numeric-cell">{{row.played}}</td>
+            <td class="numeric-cell">{{row.won}}</td>
+            <td class="numeric-cell">{{row.drawn}}</td>
+            <td class="numeric-cell">{{row.lost}}</td>
+            <td class="numeric-cell hidden-xs">{{row.gf}}</td>
+            <td class="numeric-cell hidden-xs">{{row.ga}}</td>
+            <td class="numeric-cell">{{row.gd}}</td>
+            <td class="numeric-cell">{{row.points}}</td>
+        </tr>
+    </tbody>
+</table>

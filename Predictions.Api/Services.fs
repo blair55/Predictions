@@ -302,6 +302,14 @@ module Services =
         let latestGwNo = gameWeeks() |> getlatestGameWeekNo
         playerId |> getPlayerGameWeekByPlayerIdAndGameWeekNo latestGwNo true
 
+    open TeamLeagueTable
+
+    let getPredictedLeagueTable player =
+        let gws = gameWeeks()
+        let teamRowToViewModel (tr:TeamRow) =
+            { PredictedLeagueTableRowViewModel.pos=tr.pos; team=tr.team|>getTeamViewModel; played=tr.played; won=tr.won; drawn=tr.drawn; lost=tr.lost; gf=tr.gf; ga=tr.ga; gd=tr.gd; points=tr.points}
+        { PredictedLeagueTableViewModel.rows = getTeamLeagueTableForPlayerPredictions player gws |> Seq.map(teamRowToViewModel) |> Array.ofSeq }
+
     // persistence
 
     let trySaveResultPostModel (rpm:ResultPostModel) =

@@ -120,6 +120,12 @@ module ViewModels =
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PagedLeagueViewModel = { neighbours:NeighboursViewModel; rows:LeagueTableRowViewModel array }
 
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type PredictedLeagueTableRowViewModel = { pos:int; team:Team; played:int; won:int; drawn:int; lost:int; gf:int; ga:int; gd:int; points:int }
+    
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type PredictedLeagueTableViewModel = { rows:PredictedLeagueTableRowViewModel array }
+
 [<AutoOpen>]
 module HomePageModels =
 

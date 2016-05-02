@@ -259,6 +259,11 @@ type HomeController() =
     member this.GetMonthNeighbours(month:string) =
         month |> (switch getMonthNeighbours >> resultToHttp)
 
+    [<Route("predictedleaguetable")>]
+    member this.GetPredictedLeagueTable() =
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> (switch getPredictedLeagueTable >> resultToHttp)
+
 [<Authorize>]
 [<CustomAuthorize>]
 [<RoutePrefix("api/admin")>]
