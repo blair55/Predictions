@@ -376,8 +376,58 @@ module TeamNames =
         | "West Ham"       -> "WHU"
         | _ -> team.Substring(0, 3)
 
-
 open Domain
+
+module TeamLeagueTable =
+    
+    type TeamRow = { team:string; played:int; won:int; drawn:int; lost:int; gf:int; ga:int; gd:int; points:int }
+
+    let getTeamLeagueTableForPlayerPredictions (plr:Player) (gws:GameWeek array) =
+        let fxs =
+            getFixturesForGameWeeks gws
+            |> Array.map fixtureToFixtureData
+            |> List.ofArray
+
+        let distinctTeams =
+            (fxs |> List.map(fun f -> f.home)) @ (fxs |> List.map(fun f -> f.away))
+            |> Seq.distinct
+
+        let isPredictionForTeam team fixtureId fn =
+            fxs
+            |> List.tryFind(fun f -> f.id = fixtureId)
+            |> Option.map (fun fixture -> fn(fixture) = team)
+            |> function | Some _ -> true | _ -> false
+
+        let groupedByTeam teams =
+            teams
+            |> Seq.map(
+                fun t -> 
+                    let homePredictions =
+                        plr.predictions |> Array.filter(fun pr -> isPredictionForTeam t pr.fixtureId (fun f -> f.home)) |> List.ofArray
+                    let awayPredictions =
+                        plr.predictions |> Array.filter(fun pr -> isPredictionForTeam t pr.fixtureId (fun f -> f.away)) |> List.ofArray
+                    t, homePredictions, awayPredictions)
+
+        let getTeamRow (team, homePredictions, awayPredictions) =
+            let (homewin, homedraw, homeloss) = GetOutcomeCounts homePredictions (0, 0, 0)
+            let (awayloss, awaydraw, awaywin) = GetOutcomeCounts awayPredictions (0, 0, 0)
+            let gf = (homePredictions |> List.sumBy(fun pr -> fst pr.score)) + (awayPredictions |> List.sumBy(fun pr -> snd pr.score))
+            let ga = (homePredictions |> List.sumBy(fun pr -> snd pr.score)) + (awayPredictions |> List.sumBy(fun pr -> fst pr.score))
+            let points = ((homewin + awaywin) * 3) + (homedraw + awaydraw)
+            { team = team
+              played = homePredictions.Length + awayPredictions.Length
+              won = homewin + awaywin
+              drawn = homedraw + awaydraw
+              lost = homeloss + awayloss
+              gf = gf
+              ga = ga
+              gd = gf - ga
+              points = points }
+
+        distinctTeams
+        |> groupedByTeam
+        |> Seq.map(getTeamRow)
+        |> Seq.sortBy(fun tr -> -tr.points, -tr.gd)
 
 module Achievements =
 
