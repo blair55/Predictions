@@ -45,7 +45,8 @@ module Types =
     let getExternalPlayerId (ExternalPlayerId expid) = expid
     let getExternalLoginProvider (ExternalLoginProvider exprovider) = exprovider
 
-    let currentSeason = SnYr "prem-2015/16"
+    //let currentSeason = SnYr "prem-2015/16"
+    let currentSeason = SnYr "test-0000"
     let monthFormat = "MMMM yyyy"
     let globalLeagueId = "global"
     let globalLeaguePageSize = 30
