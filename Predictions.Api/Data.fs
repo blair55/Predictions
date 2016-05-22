@@ -10,13 +10,12 @@ open Predictions.Api.Domain
 module Data =
 
     let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
-//    let connString = "Data Source=.\SQLEXPRESS;Initial Catalog=Predictions;Integrated Security=True;"
 
     let agent = MailboxProcessor.Start(fun inbox -> async {
         while true do
             let! msg = inbox.Receive()
             msg() })
- 
+
     let nonQuery sql args =
         agent.Post(fun () ->
             use conn = new SqlConnection(connString)
@@ -83,7 +82,7 @@ module Data =
         declare @seasonId uniqueidentifier
         select @seasonId = seasonId from seasons where SeasonYear = @SeasonYear
         declare @nextGameWeek int
-        select @nextGameWeek = max(gameweeknumber) + 1 from gameweeks where seasonid = @SeasonId
+        select @nextGameWeek = case when max(gameweeknumber) IS NULL then 1 else max(gameweeknumber) + 1 end from gameweeks where seasonid = @SeasonId
         insert into GameWeeks(GameWeekId, SeasonId, GameWeekNumber, GameWeekDescription) values (@Id, @SeasonId, @nextGameWeek, @description)"
                 { SaveGameWeekCommandArgs.id=cmd.id|>getGwId; seasonYear=cmd.seasonYear|>getSnYr; description=cmd.description }
         let saveFixture (fd:SaveFixtureCommand) =
@@ -156,7 +155,7 @@ module Data =
             | GetFixturePreviousMeetings a -> getQueryFuncWithArgs "select kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore from fixtures where hometeamscore is not null and awayteamscore is not null and ((hometeamname = @hometeamname and awayteamname = @awayteamname) or (awayteamname = @hometeamname and hometeamname = @awayteamname))" a
             | GetAllPlayers -> getQueryFuncWithNoArgs "select playerId, playerName, isAdmin from players"
             | GetAllPredictions -> getQueryFuncWithNoArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
-        agent.PostAndReply(fun channel -> 
+        agent.PostAndReply(fun channel ->
             (fun () ->
                 use conn = new SqlConnection(connString)
                 try conn |> queryF |> channel.Reply

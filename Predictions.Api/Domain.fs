@@ -350,6 +350,16 @@ module FixtureSourcing =
             date, home, away)
         |> Seq.toList
 
+    let [<Literal>] EuroUrl = "http://api.football-data.org/v1/soccerseasons/424/fixtures"
+    type Fixtures = JsonProvider<EuroUrl>
+
+    let getNewEuroGwFixtures no =
+        let fixtures = Fixtures.Load(EuroUrl)
+        fixtures.Fixtures
+        |> Seq.filter(fun f -> f.Matchday = no)
+        |> Seq.map(fun f -> f.Date, f.HomeTeamName, f.AwayTeamName)
+        |> Seq.toList
+
 module TeamNames =
 
     let getAbrvTeamName team =
@@ -379,7 +389,7 @@ module TeamNames =
 open Domain
 
 module TeamLeagueTable =
-    
+
     type TeamRow = { pos:int; team:string; played:int; won:int; drawn:int; lost:int; gf:int; ga:int; gd:int; points:int }
 
     let getTeamLeagueTableForPlayerPredictions (plr:Player) (gws:GameWeek array) =
@@ -400,7 +410,7 @@ module TeamLeagueTable =
         let groupedByTeam teams =
             teams
             |> Seq.map(
-                fun t -> 
+                fun t ->
                     let homePredictions =
                         plr.predictions |> Array.filter(fun pr -> isPredictionForTeam t pr.fixtureId (fun f -> f.home)) |> List.ofArray
                     let awayPredictions =
@@ -427,7 +437,7 @@ module TeamLeagueTable =
         |> Array.map(fun (t, p, w, d, l, gf, ga, gd, points) -> ((t, p, w, d, l, ga), (gf, gd, points)))
         |> Array.sortBy(fun (_, (gf, gd, pts)) -> -pts, -gd, -gf)
         |> rank
-        |> Seq.map(fun (r, ((t, p, w, d, l, ga), (gf, gd, points))) -> 
+        |> Seq.map(fun (r, ((t, p, w, d, l, ga), (gf, gd, points))) ->
                             { pos = r; team = t; played = p; won = w; drawn = d; lost = l; gf = gf; ga = ga; gd = gd; points = points })
 
 module Achievements =

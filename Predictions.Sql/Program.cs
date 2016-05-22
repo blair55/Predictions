@@ -11,11 +11,11 @@ namespace Predictions.Sql
         {
             var result = DeployChanges.To
                 .SqlDatabase(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString)
-                .WithScriptsFromFileSystem(@"C:\Users\Nick\lab\Predictions\Predictions.Sql\Scripts")
+                .WithScriptsFromFileSystem(@"C:\Users\nblair\lab\Predictions\Predictions.Sql\Scripts")
                 .LogToConsole()
                 .Build()
                 .PerformUpgrade();
-            
+
             Console.ReadKey();
             return result.Successful ? 0 : 1;
         }
