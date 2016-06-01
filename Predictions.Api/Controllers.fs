@@ -34,6 +34,16 @@ type AccountController() =
     member this.GetTime() =
         GMTDateTime.Now()
 
+    //[<HttpPost>][<Route("settime")>]
+    //member this.SetTime(model:TimeContainer) =
+    //    GMTDateTime.Now <- (fun () -> model.time)
+    //    this.Redirect(this.BaseUri)
+
+    //[<HttpPost>][<Route("resettime")>]
+    //member this.ResetTime() =
+    //    GMTDateTime.Now <- GMTDateTime.defaultTime
+    //    this.Redirect(this.BaseUri)
+
     [<HttpGet>][<Route("logout")>]
     member this.GetLogOut() =
         this.AuthManager.SignOut()
@@ -78,7 +88,7 @@ type HomeController() =
     [<Route("whoami")>]
     member this.GetWhoAmI() =
         () |> (switch this.GetPlayerViewModel >> resultToHttp)
-        
+
     [<Route("leagues")>]
     member this.GetLeagues() =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
@@ -111,7 +121,7 @@ type HomeController() =
     member this.JoinLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((joinLeague player) >> resultToHttp)
-        
+
     [<HttpPost>][<Route("leagueleave/{leagueId:Guid}")>]
     member this.LeaveLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
@@ -121,11 +131,11 @@ type HomeController() =
     member this.DeleteLeague (leagueId:Guid) =
         let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
         leagueId |> ((deleteLeague player) >> resultToHttp)
-        
+
     [<Route("player/{playerId:Guid}/global")>]
     member this.GetGlobalLeaguePlayer (playerId:Guid) =
         playerId |> (getGameWeekPointsForPlayerInGlobalLeague >> resultToHttp)
-        
+
     [<Route("player/{playerId:Guid}/{leagueId:Guid}")>]
     member this.GetLeaguePlayer (playerId:Guid, leagueId:Guid) =
         (playerId, leagueId) |> (getGameWeeksPointsForPlayerIdAndLeagueId >> resultToHttp)
@@ -133,7 +143,7 @@ type HomeController() =
     [<Route("leaguepositiongraphforplayer/{playerId:Guid}/global")>]
     member this.GetGlobalLeaguePositionGraph (playerId:Guid) =
         playerId |> (getLeaguePositionGraphDataForPlayerInGlobalLeague >> resultToHttp)
-        
+
     [<Route("leaguepositiongraphforplayer/{playerId:Guid}/{leagueId:Guid}")>]
     member this.GetLeaguePositionGraph (playerId:Guid, leagueId:Guid) =
         (playerId, leagueId) |> (getLeaguePositionGraphDataForPlayerIdAndLeagueId >> resultToHttp)
@@ -202,7 +212,7 @@ type HomeController() =
     [<Route("gameweekmatrix/global/gameweek/{gwno:int}/page/{page:int}")>]
     member this.GetGlobalGameWeekMatrix (gwno, page) =
         gwno |> GwNo |> (getGlobalGameWeekMatrix page >> resultToHttp)
-        
+
     [<Route("gameweekmatrix/{leagueId:Guid}/gameweek/{gwno:int}/page/{page:int}")>]
     member this.GetGameWeekMatrix (leagueId:Guid, gwno, page) =
         leagueId |> (gwno |> GwNo |> getGameWeekMatrix page >> resultToHttp)
@@ -215,7 +225,7 @@ type HomeController() =
     [<Route("fixturepredictiongraph/{fxId:Guid}")>]
     member this.GetFixturePredictionGraph (fxId:Guid) =
         FxId fxId |> (getFixturePredictionGraphData >> resultToHttp)
-        
+
     [<Route("fixturedoubledowns/{fxId:Guid}")>]
     member this.GetFixtureDoubleDowns (fxId:Guid) =
         FxId fxId |> (getFixtureDoubleDowns >> resultToHttp)
@@ -283,7 +293,7 @@ type AdminController() =
     member this.AddResult (result:ResultPostModel) =
         let saveResult() = trySaveResultPostModel result
         () |> (saveResult >> resultToHttp)
-        
+
     [<Route("gameweek")>]
     member this.GetImportNextGameWeek() =
         () |> (switch getImportNextGameWeekView >> resultToHttp)

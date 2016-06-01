@@ -9,6 +9,9 @@ open Newtonsoft.Json
 module ViewModels =
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
+    type TimeContainer = { time:DateTime }
+
+    [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type PlayerViewModel = { id:string; name:string; isAdmin:bool }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]

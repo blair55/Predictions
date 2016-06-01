@@ -124,6 +124,11 @@ angular
               templateUrl: 'views/predictedleaguetable.html',
               controller: 'PredictedleaguetableCtrl'
             })
+            .when('/settime', {
+              templateUrl: 'views/settime.html',
+              controller: 'SettimeCtrl',
+              controllerAs: 'settime'
+            })
             .otherwise({
                 redirectTo: '/'
             });
