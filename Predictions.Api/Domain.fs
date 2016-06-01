@@ -236,6 +236,23 @@ module Domain =
         let fixture = tryFindFixture gws fxid
         NotFound "fixture does not exist" |> optionToResult fixture
 
+    let isDoubleDownAvailableForPlayerInGameWeek (gw:GameWeek) (player:Player) =
+        let gwFixtureDatas =
+            gw.fixtures
+            |> Array.map fixtureToFixtureData
+        let isFixtureInGw fxid =
+            gwFixtureDatas
+            |> Array.exists (fun fd -> fd.id = fxid)
+        let ddPrediction =
+            player.predictions
+            |> Array.filter(fun p -> p.fixtureId |> isFixtureInGw)
+            |> Array.tryFind(fun p -> p.modifier = DoubleDown)
+        match ddPrediction with
+        | Some pr ->
+            let fd = gwFixtureDatas |> Array.find(fun fd -> fd.id = pr.fixtureId)
+            fixtureDataToFixture fd None |> isFixtureOpen
+        | None -> true
+
     // Rules
 
     // when adding gameweek:

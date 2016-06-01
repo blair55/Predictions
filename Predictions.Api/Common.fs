@@ -12,11 +12,11 @@ module Common =
         | h::_ -> Some h
         | [] -> None
 
-    type Result<'TSuccess,'TFailure> = 
+    type Result<'TSuccess,'TFailure> =
         | Success of 'TSuccess
         | Failure of 'TFailure
 
-    let bind switchFunction twoTrackInput = 
+    let bind switchFunction twoTrackInput =
         match twoTrackInput with
         | Success s -> switchFunction s
         | Failure f -> Failure f
@@ -30,7 +30,7 @@ module Common =
         printfn "%s" msg
         System.Diagnostics.Debug.WriteLine(msg)
 
-    let tryToWithReturn x = 
+    let tryToWithReturn x =
         try
             let r = x()
             Success r
@@ -46,11 +46,11 @@ module Common =
         match a with
         | Some (_, b) -> Some b
         | None -> None
-        
+
     let sToGuid s = Guid.Parse(s)
     let trySToGuid s = Guid.TryParse(s)
 
-    
+
     let compoundList collection =
         collection
         |> List.scan (fun x y -> x @ [y]) []
@@ -118,4 +118,3 @@ module Logging =
 
 module GMTDateTime =
     let Now() = DateTime.UtcNow //TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "GMT Standard Time")
-    
