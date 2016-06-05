@@ -99,12 +99,18 @@ module Logging =
 
     let private layout = "${longdate} | ${level:uppercase=True} | ${message} ${exception:format=Type,StackTrace:innerFormat=Message,Type,StackTrace:maxInnerExceptionLevel=1} "
 
+    let private configuration = new LoggingConfiguration()
+    let private consoleTarget = new ConsoleTarget()
     let private logEntriesTarget = new LogentriesTarget()
     logEntriesTarget.Token <- ConfigurationManager.AppSettings.["CustomLogEntriesToken"]
     logEntriesTarget.Layout <- Layout.FromString(layout)
-    let private configuration = new LoggingConfiguration()
+
     configuration.AddTarget("logentries", logEntriesTarget)
     configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, logEntriesTarget))
+
+    configuration.AddTarget("console", consoleTarget)
+    configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, consoleTarget))
+
     LogManager.Configuration <- configuration
     LogManager.Configuration.Reload() |> ignore
     LogManager.ReconfigExistingLoggers()

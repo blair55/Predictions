@@ -346,14 +346,14 @@ module Services =
                >> bind (switch createPrediction))
 
     let registerPlayerWithUserInfo externalId provider userName email =
-        match getPlayerByExternalLogin (externalId, provider) with
-        | Success player ->
-            updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
-            player
-        | _ ->
-            let player = { Player.id=newPlId(); name=userName; predictions=Array.empty; isAdmin=false }
-            registerPlayerInDb { RegisterPlayerCommand.player=player; explid=externalId; exProvider=provider; email=email }
-            player
+        //match getPlayerByExternalLogin (externalId, provider) with
+        //| Success player ->
+        //    updateUserNameInDb { UpdateUserNameCommand.playerId=player.id; playerName=userName }
+        //    player
+        //| _ ->
+        let newPlayer = { Player.id=newPlId(); name=userName; predictions=Array.empty; isAdmin=false }
+        registerPlayerInDb { RegisterPlayerCommand.player=newPlayer; explid=externalId; exProvider=provider; email=email }
+        findPlayerByExternalId externalId provider
 
     let doubleDown predictionId (player:Player) =
         let prId = PrId predictionId

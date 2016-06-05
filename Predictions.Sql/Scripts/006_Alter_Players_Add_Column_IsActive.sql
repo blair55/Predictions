@@ -1,0 +1,3 @@
+ALTER TABLE Players
+ADD IsActive bit NOT NULL DEFAULT(0)
+GO

@@ -25,7 +25,10 @@ module Data =
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
     type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string; email:string }
     let registerPlayerInDb (cmd:RegisterPlayerCommand) =
-        nonQuery @"insert into Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName, IsAdmin, Email) values (@id, @externalId, @externalProvider, @Name, 0, @email)"
+        nonQuery @"
+        IF EXISTS(select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider)
+        BEGIN UPDATE Players SET PlayerName = @name, IsActive = 1 WHERE ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider END ELSE
+        BEGIN INSERT INTO Players(PlayerId, ExternalLoginId, ExternalLoginProvider, PlayerName, IsAdmin, Email, IsActive) values (@id, @externalId, @externalProvider, @Name, 0, @email, 1) END"
             { RegisterPlayerCommandArgs.id=cmd.player.id|>getPlayerId; name=cmd.player.name|>getPlayerName; externalId=cmd.explid|>getExternalPlayerId; externalProvider=cmd.exProvider|>getExternalLoginProvider; email=cmd.email }
 
     type SaveLeagueCommand = { id:LgId; name:LeagueName; admin:Player }
@@ -52,11 +55,11 @@ module Data =
         nonQuery @"update Leagues set LeagueIsDeleted = 1 where LeagueId = @leagueId"
             { DeleteLeagueCommandArgs.leagueId=cmd.leagueId|>getLgId }
 
-    type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
-    type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
-    let updateUserNameInDb (cmd:UpdateUserNameCommand) =
-        nonQuery @"UPDATE Players SET PlayerName = @playerName WHERE PlayerId = @playerId"
-            { UpdateUserNameCommandArgs.playerId=cmd.playerId|>getPlayerId; playerName=cmd.playerName|>getPlayerName }
+    //type UpdateUserNameCommand = { playerId:PlId; playerName:PlayerName }
+    //type UpdateUserNameCommandArgs = { playerId:Guid; playerName:string }
+    //let updateUserNameInDb (cmd:UpdateUserNameCommand) =
+    //    nonQuery @"UPDATE Players SET PlayerName = @playerName, IsActive = 1 WHERE PlayerId = @playerId"
+    //        { UpdateUserNameCommandArgs.playerId=cmd.playerId|>getPlayerId; playerName=cmd.playerName|>getPlayerName }
 
     type SaveResultCommand = { fixtureId:FxId; score:Score }
     type SaveResultCommandArgs = { fixtureId:Guid; homeScore:int; awayScore:int }
@@ -144,16 +147,16 @@ module Data =
             | BuildGameWeek a -> getQueryFuncWithArgs "select gws.gameWeekId, gws.seasonId, gws.gameWeekNumber, gws.gameWeekDescription from seasons sns join gameWeeks gws on sns.SeasonId = gws.SeasonId where sns.SeasonYear = @seasonYear" a
             | BuildFixture a -> getQueryFuncWithArgs "select fxs.fixtureId, fxs.gameWeekId, fxs.kickoff, fxs.homeTeamName, fxs.awayTeamName, fxs.homeTeamScore, fxs.awayTeamScore from seasons sns join gameWeeks gws on sns.SeasonId = gws.SeasonId join fixtures fxs on gws.GameWeekId = fxs.GameWeekId where sns.SeasonYear = @seasonYear" a
             | GetLeagueIdsPlayerIsIn a -> getQueryFuncWithArgs "select lgs.leagueId from leagues lgs join leaguePlayerBridge lpb on lgs.leagueId = lpb.leagueId where lpb.playerId = @playerId and lgs.LeagueIsDeleted = 0" a
-            | FindPlayerByPlayerId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where playerId = @playerId" a
-            | FindPlayerByExternalId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider" a
+            | FindPlayerByPlayerId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where IsActive = 1 and playerId = @playerId" a
+            | FindPlayerByExternalId a -> getQueryFuncWithArgs "select playerId, playerName, isAdmin from players where IsActive = 1 and ExternalLoginId = @externalId and ExternalLoginProvider = @externalProvider" a
             | GetPredictionsForPlayer a -> getQueryFuncWithArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = @playerId and pds.PredictionId = dd.PredictionId where pds.playerId = @playerId" a
             | FindLeagueByLeagueId a -> getQueryFuncWithArgs "select lgs.LeagueId, lgs.LeagueName, lgs.LeagueAdminId from Leagues lgs where lgs.LeagueId = @leagueId and lgs.LeagueIsDeleted = 0" a
-            | GetPlayersWithLeagueJoinDate a -> getQueryFuncWithArgs "select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate from Players pls join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId where lpb.LeagueId = @leagueId" a
-            | GetPredictionsForPlayersInLeague a -> getQueryFuncWithArgs "select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from Predictions pds join Players pls on pds.PlayerId = pls.PlayerId join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId where lpb.LeagueId = @leagueId" a
+            | GetPlayersWithLeagueJoinDate a -> getQueryFuncWithArgs "select pls.PlayerId, pls.PlayerName, pls.IsAdmin, lpb.Created as LeagueJoinDate from Players pls join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId where pls.IsActive = 1 and lpb.LeagueId = @leagueId" a
+            | GetPredictionsForPlayersInLeague a -> getQueryFuncWithArgs "select pds.PredictionId, pds.FixtureId, pds.PlayerId, pds.HomeTeamScore, pds.AwayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from Predictions pds join Players pls on pds.PlayerId = pls.PlayerId join LeaguePlayerBridge lpb on pls.PlayerId = lpb.PlayerId left outer join DoubleDowns dd on lpb.PlayerId = dd.PlayerId and pds.PredictionId = dd.PredictionId where pls.IsActive = 1 and lpb.LeagueId = @leagueId" a
             | FindLeagueByShareableLeagueId a -> getQueryFuncWithArgs "select LeagueId, LeagueName, LeagueAdminId from Leagues where LeagueShareableId = @shareableLeagueId and LeagueIsDeleted = 0" a
             | GetAllPredictionsForFixture a -> getQueryFuncWithArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId where pds.fixtureId = @fixtureId" a
             | GetFixturePreviousMeetings a -> getQueryFuncWithArgs "select kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore from fixtures where hometeamscore is not null and awayteamscore is not null and ((hometeamname = @hometeamname and awayteamname = @awayteamname) or (awayteamname = @hometeamname and hometeamname = @awayteamname))" a
-            | GetAllPlayers -> getQueryFuncWithNoArgs "select playerId, playerName, isAdmin from players"
+            | GetAllPlayers -> getQueryFuncWithNoArgs "select playerId, playerName, isAdmin from players where isactive = 1"
             | GetAllPredictions -> getQueryFuncWithNoArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
         agent.PostAndReply(fun channel ->
             (fun () ->
@@ -205,13 +208,11 @@ module Data =
             let player = playersResult.[0]
             Some (queryResultToPlayer player predictions)
 
-    let tryFindPlayerByExternalId externalPlayerId externalLoginProvider =
+    let findPlayerByExternalId externalPlayerId externalLoginProvider =
         let args = { FindPlayerByExternalIdQueryArgs.externalId=externalPlayerId|>getExternalPlayerId; externalProvider=externalLoginProvider|>getExternalLoginProvider }
         let result = FindPlayerByExternalId args |> query<PlayersTableQueryResult> |> Seq.toArray
-        if result |> Array.isEmpty then None
-        else
-            let player = result.[0]
-            Some (queryResultToPlayer player Array.empty)
+        let player = result.[0]
+        queryResultToPlayer player [||]
 
     let tryFindLeagueByLeagueId leagueId =
         let args = { FindLeagueByLeagueIdQueryArgs.leagueId=leagueId|>getLgId }
@@ -269,10 +270,10 @@ module Data =
         playersResult
             |> Array.map(fun pl -> queryResultToPlayer pl (getPredictionsForPlayerId pl.playerId))
 
-    let getPlayerByExternalLogin (explid:ExternalPlayerId, exprov:ExternalLoginProvider) =
-        match tryFindPlayerByExternalId explid exprov with
-        | Some p -> p |> Success
-        | None -> NotFound "Player not found" |> Failure
+    //let getPlayerByExternalLogin (explid:ExternalPlayerId, exprov:ExternalLoginProvider) =
+    //    match tryFindPlayerByExternalId explid exprov with
+    //    | Some p -> p |> Success
+    //    | None -> NotFound "Player not found" |> Failure
 
     let getPlayer (plId:PlId) =
         match tryFindPlayerByPlayerId plId with

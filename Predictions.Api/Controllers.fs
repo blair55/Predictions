@@ -12,10 +12,12 @@ open Predictions.Api.Domain
 open Predictions.Api.ViewModels
 open Predictions.Api.PostModels
 open Predictions.Api.Services
+open Predictions.Api.Attributes
 open Predictions.Api.WebUtils
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
+
 
 [<AllowAnonymous>]
 [<RoutePrefix("account")>]
@@ -61,6 +63,7 @@ type AccountController() =
         else this.Redirect(this.BaseUri)
 
 [<Authorize>]
+[<ActiveUserAuthorize>]
 [<LogRoute>]
 [<RoutePrefix("api")>]
 type HomeController() =
@@ -275,7 +278,7 @@ type HomeController() =
         player |> (switch getPredictedLeagueTable >> resultToHttp)
 
 [<Authorize>]
-[<CustomAuthorize>]
+[<AdminAuthorize>]
 [<RoutePrefix("api/admin")>]
 type AdminController() =
     inherit ApiController()

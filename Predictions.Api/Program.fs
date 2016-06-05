@@ -11,7 +11,6 @@ module EntryPoint =
     [<EntryPoint>]
     let main argv =
         let hostUrl = Config.hostUrl
-        Console.WriteLine("Starting at {0}", hostUrl)
         Logging.info(sprintf "Starting at %s" hostUrl)
         WebApp.Start(hostUrl, Config.buildApp) |> ignore
         quitEvent.WaitOne() |> ignore
