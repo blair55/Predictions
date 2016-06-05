@@ -123,5 +123,5 @@ module Logging =
     let error (ex:Exception) = log.Error(ex, ex.Message)
 
 module GMTDateTime =
-    let defaultTime() = DateTime.Now
+    let defaultTime() = DateTime.Now.AddHours(5.)
     let mutable Now = defaultTime //TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "GMT Standard Time")
