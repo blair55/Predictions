@@ -57,7 +57,7 @@ module ViewModels =
     type HistoryByMonthViewModel = { league:MicroLeagueViewModel; rows:HistoryByMonthRowViewModel array }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
-    type NeighboursViewModel = { prev:string; next:string; }
+    type NeighboursViewModel = { hasPrev:bool; prev:string; next:string; hasNext:bool }
 
     [<CLIMutable>][<JsonObject(MemberSerialization=MemberSerialization.OptOut)>]
     type LeagueTableRowViewModel = { diffPos:int; position:int; player:PlayerViewModel; correctScores:int; correctOutcomes:int; points:int }

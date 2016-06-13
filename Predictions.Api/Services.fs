@@ -228,11 +228,12 @@ module Services =
         let i = col |> Seq.findIndex(findItem)
         let iToVal index = col.[index] |> getId
         let max = col.Length - 1
+        let defaultModel = { NeighboursViewModel.prev=""; hasPrev=false; next=""; hasNext=false; }
         match i with
-        | 0 when i = max -> { NeighboursViewModel.prev=""; next=""; }
-        | 0 -> { NeighboursViewModel.prev=""; next=i+1|>iToVal; }
-        | _ when i = max -> { NeighboursViewModel.prev=i-1|>iToVal; next=""; }
-        | _ -> { NeighboursViewModel.prev=i-1|>iToVal; next=i+1|>iToVal; }
+        | 0 when i = max -> defaultModel
+        | 0 -> { defaultModel with hasNext=true; next=i+1|>iToVal; }
+        | _ when i = max -> { defaultModel with hasPrev=true; prev=i-1|>iToVal; }
+        | _ -> { NeighboursViewModel.hasPrev=true; prev=i-1|>iToVal; hasNext=true; next=i+1|>iToVal; }
 
     let getFixtureNeighbours fxid =
         let gws = gameWeeks()

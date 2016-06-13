@@ -12,10 +12,10 @@ angular.module('frontendApp')
             template:
                 '<nav ng-if="neighbours">' +
                     '<ul class="pager">' +
-                    '<li class="previous" ng-if="neighbours.prev">' +
+                    '<li class="previous" ng-if="neighbours.hasPrev">' +
                     '<a ng-href="{{url + neighbours.prev}}"><span aria-hidden="true">&larr;</span> Prev</a>' +
                     '</li>' +
-                    '<li class="next" ng-if="neighbours.next">' +
+                    '<li class="next" ng-if="neighbours.hasNext">' +
                     '<a ng-href="{{url + neighbours.next}}">Next <span aria-hidden="true">&rarr;</span></a>' +
                     '</li>' +
                     '</ul>' +
