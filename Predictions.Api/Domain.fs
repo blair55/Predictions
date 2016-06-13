@@ -120,7 +120,7 @@ module Domain =
         let countBracket bracketTest = brackets |> Array.filter(bracketTest) |> Array.length
         let totalCorrectScores = (function | CorrectScore _ -> true | _ -> false) |> countBracket
         let totalCorrectOutcomes = (function | CorrectOutcome _ -> true | _ -> false) |> countBracket
-        let totalPoints = brackets |> Array.sumBy(fun b -> getPointsForBracket b)
+        let totalPoints = brackets |> Array.sumBy(getPointsForBracket)
         player, totalCorrectScores, totalCorrectOutcomes, totalPoints
 
     let rec bumprank sumdelta acc a =
@@ -374,7 +374,7 @@ module FixtureSourcing =
         let fixtures = Fixtures.Load(EuroUrl)
         fixtures.Fixtures
         |> Seq.filter(fun f -> f.Matchday = no)
-        |> Seq.map(fun f -> f.Date, f.HomeTeamName, f.AwayTeamName)
+        |> Seq.map(fun f -> (f.Date.AddHours(1.)), f.HomeTeamName, f.AwayTeamName)
         |> Seq.toList
 
 module TeamNames =
