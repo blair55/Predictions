@@ -11,7 +11,7 @@ namespace Predictions.Sql
         {
             var result = DeployChanges.To
                 .SqlDatabase(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString)
-                .WithScriptsFromFileSystem(@"C:\Users\nblair\lab\Predictions\Predictions.Sql\Scripts")
+                .WithScriptsFromFileSystem("/Users/nblair/lab/Predictions/Predictions.Sql/Scripts")
                 .LogToConsole()
                 .Build()
                 .PerformUpgrade();
