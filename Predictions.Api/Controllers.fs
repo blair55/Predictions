@@ -53,10 +53,10 @@ type AccountController() =
         this.Redirect(this.BaseUri)
 
     [<HttpGet>][<Route("callback")>]
-    member this.GetCallback([<FromUri>]redirect:string, [<FromUri>]?error:string) =
+    member this.GetCallback([<FromUri>]redirect:string, [<FromUri>]error:string) =
         Logging.info redirect
         let r s = sprintf "error=%s" s |> Logging.info
-        error |> Option.map r |> ignore
+        Some error |> Option.map r |> ignore
         try
             let loginInfo = this.AuthManager.GetExternalLoginInfo()
             Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
