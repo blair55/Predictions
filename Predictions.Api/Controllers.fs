@@ -53,18 +53,24 @@ type AccountController() =
         this.Redirect(this.BaseUri)
 
     [<HttpGet>][<Route("callback")>]
-    member this.GetCallback([<FromUri>]redirect:string) =
+    member this.GetCallback([<FromUri>]redirect:string, [<FromUri>]?error:string) =
         Logging.info redirect
-        let loginInfo = this.AuthManager.GetExternalLoginInfo()
-        Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
-        if (box loginInfo <> null) then
-            Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
-            let signInUser = register loginInfo
-            this.SignInManager.SignIn(signInUser, true, true)
-            let uri = sprintf "%s#%s" (str this.BaseUri) redirect
-            this.Redirect(new Uri(uri))
-        else
-            Logging.errorNx "should not be null" 
+        let r s = sprintf "error=%s" s |> Logging.info
+        error |> Option.map r |> ignore
+        try
+            let loginInfo = this.AuthManager.GetExternalLoginInfo()
+            Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
+            if (box loginInfo <> null) then
+                Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
+                let signInUser = register loginInfo
+                this.SignInManager.SignIn(signInUser, true, true)
+                let uri = sprintf "%s#%s" (str this.BaseUri) redirect
+                this.Redirect(new Uri(uri))
+            else
+                Logging.errorNx "should not be null" 
+                this.Redirect(this.BaseUri)
+        with ex ->
+            Logging.error ex
             this.Redirect(this.BaseUri)
 
 [<Authorize>]
