@@ -53,14 +53,18 @@ type AccountController() =
 
     [<HttpGet>][<Route("callback")>]
     member this.GetCallback([<FromUri>]redirect:string) =
+        Logging.info redirect
         let loginInfo = this.AuthManager.GetExternalLoginInfo()
+        Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
         if (box loginInfo <> null) then
             Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
             let signInUser = register loginInfo
             this.SignInManager.SignIn(signInUser, true, true)
             let uri = sprintf "%s#%s" (str this.BaseUri) redirect
             this.Redirect(new Uri(uri))
-        else this.Redirect(this.BaseUri)
+        else
+            Logging.errorNx "should not be null" 
+            this.Redirect(this.BaseUri)
 
 [<Authorize>]
 [<ActiveUserAuthorize>]
