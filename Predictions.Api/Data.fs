@@ -18,8 +18,9 @@ module Data =
 
     let nonQuery sql args =
         agent.Post(fun () ->
-            use conn = new SqlConnection(connString)
-            try conn.Execute(sql, args) |> ignore
+            try 
+                use conn = new SqlConnection(connString)
+                conn.Execute(sql, args) |> ignore
             with ex -> Logging.error ex)
 
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
@@ -160,8 +161,9 @@ module Data =
             | GetAllPredictions -> getQueryFuncWithNoArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId"
         agent.PostAndReply(fun channel ->
             (fun () ->
-                use conn = new SqlConnection(connString)
-                try conn |> queryF |> channel.Reply
+                try 
+                    use conn = new SqlConnection(connString)
+                    conn |> queryF |> channel.Reply
                 with ex -> Logging.error ex))
 
     let buildSeason (year:SnYr) =

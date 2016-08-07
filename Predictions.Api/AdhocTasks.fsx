@@ -1,4 +1,4 @@
-﻿#r """C:\code\Predictions\packages\FSharp.Data.2.0.15\lib\net40\FSharp.Data.dll"""
+﻿#r """/Users/nblair/lab/Predictions/packages/FSharp.Data/lib/net40/FSharp.Data.dll"""
 #r """C:\Code\Predictions\packages\Npgsql.2.2.1\lib\net40\Npgsql.dll"""
 #r """C:\Code\Predictions\Predictions.Api\bin\Debug\Predictions.Api.dll"""
 open System

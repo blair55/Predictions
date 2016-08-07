@@ -348,23 +348,26 @@ module List =
         | BisShorter -> (a |> Seq.truncate b.Length |> Seq.toList, b)
         | Same -> (a, b)
 
-open FSharp.Data
 
 module FixtureSourcing =
 
-    let getNewGwFixtures no =
-        let url = sprintf "http://fantasy.premierleague.com/fixtures/%i/" no
-        let gwhtml = Http.RequestString(url, headers = ["X-Requested-With", "XMLHttpRequest"])
-        let results = HtmlDocument.Parse(gwhtml)
-        results.Descendants ["tr"]
-        |> Seq.map(fun tr ->
-            let tds = tr.Descendants ["td"] |> Seq.toList
-            let dateA = (tds.[0].InnerText()).Split(' ') |> Seq.toList
-            let dateS = sprintf "%s %s %s 2016" dateA.[2] dateA.[0] dateA.[1]
-            let date = Convert.ToDateTime(dateS)
-            let home = tds.[1].InnerText()
-            let away = tds.[5].InnerText()
-            date, home, away)
+    open FSharp.Data
+
+    let [<Literal>] PremFixturesUrl = "https://fantasy.premierleague.com/drf/fixtures/?event=1"
+    type PremFixtures = JsonProvider<PremFixturesUrl>
+
+    let premTeamIdToName = function
+        | 1 -> "Arsenal" | 2 -> "Bournemouth" | 3 -> "Burnley" | 4 -> "Chelsea"
+        | 5 -> "Crystal Palace" | 6 -> "Everton" | 7 -> "Hull" | 8 -> "Leicester"
+        | 9 -> "Liverpool" | 10 -> "Man City" | 11 -> "Man Utd" | 12 -> "Middlesbrough"
+        | 13 -> "Southampton" | 14 -> "Stoke" | 15 -> "Sunderland" | 16 -> "Swansea"
+        | 17 -> "Spurs" | 18 -> "Watford" | 19 -> "West Brom" | 20 -> "West Ham"
+        | _ -> failwith "Unrecognised team id" 
+
+    let getNewPremGwFixtures no =
+        let premFixturesUrl = sprintf "https://fantasy.premierleague.com/drf/fixtures/?event=%i" no
+        PremFixtures.Load(premFixturesUrl)
+        |> Seq.map(fun f -> f.KickoffTime.AddHours 1., f.TeamH |> premTeamIdToName, f.TeamA |> premTeamIdToName)
         |> Seq.toList
 
     let [<Literal>] EuroUrl = "http://api.football-data.org/v1/soccerseasons/424/fixtures"
@@ -381,24 +384,10 @@ module TeamNames =
 
     let getAbrvTeamName team =
         match team with
-        | "Arsenal"        -> "ARS"
-        | "Aston Villa"    -> "AVL"
-        | "Bournemouth"    -> "BOU"
-        | "Chelsea"        -> "CHE"
-        | "Crystal Palace" -> "CRY"
-        | "Everton"        -> "EVE"
-        | "Leicester"      -> "LEI"
-        | "Liverpool"      -> "LIV"
         | "Man City"       -> "MCI"
         | "Man Utd"        -> "MUN"
-        | "Newcastle"      -> "NEW"
-        | "Norwich"        -> "NOR"
-        | "Southampton"    -> "SOU"
         | "Spurs"          -> "TOT"
         | "Stoke"          -> "STK"
-        | "Sunderland"     -> "SUN"
-        | "Swansea"        -> "SWA"
-        | "Watford"        -> "WAT"
         | "West Brom"      -> "WBA"
         | "West Ham"       -> "WHU"
         | _ -> team.Substring(0, 3)

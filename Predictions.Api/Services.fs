@@ -640,7 +640,7 @@ module Services =
     let getImportNextGameWeekView() =
         let gws = gameWeeks()
         let importGwNo = gws |> getlatestGameWeekNo |> (fun gwno -> gwno+1)
-        getNewEuroGwFixtures importGwNo
+        getNewPremGwFixtures importGwNo
         |> List.map(fun (d, h, a) -> { ImportNewGameWeekViewModelRow.home=h; away=a; kickoff=d })
         |> fun rows -> { ImportNewGameWeekViewModel.rows=rows|>List.toArray; gwno=importGwNo }
 
@@ -677,7 +677,7 @@ module Services =
             { SaveGameWeekCommand.id=newGwId(); seasonYear=currentSeason; description=""; saveFixtureCommands=fxcmds|>List.toArray }
             |> saveGameWeek
 
-        importGwNo |> (switch (getNewEuroGwFixtures)
+        importGwNo |> (switch (getNewPremGwFixtures)
                    >> bind allKicksOffsAreInFuture
-                //   >> bind allTeamsExist
+                //    >> bind allTeamsExist
                    >> bind (switch saveGw))

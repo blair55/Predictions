@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Reflection;
 using DbUp;
 
 namespace Predictions.Sql
@@ -12,6 +11,7 @@ namespace Predictions.Sql
             var result = DeployChanges.To
                 .SqlDatabase(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString)
                 .WithScriptsFromFileSystem("/Users/nblair/lab/Predictions/Predictions.Sql/Scripts")
+                // .WithScriptsFromFileSystem("/Users/nblair/lab/Predictions/Predictions.Sql/ResultScripts")
                 .LogToConsole()
                 .Build()
                 .PerformUpgrade();

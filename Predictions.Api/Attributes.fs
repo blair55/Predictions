@@ -69,4 +69,4 @@ module Attributes =
             let authManager = actionContext.Request.GetOwinContext().Authentication
             let path = actionContext.Request.RequestUri.PathAndQuery
             let user = authManager.User.Identity.GetUserName()
-            Logging.info(sprintf "path=%s user=%s" path user)
+            Logging.info(sprintf "path=%s user='%s'" path user)

@@ -102,12 +102,13 @@ module Logging =
     let private configuration = new LoggingConfiguration()
     let private consoleTarget = new ConsoleTarget()
     let private logEntriesTarget = new LogentriesTarget()
-    logEntriesTarget.Token <- ConfigurationManager.AppSettings.["CustomLogEntriesToken"]
+    
     logEntriesTarget.Layout <- Layout.FromString(layout)
-
+    logEntriesTarget.Token <- ConfigurationManager.AppSettings.["CustomLogEntriesToken"]
     configuration.AddTarget("logentries", logEntriesTarget)
     configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, logEntriesTarget))
 
+    consoleTarget.Layout <- Layout.FromString(layout)
     configuration.AddTarget("console", consoleTarget)
     configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, consoleTarget))
 
