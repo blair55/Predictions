@@ -1,4 +1,4 @@
-# mono .paket/paket.bootstrapper.exe
+mono .paket/paket.bootstrapper.exe
 
 mozroots --import --sync --quiet
 
