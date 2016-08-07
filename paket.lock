@@ -2,7 +2,7 @@ NUGET
   remote: https://www.nuget.org/api/v2
     Dapper (1.42) - framework: >= net45
     dbup (3.2.1) - framework: >= net451
-    FAKE (4.10.3)
+    FAKE (4.36)
     FSharp.Data (2.2.3) - framework: >= net45
     logentries.core (2.7.1) - framework: >= net45
       Microsoft.WindowsAzure.ConfigurationManager (>= 3.1) - framework: >= net40
