@@ -30,6 +30,7 @@ type AccountController() =
 
     [<HttpPost>][<Route("login")>]
     member this.LoginWithExternal(model:ExternalLoginPostModel) =
+        Logging.info model.provider 
         new ChallengeResult(model.provider, this.Request)
 
     [<HttpGet>][<Route("time")>]
