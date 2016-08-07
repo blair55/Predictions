@@ -46,7 +46,7 @@ module Config =
         twitterOptions.BackchannelCertificateValidator <- new CertificateSubjectKeyIdentifierValidator(ids)
 
         let facebookOptions = new Facebook.FacebookAuthenticationOptions()
-        // facebookOptions.Scope.Add("email")
+        facebookOptions.Scope.Add("email")
         facebookOptions.AppId <- config "FacebookAppId"
         facebookOptions.AppSecret <- config "FacebookAppSecret"
 
