@@ -26,10 +26,6 @@ module Common =
     let optionToResult x msg = match x with | Some y -> Success y | None -> Failure msg
     let doIfSome o f = match o with | Some r -> r |> f |> Some | None -> None
 
-    let log msg =
-        printfn "%s" msg
-        System.Diagnostics.Debug.WriteLine(msg)
-
     let tryToWithReturn x =
         try
             let r = x()
@@ -50,11 +46,19 @@ module Common =
     let sToGuid s = Guid.Parse(s)
     let trySToGuid s = Guid.TryParse(s)
 
-
     let compoundList collection =
         collection
         |> List.scan (fun x y -> x @ [y]) []
         |> List.tail
+    
+open Newtonsoft.Json
+open System.Collections.Generic
+
+module AppSettings =
+
+    let file = System.IO.File.ReadAllText("config.json")
+    let json = JsonConvert.DeserializeObject<IDictionary<string,string>>(file)
+    let get key = json.[key]
 
 
 open Microsoft.AspNet.Identity
@@ -104,7 +108,7 @@ module Logging =
     let private logEntriesTarget = new LogentriesTarget()
     
     logEntriesTarget.Layout <- Layout.FromString(layout)
-    logEntriesTarget.Token <- ConfigurationManager.AppSettings.["CustomLogEntriesToken"]
+    logEntriesTarget.Token <- AppSettings.get "CustomLogEntriesToken"
     configuration.AddTarget("logentries", logEntriesTarget)
     configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, logEntriesTarget))
 

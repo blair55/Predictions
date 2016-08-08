@@ -1,6 +1,7 @@
 #r "packages/FAKE/tools/FakeLib.dll"
 open System
 open Fake
+open Fake.FileSystem
 open Fake.ProcessHelper
 open System.Diagnostics
 
@@ -13,6 +14,9 @@ Target "StopRunning" (fun _ ->
 
 Target "Clean" (fun _ ->
     CleanDir buildDir)
+
+Target "CopyConfig" (fun _ ->
+    "config.prod.json" |> CopyFile (buildDir + "/config.json"))
 
 Target "Compile" (fun _ ->
     !! slnFile |> MSBuildRelease buildDir "Build" |> ignore)
@@ -40,6 +44,7 @@ Target "All" DoNothing
 
 "StopRunning"
     ==> "Clean"
+    ==> "CopyConfig"
     ==> "Compile"
     ==> "Run"
     ==> "All"

@@ -30,8 +30,12 @@ type AccountController() =
 
     [<HttpPost>][<Route("login")>]
     member this.LoginWithExternal(model:ExternalLoginPostModel) =
-        Logging.info model.provider 
-        new ChallengeResult(model.provider, this.Request)
+        Logging.info (sprintf "provider=%s" model.provider)
+        try
+            new ChallengeResult(model.provider, this.Request)
+        with ex ->
+            Logging.error ex
+            failwith ex.Message
 
     [<HttpGet>][<Route("time")>]
     member this.GetTime() =
@@ -55,21 +59,25 @@ type AccountController() =
     [<HttpGet>][<Route("callback")>]
     member this.GetCallback([<FromUri>]redirect:string) =
         Logging.info (sprintf "redirect=%s" redirect)
-        Logging.info "getting ex login info"
-        if (box this.AuthManager = null) then
-            Logging.errorNx "Authmanager is null"
-        else Logging.info (sprintf "notnull=%A" this.AuthManager)
-        let loginInfo = this.AuthManager.GetExternalLoginInfo()
-        Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
-        if (box loginInfo <> null) then
-            Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
-            let signInUser = register loginInfo
-            this.SignInManager.SignIn(signInUser, true, true)
-            let uri = sprintf "%s#%s" (str this.BaseUri) redirect
-            this.Redirect(uri)
-        else
-            Logging.errorNx "should not be null" 
-            this.Redirect(this.BaseUri)
+        try
+            Logging.info "getting ex login info"
+            if (box this.AuthManager = null) then
+                Logging.errorNx "Authmanager is null"
+            else Logging.info (sprintf "notnull=%A" this.AuthManager)
+            let loginInfo = this.AuthManager.GetExternalLoginInfo()
+            Logging.info (sprintf "providerkey=%s" loginInfo.Login.ProviderKey)
+            if (box loginInfo <> null) then
+                Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
+                let signInUser = register loginInfo
+                this.SignInManager.SignIn(signInUser, true, true)
+                let uri = sprintf "%s#%s" (str this.BaseUri) redirect
+                this.Redirect(uri)
+            else
+                Logging.errorNx "should not be null" 
+                this.Redirect(this.BaseUri)
+        with ex ->
+            Logging.error ex
+            failwith ex.Message
 
 [<Authorize>]
 [<ActiveUserAuthorize>]

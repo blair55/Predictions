@@ -6,10 +6,11 @@ open System.Data.SqlClient
 open System.Configuration
 open Dapper
 open Predictions.Api.Domain
+open Predictions.Api.AppSettings
 
 module Data =
 
-    let connString = ConfigurationManager.AppSettings.["SQLSERVER_CONNECTION_STRING"]
+    let connString = AppSettings.get "SQLSERVER_CONNECTION_STRING"
 
     let agent = MailboxProcessor.Start(fun inbox -> async {
         while true do

@@ -13,6 +13,7 @@
 *.sln.docstates
 .vs/
 .vscode/
+config.prod.json
 
 # Build results
 [Dd]ebug/

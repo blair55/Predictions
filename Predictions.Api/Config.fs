@@ -22,10 +22,11 @@ open System.Web.Http.Controllers
 open Predictions.Api.Domain
 open Predictions.Api.Data
 open Predictions.Api.Attributes
+open Predictions.Api.AppSettings
 
 module Config =
 
-    let config (key:string) = ConfigurationManager.AppSettings.[key]
+    let config (key:string) = AppSettings.get key
     let hostUrl = config "HostUrl"
 
     let buildApp(app:IAppBuilder) =
@@ -53,6 +54,8 @@ module Config =
         let fsOptions = new FileServerOptions()
         fsOptions.EnableDirectoryBrowsing <- true
         fsOptions.RequestPath <- PathString.Empty
+        Logging.info (Environment.CurrentDirectory)
+        Logging.info (config "StaticFileRoot")
         fsOptions.FileSystem <- new PhysicalFileSystem(config "StaticFileRoot")
 
         let config = new HttpConfiguration()
