@@ -9,7 +9,7 @@
  */
 angular.module('frontendApp')
     .controller('MainCtrl', function($scope, $http, localStorageService, auth, title) {
-        title.set('Predictions League');
+        title.set('Right Result');
         auth.withPlayer(function(player) {
             $scope.loggedInPlayer = player;
         });

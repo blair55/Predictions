@@ -15,12 +15,12 @@ angular.module('frontendApp')
             title.set('Invite to ' + data.name);
             title.useBackButton('#/league/' + data.id + "/0");
             $scope.model.encodedInviteLink = encodeURIComponent(data.inviteLink);
-            $scope.model.encodedShareText = encodeURIComponent("Join my Predictions League!");
+            $scope.model.encodedShareText = encodeURIComponent("Join my predictions league on Right Result!");
         });
         $scope.share = function() {
             FB.ui({
                 method: 'share',
-                caption: 'Join my Predictions League!',
+                caption: 'Join my predictions league on Right Result!',
                 href: $scope.model.inviteLink
             });
         }
