@@ -14,7 +14,7 @@ angular.module('frontendApp')
                 restrict: 'A',
                 link: function(scope, element, attrs) {
                     setTimeout(function() {
-                        element.html('<a href="https://twitter.com/predictionslge" class="twitter-follow-button">Follow @PredictionsLge</a>');
+                        element.html('<a href="https://twitter.com/rightresu_lt" class="twitter-follow-button">Follow @rightresu_lt</a>');
                         $window.twttr.widgets.load(element.parent()[0]);
                     }, 100);
                 }
