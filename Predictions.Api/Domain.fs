@@ -353,8 +353,7 @@ module FixtureSourcing =
 
     open FSharp.Data
 
-    let [<Literal>] PremFixturesUrl = "https://fantasy.premierleague.com/drf/fixtures/?event=1"
-    type PremFixtures = JsonProvider<PremFixturesUrl>
+    type PremFixtures = JsonProvider<Sample="PremFixturesSample.json">
     let premFixturesUrl no = sprintf "https://fantasy.premierleague.com/drf/fixtures/?event=%i" no
 
     let premTeamIdToName = function
