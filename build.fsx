@@ -16,7 +16,8 @@ Target "Clean" (fun _ ->
     CleanDir buildDir)
 
 Target "CopyConfig" (fun _ ->
-    "config.prod.json" |> CopyFile (buildDir + "/config.json"))
+    let configFile = "config.prod.json"
+    if fileExists configFile then configFile |> CopyFile (buildDir + "/config.json"))
 
 Target "Compile" (fun _ ->
     !! slnFile |> MSBuildRelease buildDir "Build" |> ignore)
