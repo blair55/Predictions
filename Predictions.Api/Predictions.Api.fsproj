@@ -61,9 +61,6 @@
     <Compile Include="WebUtils.fs" />
     <Compile Include="Controllers.fs" />
     <None Include="app.config" />
-    <None Include="AdhocTasks.fsx" />
-    <Compile Include="DummyNames.fs" />
-    <None Include="DummyDataImport2.fsx" />
     <None Include="paket.references" />
     <Compile Include="Program.fs" />
   </ItemGroup>
