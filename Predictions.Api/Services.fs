@@ -703,9 +703,9 @@ module Services =
             |> Array.filter(fun gw -> fds |> List.exists(fun fd -> fd.gwId = gw.id))
         let distinctGwNos =
             gameweeksNeeded
-            |> Array.map(fun gw -> getGameWeekNo gw.number)
-            |> Array.distinct
             |> List.ofArray
+            |> List.map(fun gw -> getGameWeekNo gw.number)
+            |> List.distinct
         distinctGwNos
         |> List.map(fun gwno -> Logging.info(sprintf "fetching results for gw %i" gwno); getNewPremGwResults gwno)
         |> List.collect id
