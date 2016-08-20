@@ -705,7 +705,7 @@ module Services =
             gameweeksNeeded
             |> List.ofArray
             |> List.map(fun gw -> getGameWeekNo gw.number)
-            |> List.distinct
+            |> List.distinctBy id
         distinctGwNos
         |> List.map(fun gwno -> Logging.info(sprintf "fetching results for gw %i" gwno); getNewPremGwResults gwno)
         |> List.collect id
