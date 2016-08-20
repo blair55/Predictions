@@ -53,13 +53,18 @@ module Common =
     
 open Newtonsoft.Json
 open System.Collections.Generic
+open System.IO
 
 module AppSettings =
 
-    let file = System.IO.File.ReadAllText("config.json")
+    let file =
+        let filename = "config.json"
+        if File.Exists filename then
+            File.ReadAllText(filename)
+        else 
+            File.ReadAllText("./build/"+filename)
     let json = JsonConvert.DeserializeObject<IDictionary<string,string>>(file)
     let get key = json.[key]
-
 
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin

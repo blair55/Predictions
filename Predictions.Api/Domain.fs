@@ -355,6 +355,7 @@ module FixtureSourcing =
 
     let [<Literal>] PremFixturesUrl = "https://fantasy.premierleague.com/drf/fixtures/?event=1"
     type PremFixtures = JsonProvider<PremFixturesUrl>
+    let premFixturesUrl no = sprintf "https://fantasy.premierleague.com/drf/fixtures/?event=%i" no
 
     let premTeamIdToName = function
         | 1 -> "Arsenal" | 2 -> "Bournemouth" | 3 -> "Burnley" | 4 -> "Chelsea"
@@ -365,9 +366,15 @@ module FixtureSourcing =
         | _ -> failwith "Unrecognised team id" 
 
     let getNewPremGwFixtures no =
-        let premFixturesUrl = sprintf "https://fantasy.premierleague.com/drf/fixtures/?event=%i" no
-        PremFixtures.Load(premFixturesUrl)
+        PremFixtures.Load(premFixturesUrl no)
         |> Seq.map(fun f -> f.KickoffTime.AddHours 1., f.TeamH |> premTeamIdToName, f.TeamA |> premTeamIdToName)
+        |> Seq.toList
+    
+    let getNewPremGwResults no =
+        PremFixtures.Load(premFixturesUrl no)
+        |> Seq.filter(fun f -> f.Started = true && f.FinishedProvisional = true)
+        |> Seq.map(fun f -> f.TeamH |> premTeamIdToName, f.TeamHScore.JsonValue.AsInteger(),
+                            f.TeamA |> premTeamIdToName, f.TeamAScore.JsonValue.AsInteger())
         |> Seq.toList
 
     let [<Literal>] EuroUrl = "http://api.football-data.org/v1/soccerseasons/424/fixtures"

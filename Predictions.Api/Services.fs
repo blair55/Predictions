@@ -681,3 +681,53 @@ module Services =
                    >> bind allKicksOffsAreInFuture
                 //    >> bind allTeamsExist
                    >> bind (switch saveGw))
+
+    open System
+    open System.Threading
+
+    let createTimer (ts:TimeSpan) eventHandler =
+        let timer = new Timers.Timer(ts.TotalMilliseconds)
+        timer.AutoReset <- true
+        timer.Elapsed.Add eventHandler
+        async { timer.Start() }
+        
+    let getClosedFixturesWithNoResults gameWeeks =
+        getClosedFixturesForGameWeeks gameWeeks
+        |> List.ofArray
+        |> List.filter(fun (_, result) -> result.IsNone)
+        |> List.map(fun (fixture, _) -> fixture)
+    
+    let getResultsFromFplForFixtures (gameweeks:GameWeek []) (fds:FixtureData list) =
+        let gameweeksNeeded =
+            gameweeks
+            |> Array.filter(fun gw -> fds |> List.exists(fun fd -> fd.gwId = gw.id))
+        let distinctGwNos =
+            gameweeksNeeded
+            |> Array.map(fun gw -> getGameWeekNo gw.number)
+            |> Array.distinct
+            |> List.ofArray
+        distinctGwNos
+        |> List.map(fun gwno -> Logging.info(sprintf "fetching results for gw %i" gwno); getNewPremGwResults gwno)
+        |> List.collect id
+     
+    let matchResultsToFixtures closedFixtures results =
+        let findResult (fd:FixtureData) =
+            match results |> Seq.tryFind(fun (htn, _, atn, _) -> htn = fd.home && atn = fd.away) with
+            | Some (_, hts, _, ats) -> (fd, (hts, ats)) |> Some
+            | None -> None
+        closedFixtures
+        |> List.map(fun fd -> Logging.info(sprintf "looking for fixture result %A" fd); findResult fd)
+        |> List.choose id
+    
+    let saveResults fixturesAndResults =
+        fixturesAndResults
+        |> List.map(fun ((fd:FixtureData), score) -> { SaveResultCommand.fixtureId=fd.id; score=score })
+        |> List.map(fun cmd -> Logging.info(sprintf "saving result %A" cmd); cmd)
+        |> List.iter saveResult 
+
+    let findAndSaveResultsFromFplForClosedFixturesWithNoResults _ =
+        let gws = gameWeeks()
+        let closedFixtures = getClosedFixturesWithNoResults gws
+        let getResultsF = getResultsFromFplForFixtures gws
+        let matchResultsF = matchResultsToFixtures closedFixtures
+        closedFixtures |> (getResultsF >> matchResultsF >> saveResults) 
