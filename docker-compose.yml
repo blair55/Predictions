@@ -1,0 +1,6 @@
+version: "2"
+services:
+  predictions:
+    image: nickblair/predictions:latest
+    ports:
+      - "9000:9000"
