@@ -46,7 +46,6 @@ user history for all leagues
 // prem league table
 // fixture guide shows team league positions / position diffs / goal diffs
 // closed fixture page view? (hide form, show result, show trophies?)
-// double down anytime
 // sql writes try catch
 // all fixtures check box -> icon/label
 // aggregated predictions by league
@@ -56,6 +55,7 @@ user history for all leagues
 // faq
 // mono datetime
 
+// double down anytime
 // bigger info button
 // breadcrumb / back
 // global history
