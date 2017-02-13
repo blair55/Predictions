@@ -1,9 +1,19 @@
 language: csharp
 
-sudo: false  # use the new container-based Travis infrastructure
+sudo: required
+
+services:
+  - docker
+
+env:
+  - IMAGE_NAME=nickblair/predictions:0.0.$TRAVIS_BUILD_NUMBER
 
 script:
   - ./build.sh
+  - docker build -t $IMAGE_NAME .
 
-before_install:
-  - chmod +x build.sh
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push $IMAGE_NAME;
+    fi

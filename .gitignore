@@ -6,6 +6,7 @@
 
 .fake/
 .paket/paket.exe
+paket-cache/
 
 # User-specific files
 *.suo

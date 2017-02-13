@@ -1,6 +1,8 @@
 version: "2"
 services:
   predictions:
-    image: nickblair/predictions:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - "9000:9000"
