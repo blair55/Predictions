@@ -60,8 +60,7 @@ module AppSettings =
     let conf =
         let filename = "config.json"
         if File.Exists filename then
-            File.ReadAllText filename
-            |> JsonConvert.DeserializeObject<Dictionary<string,string>>
+            JsonConvert.DeserializeObject<Dictionary<string,string>>(File.ReadAllText filename)
         else 
             new Dictionary<string,string>()
     let get key = 
