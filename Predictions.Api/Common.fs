@@ -57,16 +57,16 @@ open System.IO
 
 module AppSettings =
 
-    let file =
+    let conf =
         let filename = "config.json"
         if File.Exists filename then
-            File.ReadAllText(filename)
+            File.ReadAllText filename
+            |> JsonConvert.DeserializeObject<Dictionary<string,string>>
         else 
-            File.ReadAllText("./build/"+filename)
-    let json = JsonConvert.DeserializeObject<IDictionary<string,string>>(file)
+            new Dictionary<string,string>()
     let get key = 
         let e = Environment.GetEnvironmentVariable key
-        if String.IsNullOrEmpty e then json.[key] else e
+        if String.IsNullOrEmpty e then conf.[key] else e
 
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
