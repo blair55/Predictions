@@ -14,8 +14,10 @@ paket-cache/
 *.sln.docstates
 .vs/
 .vscode/
-config.prod.json
 .DS_Store
+
+config.prod.json
+dockerconfig.env
 
 # Build results
 [Dd]ebug/
