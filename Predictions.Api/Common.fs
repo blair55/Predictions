@@ -64,7 +64,9 @@ module AppSettings =
         else 
             File.ReadAllText("./build/"+filename)
     let json = JsonConvert.DeserializeObject<IDictionary<string,string>>(file)
-    let get key = json.[key]
+    let get key = 
+        let e = Environment.GetEnvironmentVariable key
+        if String.IsNullOrEmpty e then json.[key] else e
 
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
