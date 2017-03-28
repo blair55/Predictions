@@ -17,6 +17,7 @@ open Predictions.Api.WebUtils
 open Microsoft.Owin.Security
 open Microsoft.AspNet.Identity
 open Microsoft.AspNet.Identity.Owin
+open Newtonsoft.Json.Linq
 
 [<AllowAnonymous>]
 [<RoutePrefix("account")>]
@@ -31,7 +32,7 @@ type AccountController() =
     member this.LoginWithExternal(model:ExternalLoginPostModel) =
         Logging.info (sprintf "provider=%s" model.provider)
         try
-            new ChallengeResult(model.provider, this.Request)
+            ChallengeResult(model.provider, this.Request)
         with ex ->
             Logging.error ex
             failwith ex.Message
@@ -63,7 +64,7 @@ type AccountController() =
             let loginInfo = this.AuthManager.GetExternalLoginInfo()
             if (box loginInfo <> null) then
                 Logging.info(sprintf "loggedin=%s" loginInfo.DefaultUserName)
-                let signInUser = register loginInfo
+                let signInUser = loginInfo |> (mapToPlExternalInfo >> register) 
                 this.SignInManager.SignIn(signInUser, true, true)
                 let uri = sprintf "%s#%s" (str this.BaseUri) redirect
                 this.Redirect(uri)
@@ -73,6 +74,57 @@ type AccountController() =
         with ex ->
             Logging.error ex
             failwith ex.Message
+
+    [<HttpPost>][<Route("fblogin")>]
+    member this.FacebookLogin(model:ExternalLoginPostModel) =
+        let path = "https://www.facebook.com/v2.8/dialog/oauth"
+        let clientid = sprintf "?client_id=%s" <| Config.config "FacebookAppId"
+        let redurl = sprintf "%saccount/fbredirect" <| string this.BaseUri
+        let redirect = sprintf "&redirect_uri=%s" <| Uri.EscapeUriString redurl
+        let scope = "&scope=email"
+        let url = sprintf "%s%s%s%s" path clientid redirect scope
+        this.Redirect(url)
+
+    [<HttpGet>][<Route("fbredirect")>]
+    member this.GetFacebookRedirect([<FromUri>]code:string) =
+
+        let getUserAccessToken() =
+            let path = "https://graph.facebook.com/v2.8/oauth/access_token"
+            let clientid = sprintf "?client_id=%s" <| Config.config "FacebookAppId" 
+            let secret = sprintf "&client_secret=%s" <| Config.config "FacebookAppSecret" 
+            let redurl = sprintf "%saccount/fbredirect" <| string this.BaseUri
+            let redirect = sprintf "&redirect_uri=%s" <| Uri.EscapeUriString redurl
+            let code = sprintf "&code=%s" code
+            let url = sprintf "%s%s%s%s%s" path clientid secret redirect code
+            let c = new HttpClient()
+            let r = c.GetStringAsync(url).Result
+            let accessToken = string <| JObject.Parse(r).["access_token"]
+            accessToken
+
+        let getUserInformation uat =
+            let path = "https://graph.facebook.com/v2.8/me"
+            let access = sprintf "?access_token=%s" uat
+            let url = sprintf "%s%s" path access 
+            let c = new HttpClient()
+            let r = c.GetStringAsync(url).Result
+            JObject.Parse(r)
+
+        let mapUserToPlExternalInfo (user:JObject) : PlExternalLoginInfo = {
+            UserId=string user.["id"]
+            UserName=string user.["name"]
+            Email=string user.["email"]
+            Provider="Facebook" }
+
+        let signIn(plUser:PlUser) =
+            this.SignInManager.SignIn(plUser, true, true)
+
+        () |> (getUserAccessToken
+            >> getUserInformation
+            >> mapUserToPlExternalInfo
+            >> register
+            >> signIn)
+
+        this.Redirect(this.BaseUri)
 
 [<Authorize>]
 [<ActiveUserAuthorize>]

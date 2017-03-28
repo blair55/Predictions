@@ -61,11 +61,20 @@ module WebUtils =
                 response.RequestMessage <- request
                 Task.FromResult(response)
 
-    let register (loginInfo:ExternalLoginInfo) =
-        let externalId = loginInfo.ExternalIdentity.GetUserId() |> ExternalPlayerId
-        let provider = loginInfo.Login.LoginProvider |> ExternalLoginProvider
-        let userName = loginInfo.ExternalIdentity.GetUserName() |> PlayerName
+    type PlExternalLoginInfo = {
+        UserId:string; UserName:string; Email:string; Provider:string; }
+
+    let mapToPlExternalInfo (loginInfo:ExternalLoginInfo) : PlExternalLoginInfo = {
+        UserId=loginInfo.ExternalIdentity.GetUserId()
+        UserName=loginInfo.ExternalIdentity.GetUserName()
+        Email=loginInfo.Email
+        Provider=loginInfo.Login.LoginProvider }
+
+    let register (loginInfo:PlExternalLoginInfo) =
+        let externalId = loginInfo.UserId |> ExternalPlayerId
+        let provider = loginInfo.Provider |> ExternalLoginProvider
+        let userName = loginInfo.UserName |> PlayerName
         let registeredPlayer = registerPlayerWithUserInfo externalId provider userName loginInfo.Email
         let userId = registeredPlayer.id |> getPlayerId |> str
         let playerName = registeredPlayer.name |> getPlayerName
-        new PlUser(userId, provider, playerName)
+        PlUser(userId, provider, playerName)
