@@ -318,14 +318,11 @@ module LeagueTableCalculation =
 
     let getLeagueTableRows (league:League) gwsWithResults =
         let players = league.players
-//        let getSafeTail collection = if collection |> Array.exists(fun _ -> true) then collection |> Array.tail else collection
         let getSafeTail collection =
-            collection |> Array.mapi(fun index item -> if index = 0 then None else Some item) |> Array.choose(fun r -> r)
+            collection |> Array.mapi(fun index item -> if index = 0 then None else Some item) |> Array.choose id
         let gwsWithResultsWithoutMax = gwsWithResults |> Array.sortBy(fun gw -> -(getGameWeekNo gw.number)) |> getSafeTail
-        let recentFixtures = getFixturesForGameWeeks gwsWithResults
-        let priorFixtures = getFixturesForGameWeeks gwsWithResultsWithoutMax
-        let recentLge = getLeagueTable players recentFixtures
-        let priorLge = getLeagueTable players priorFixtures
+        let recentLge = getLeagueTable players <| getFixturesForGameWeeks gwsWithResults 
+        let priorLge = getLeagueTable players <| getFixturesForGameWeeks gwsWithResultsWithoutMax
         let findPlayerPriorPos (player:Player) currentPos =
             let playerPriorLgeRow = priorLge |> Array.tryFind(fun (_, plr, _, _, _) -> plr.id = player.id)
             match playerPriorLgeRow with | Some (pos, _, _, _, _) -> pos | None -> currentPos
