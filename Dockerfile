@@ -1,4 +1,4 @@
-FROM mono:4.2.4
+FROM mono:4.8.0.495
 
 COPY /Predictions.Host.AppHb /static
 COPY /build /build

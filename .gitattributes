@@ -1,2 +1,4 @@
 * text=auto
 *.sh eol=lf
+*.png binary
+
