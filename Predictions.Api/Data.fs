@@ -12,21 +12,21 @@ module Data =
 
     let connString = AppSettings.get "SQLSERVER_CONNECTION_STRING"
 
-    // let agent = MailboxProcessor.Start(fun inbox -> async {
-    //     while true do
-    //         let! msg = inbox.Receive()
-    //         msg() })
-
-    // let nonQuery sql args =
-    //     agent.Post(fun () ->
-    //         try 
-    //             use conn = new SqlConnection(connString)
-    //             conn.Execute(sql, args) |> ignore
-    //         with ex -> Logging.error ex)
+    let agent = MailboxProcessor.Start(fun inbox -> async {
+        while true do
+            let! msg = inbox.Receive()
+            msg() })
 
     let nonQuery sql args =
-        use conn = new SqlConnection(connString)
-        conn.Execute(sql, args) |> ignore
+        agent.Post(fun () ->
+            try 
+                use conn = new SqlConnection(connString)
+                conn.Execute(sql, args) |> ignore
+            with ex -> Logging.error ex)
+
+    // let nonQuery sql args =
+    //     use conn = new SqlConnection(connString)
+    //     conn.Execute(sql, args) |> ignore
 
     type RegisterPlayerCommand = { player:Player; explid:ExternalPlayerId; exProvider:ExternalLoginProvider; email:string }
     type RegisterPlayerCommandArgs = { id:Guid; externalId:string; externalProvider:string; name:string; email:string }
@@ -165,16 +165,11 @@ module Data =
             | GetFixturePreviousMeetings a -> getQueryFuncWithArgs "select kickoff, hometeamname, awayteamname, hometeamscore, awayteamscore from fixtures where hometeamscore is not null and awayteamscore is not null and ((hometeamname = @hometeamname and awayteamname = @awayteamname) or (awayteamname = @hometeamname and hometeamname = @awayteamname))" a
             | GetAllPlayers -> getQueryFuncWithNoArgs "select playerId, playerName, isAdmin from players where isactive = 1"
             | GetAllPredictions a -> getQueryFuncWithArgs "select pds.predictionId, pds.fixtureId, pds.playerId, pds.homeTeamScore, pds.awayTeamScore, pds.created, case when dd.predictionid is null then 0 else 1 end as DoubleDown from predictions pds join fixtures f on f.FixtureId = pds.FixtureId join GameWeeks gw on gw.GameWeekId = f.GameWeekId join Seasons s on s.SeasonId = gw.SeasonId left outer join DoubleDowns dd on dd.PlayerId = pds.playerId and pds.PredictionId = dd.PredictionId where s.SeasonYear = @seasonYear" a
-
-        // agent.PostAndReply(fun channel ->
-        // (fun () ->
-        // try 
-        use conn = new SqlConnection(connString)
-        conn |> queryF
-        // |> channel.Reply
-        // with ex ->
-        //     Logging.error ex
-        // ) )
+        agent.PostAndReply(fun channel _ ->
+            try 
+                use conn = new SqlConnection(connString)
+                conn |> queryF |> channel.Reply
+            with ex -> Logging.error ex)
 
     let buildSeason (year:SnYr) =
         let args = { BuildSeasonQueryArgs.seasonYear=year|>getSnYr; }
