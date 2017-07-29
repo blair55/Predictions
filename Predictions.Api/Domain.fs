@@ -354,11 +354,26 @@ module FixtureSourcing =
     let premFixturesUrl no = sprintf "https://fantasy.premierleague.com/drf/fixtures/?event=%i" no
 
     let premTeamIdToName = function
-        | 1 -> "Arsenal" | 2 -> "Bournemouth" | 3 -> "Burnley" | 4 -> "Chelsea"
-        | 5 -> "Crystal Palace" | 6 -> "Everton" | 7 -> "Hull" | 8 -> "Leicester"
-        | 9 -> "Liverpool" | 10 -> "Man City" | 11 -> "Man Utd" | 12 -> "Middlesbrough"
-        | 13 -> "Southampton" | 14 -> "Stoke" | 15 -> "Sunderland" | 16 -> "Swansea"
-        | 17 -> "Spurs" | 18 -> "Watford" | 19 -> "West Brom" | 20 -> "West Ham"
+        | 1 -> "Arsenal"
+        | 2 -> "Bournemouth"
+        | 3 -> "Brighton"
+        | 4 -> "Burnley"
+        | 5 -> "Chelsea"
+        | 6 -> "Crystal Palace" 
+        | 7 -> "Everton" 
+        | 8 -> "Huddersfield"
+        | 9 -> "Leicester"
+        | 10 -> "Liverpool" 
+        | 11 -> "Man City" 
+        | 12 -> "Man Utd" 
+        | 13 -> "Newcastle"
+        | 14 -> "Southampton" 
+        | 15 -> "Stoke" 
+        | 16 -> "Swansea"
+        | 17 -> "Spurs" 
+        | 18 -> "Watford" 
+        | 19 -> "West Brom" 
+        | 20 -> "West Ham"
         | _ -> failwith "Unrecognised team id" 
 
     let getNewPremGwFixtures no =
