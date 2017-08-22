@@ -16,6 +16,7 @@ paket-cache/
 .vscode/
 .DS_Store
 
+config.json
 config.prod.json
 dockerconfig.env
 
