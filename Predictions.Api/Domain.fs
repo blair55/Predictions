@@ -378,7 +378,7 @@ module FixtureSourcing =
 
     let getNewPremGwFixtures no =
         PremFixtures.Load(premFixturesUrl no)
-        |> Seq.map(fun f -> f.KickoffTime.AddHours 1., f.TeamH |> premTeamIdToName, f.TeamA |> premTeamIdToName)
+        |> Seq.map(fun f -> f.KickoffTime, f.TeamH |> premTeamIdToName, f.TeamA |> premTeamIdToName)
         |> Seq.toList
     
     let getNewPremGwResults no =
