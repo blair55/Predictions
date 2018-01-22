@@ -7,7 +7,7 @@ env:
   - IMAGE_NAME=nickblair/predictions:0.0.$TRAVIS_BUILD_NUMBER
 
 script:
-  - docker run -v $PWD:/predictions -w /predictions mono:4.2.4 ./build.sh
+  - docker run -v $PWD:/predictions -w /predictions mono:5.4 ./build.sh
   - docker build -t $IMAGE_NAME .
 
 after_success:
