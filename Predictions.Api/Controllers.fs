@@ -307,9 +307,8 @@ type HomeController() =
 
     [<Route("getleaguepositionforplayer")>]
     member this.Getleaguepositionforplayer() =
-        // let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
-        // player |> (switch getGlobalLeaguePositionforplayer >> resultToHttp)
-        Success false |> resultToHttp
+        let player = this.GetLoggedInPlayerId() |> getLoggedInPlayer
+        player |> (switch getGlobalLeaguePositionforplayer >> resultToHttp)
 
     [<Route("getlastgameweekandwinner")>]
     member this.GetLastGameWeekAndWinner() =
